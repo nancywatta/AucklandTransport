@@ -32,4 +32,7 @@
     <string name="allowLocAgree">Agree</string>
     <string name="allowLocDisagree">Disagree</string>
 
+    <string name="histName">Name</string>
+    <string name="histAddress">Address</string>
+
 </resources>

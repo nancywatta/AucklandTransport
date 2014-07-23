@@ -44,6 +44,7 @@ public class RoutesActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_routes);
+
         Intent intent = getIntent();
         fromLoc = intent.getStringExtra(MainApp.FROM_LOCATION);
         toLoc = intent.getStringExtra(MainApp.TO_LOCATION);
@@ -51,6 +52,12 @@ public class RoutesActivity extends Activity {
         timeSinceEpoch = intent.getLongExtra(MainApp.TIME, 0);
         fromCoords = intent.getStringExtra(MainApp.FROM_COORDS);
         toCoords = intent.getStringExtra(MainApp.TO_COORDS);
+
+        if(fromCoords != "" && !fromCoords.equals(""))
+            History.saveHistory(this, fromLoc, "", fromCoords);
+        if(toCoords != "" && !toCoords.equals(""))
+            History.saveHistory(this, toLoc, "", toCoords);
+
         list=(ListView)findViewById(R.id.list);
         origin = (TextView)findViewById(R.id.textView1);
         destination = (TextView)findViewById(R.id.textView2);
@@ -231,10 +238,15 @@ public class RoutesActivity extends Activity {
             }
 
             routes = result;
-            if(fromCoords!="" && !fromCoords.equals(""))
-                fromCoords = ((Route)result.get(0)).getStartLocation().toString();
-            if(toCoords!="" && !toCoords.equals(""))
-                toCoords = ((Route)result.get(0)).getEndLocation().toString();
+            if(fromCoords!="" && !fromCoords.equals("")) {
+                fromCoords = ((Route) result.get(0)).getStartLocation().toString();
+                History.saveHistory(RoutesActivity.this, fromLoc, "", fromCoords);
+            }
+            if(toCoords!="" && !toCoords.equals("")) {
+                toCoords = ((Route) result.get(0)).getEndLocation().toString();
+                History.saveHistory(RoutesActivity.this, toLoc, "", toCoords);
+            }
+
             // Getting adapter by passing xml data ArrayList
             adapter=new RoutesAdaptar(RoutesActivity.this, result);
             list.setAdapter(adapter);

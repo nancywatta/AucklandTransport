@@ -20,11 +20,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+
+import com.example.nancy.aucklandtransport.History.PlaceItem;
 
 import org.json.JSONObject;
 
@@ -36,6 +39,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -80,6 +84,9 @@ public class MainApp extends FragmentActivity {
     DatePickerDialogFragment dateFragment = null;
     SharedPreferences prefs;
 
+    private ArrayAdapter<String> autoCompleteAdapter;
+    ArrayList<PlaceItem> history;
+
     private void locationConsent(boolean showDialog) {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -123,6 +130,9 @@ public class MainApp extends FragmentActivity {
         }
 
         locationConsent(true);
+        history = History.getHistory(this);
+
+        autoCompleteAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, History.getHistoryAsArray());
 
         origin = (AutoCompleteTextView) findViewById(R.id.editText1);
         origin.setThreshold(1);
@@ -146,6 +156,36 @@ public class MainApp extends FragmentActivity {
                 // TODO Auto-generated method stub
             }
 
+        });
+
+        /*origin.setAdapter(autoCompleteAdapter);
+
+        origin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                    origin.showDropDown();
+            }
+        });
+
+        origin.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if(hasFocus){
+                    origin.showDropDown();
+                }
+            }
+        });
+        */
+
+        origin.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_NEXT) {
+                    destination.requestFocus();
+                    return true;
+                }
+                return false;
+            }
         });
 
         destination = (AutoCompleteTextView) findViewById(R.id.editText2);
@@ -183,6 +223,17 @@ public class MainApp extends FragmentActivity {
                 return false;
             }
         });
+
+        /*destination.setAdapter(autoCompleteAdapter);
+
+        destination.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean hasFocus) {
+                if(hasFocus){
+                    destination.showDropDown();
+                }
+            }
+        }); */
 
         Calendar calendar = Calendar.getInstance();
         ((Button)findViewById(R.id.button2)).setText(calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE));
