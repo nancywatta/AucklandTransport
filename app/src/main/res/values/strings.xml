@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">AucklandTransport</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="go">Go</string>
+    <string name="Time">Set Time</string>
+    <string name="Date">Set Date</string>
+    <string name="action_settings">Settings</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="leave_after">Leave after</string>
+    <string name="arrive_before">Arrive before</string>
+    <string name="title_activity_display_map">DisplayMapActivity</string>
+    <string name="str_btn_find">Find</string>
+    <string name="hnt_et_location">Enter location</string>
+    <string name="title_activity_routes">RoutesActivity</string>
+    <string name="tr_walk">Walk</string>
+    <string name="tr_bus">Bus</string>
+    <string name="tr_tram">Tram</string>
+    <string name="tr_metro">Metro</string>
+    <string name="tr_train">Train</string>
+    <string name="tr_boat">Boat</string>
+    <string name="PREFS_NAME">RoutePreferences</string>
+    <string name="title_activity_route_info_screen">RouteInfoScreen</string>
+    <string name="Map">Map</string>
+    <string name="Navigation">Start Navigation</string>
+    <string name="title_activity_route_map">RouteMapActivity</string>
+
+    <string name="allowLocTitle">Location consent</string>
+    <string name="allowLocText">Allow sharing your current location while using public transport.</string>
+    <string name="allowLocAgree">Agree</string>
+    <string name="allowLocDisagree">Disagree</string>
+
+</resources>

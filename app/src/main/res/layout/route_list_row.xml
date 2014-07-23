@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/list_selector"
+        android:orientation="horizontal"
+        android:padding="5dip">
+
+    <LinearLayout android:id="@+id/routeImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="3dip"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="5dip">
+
+        <ImageView
+            android:id="@+id/RouteInfoIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/man"/>
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/TextRouteBus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#040404"
+        android:typeface="sans"
+        android:textSize="15dip"
+        android:textStyle="bold"
+        android:layout_alignTop="@+id/routeImage"
+        android:layout_toRightOf="@+id/routeImage"/>
+
+    <TextView
+        android:id="@+id/TextRouteDur"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/TextRouteBus"
+        android:textColor="#343434"
+        android:textSize="10dip"
+        android:layout_marginTop="1dip"
+        android:layout_toRightOf="@+id/routeImage"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/TextRouteAddress"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/routeImage"
+        android:textColor="#343434"
+        android:textSize="10dip"
+        android:layout_marginTop="1dip"
+        android:layout_alignParentLeft="true"
+        android:text="" />
+
+</RelativeLayout>
