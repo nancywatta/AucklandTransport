@@ -192,7 +192,7 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
         String sensor = "sensor=false";
 
         // url , from where the geocoding data is fetched
-        url = url + address + "&" + sensor;
+        url = url + address + "&" + sensor + "&" + "region=nz" + "&" + "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
 
         // Instantiating DownloadTask to get places from Google Geocoding service
         // in a non-ui thread
@@ -229,7 +229,7 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
         String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
 
         // url , from where the geocoding data is fetched
-        url = url + latilong + "&" + sensor + "&" + key;
+        url = url + latilong + "&" + sensor + "&" + key + "&" + "region=nz";
 
         // Instantiating DownloadTask to get places from Google Geocoding service
         // in a non-ui thread

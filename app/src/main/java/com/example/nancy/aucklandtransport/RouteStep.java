@@ -1,5 +1,6 @@
 package com.example.nancy.aucklandtransport;
 
+import com.example.nancy.aucklandtransport.datatype.TravelTime;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
@@ -23,12 +24,14 @@ public class RouteStep {
 
     public String type = "";
 
-    protected String depTime;
-    protected String arrTime;
+    protected TravelTime departure;
+    protected TravelTime arrival;
     private String vehicleName;
     private String shortName;
 
     List<LatLng> latlng;
+    LatLng startLoc;
+    LatLng endLoc;
 
         //public ArrayList<PathSegment> path;
 
@@ -72,19 +75,22 @@ public class RouteStep {
         }
 
     public RouteStep(String distance, String duration, String desc,
-                     String firstLoc, String lastLoc, String type, String depTime, String arrTime,
-                     String vehicleName, String shortName, List<LatLng> latlng) {
+                     String firstLoc, String lastLoc, String type, String depTime, long depSec, String arrTime,
+                     long arrSec, String vehicleName, String shortName, List<LatLng> latlng,
+                     LatLng startLoc, LatLng endLoc) {
         this.distance = distance;
         this.duration = duration;
         this.desc = desc;
         this.firstLoc = firstLoc;
         this.lastLoc = lastLoc;
         this.type = type;
-        this.depTime = depTime;
-        this.arrTime = arrTime;
+        this.departure = new TravelTime(depTime,depSec);
+        this.arrival = new TravelTime(arrTime,arrSec);
         this.vehicleName = vehicleName;
         this.shortName = shortName;
         this.latlng = latlng;
+        this.startLoc = startLoc;
+        this.endLoc = endLoc;
     }
 
     public RouteStep(String type, String name) {
@@ -98,9 +104,9 @@ public class RouteStep {
 
     public String getDesc() { return desc; }
 
-    public String getDepTime() { return depTime; }
+    public TravelTime getDeparture() { return departure; }
 
-    public  String getArrTime() { return  arrTime; }
+    public  TravelTime getArrival() { return  arrival; }
 
     public String getVehicleName() { return vehicleName; }
 
@@ -108,4 +114,7 @@ public class RouteStep {
 
     public List<LatLng> getLatlng() { return latlng; }
 
+    public LatLng getStartLoc() { return startLoc; }
+
+    public LatLng getEndLoc() { return endLoc; }
 }

@@ -15,19 +15,24 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.SimpleAdapter;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.example.nancy.aucklandtransport.History.PlaceItem;
+import com.example.nancy.aucklandtransport.History.RouteHistoryItem;
 
 import org.json.JSONObject;
 
@@ -48,6 +53,7 @@ import java.util.Locale;
 
 public class MainApp extends FragmentActivity {
 
+    private static final String TAG = MainApp.class.getSimpleName();
     AutoCompleteTextView origin;
     AutoCompleteTextView destination;
     PlacesTask placesTask;
@@ -75,17 +81,18 @@ public class MainApp extends FragmentActivity {
     // flag for Internet connection status
     Boolean isInternetPresent = false;
 
-    int mDay;
-    int mMonth;
-    int mYear;
-    int hour;
-    int minute;
     TimePickerFragment timeFragment = null;
     DatePickerDialogFragment dateFragment = null;
     SharedPreferences prefs;
 
-    private ArrayAdapter<String> autoCompleteAdapter;
+    /* private ArrayAdapter<String> autoCompleteAdapter; */
     ArrayList<PlaceItem> history;
+    ArrayList<RouteHistoryItem> routes;
+    private int lastSelectedRoute = -1;
+    ListView myPlaces, myRoutes;
+    History.PlaceAdapter placeAdapter;
+    History.RoutesAdapter routesAdapter;
+    private int lastSelectedPlace = -1;
 
     private void locationConsent(boolean showDialog) {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -131,8 +138,9 @@ public class MainApp extends FragmentActivity {
 
         locationConsent(true);
         history = History.getHistory(this);
+        routes = History.getRoutes(this);
 
-        autoCompleteAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, History.getHistoryAsArray());
+        /*autoCompleteAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, History.getHistoryAsArray());*/
 
         origin = (AutoCompleteTextView) findViewById(R.id.editText1);
         origin.setThreshold(1);
@@ -158,9 +166,9 @@ public class MainApp extends FragmentActivity {
 
         });
 
-        /*origin.setAdapter(autoCompleteAdapter);
+        /*origin.setAdapter(autoCompleteAdapter);*/
 
-        origin.setOnClickListener(new View.OnClickListener() {
+        /* origin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                     origin.showDropDown();
@@ -224,9 +232,127 @@ public class MainApp extends FragmentActivity {
             }
         });
 
-        /*destination.setAdapter(autoCompleteAdapter);
+        /*destination.setAdapter(autoCompleteAdapter); */
 
-        destination.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        TabHost tabs = (TabHost)findViewById(R.id.TabHost01);
+        tabs.setup();
+
+        Log.d(TAG, "size" + history.size());
+        if (history.size() > 0 || routes.size() > 0) {
+
+            TabHost.TabSpec spec1 = tabs.newTabSpec("tag1");
+
+            spec1.setContent(R.id.myPlacesList);
+
+            View tabIndicator = LayoutInflater.from(this).inflate(R.layout.tab_indicator, tabs.getTabWidget(), false);
+            ((TextView) tabIndicator.findViewById(R.id.title)).setText(R.string.TabPlaces);
+            ((ImageView) tabIndicator.findViewById(R.id.icon)).setImageResource(android.R.drawable.ic_menu_mylocation);
+
+            spec1.setIndicator(tabIndicator);
+
+            tabs.addTab(spec1);
+
+            TabHost.TabSpec spec2 = tabs.newTabSpec("tag2");
+            spec2.setContent(R.id.myRoutesList);
+            View tabIndicator2 = LayoutInflater.from(this).inflate(R.layout.tab_indicator, tabs.getTabWidget(), false);
+            ((TextView) tabIndicator2.findViewById(R.id.title)).setText(R.string.TabRoutes);
+            ((ImageView) tabIndicator2.findViewById(R.id.icon)).setImageResource(android.R.drawable.ic_menu_myplaces);
+            spec2.setIndicator(tabIndicator2);
+
+            tabs.addTab(spec2);
+        } else tabs.setVisibility(View.GONE);
+
+        myPlaces = (ListView)findViewById(R.id.myPlacesList);
+        myRoutes = (ListView)findViewById(R.id.myRoutesList);
+
+        placeAdapter = new History.PlaceAdapter(this);
+        refreshYourAdapter();
+        routesAdapter = new History.RoutesAdapter(this);
+
+        myPlaces.setAdapter(placeAdapter);
+        myRoutes.setAdapter(routesAdapter);
+
+        myPlaces.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+                                    long arg3) {
+
+                lastSelectedPlace = arg2;
+
+                final String[] items = new String[]{
+                        getString(R.string.TabPlacesMenuFrom),
+                        getString(R.string.TabPlacesMenuTo),
+                        getString(R.string.TabPlacesMenuDelete)
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainApp.this);
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        PlaceItem h = history.get(lastSelectedPlace);
+                        switch(which) {
+                            case 0: origin.setText(h.address);
+                                fromCoords = h.coords;
+                                //Log.i(TAG, "SET FROM COORDINATES!!!");
+                                break;
+                            case 1: destination.setText(h.address);
+                                toCoords = h.coords;
+                                //Log.i(TAG, "SET TO COORDINATES!!!");
+                                break;
+                            case 2:
+                                History.remove(MainApp.this, "history_"+history.get(lastSelectedPlace).address);
+                                History.init(MainApp.this);
+                                history = History.getHistory(MainApp.this);
+                                placeAdapter.notifyDataSetChanged();
+                                break;
+                        }
+
+                    }
+                });
+                builder.show();
+            }
+        });
+
+        myRoutes.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+
+                lastSelectedRoute = arg2;
+                final String[] items = new String[]{
+                        getString(R.string.TabRoutesMenuSet),
+                        getString(R.string.TabRoutesMenuSetBackwards),
+                        getString(R.string.TabRoutesMenuDelete)
+                };
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainApp.this);
+                builder.setItems(items, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        History.RouteHistoryItem r = routes.get(lastSelectedRoute);
+                        switch(which) {
+                            case 0:
+                                origin.setText(r.start);
+                                destination.setText(r.end);
+                                fromCoords = r.coords;
+                                toCoords = r.coords2;
+                                break;
+                            case 1:
+                                origin.setText(r.end);
+                                destination.setText(r.start);
+                                fromCoords = r.coords2;
+                                toCoords = r.coords;
+                                break;
+                            case 2:
+                                History.remove(MainApp.this, "route_"+r.start+"_"+r.end);
+                                History.init(MainApp.this);
+                                routes = History.getRoutes(MainApp.this);
+                                routesAdapter.notifyDataSetChanged();
+                                break;
+                        }
+
+                    }
+                });
+                builder.show();
+            }
+        });
+
+        /* destination.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean hasFocus) {
                 if(hasFocus){
@@ -251,6 +377,14 @@ public class MainApp extends FragmentActivity {
             locationConsent(false);
         }
 
+    }
+
+    private void refreshYourAdapter() {
+        runOnUiThread(new Runnable() {
+            public void run() {
+                placeAdapter.refreshAdapter();
+            }
+        });
     }
 
     /** A method to download json data from url */
@@ -317,7 +451,7 @@ public class MainApp extends FragmentActivity {
             String sensor = "sensor=false";
 
             // Building the parameters to the web service
-            String parameters = input+"&"+types+"&"+sensor+"&"+key;
+            String parameters = input+"&"+types+"&"+sensor+"&"+key+"&"+"components=country:nz";
 
             // Output format
             String output = "json";
@@ -411,7 +545,7 @@ public class MainApp extends FragmentActivity {
         AutoCompleteTextView origin1 = (AutoCompleteTextView) findViewById(R.id.editText1);
         try {
             String fromAddress = origin1.getText().toString(); // Get address
-            fromAddress = fromAddress.replace(' ' , '+');
+            //fromAddress = fromAddress.replace(' ' , '+');
             //Intent geoIntent = new Intent (android.content.Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + fromAddress));  Prepare intent
             Intent intent = new Intent(this, DisplayMapActivity.class);
             intent.putExtra(ADDRSTR, fromAddress);
@@ -424,7 +558,7 @@ public class MainApp extends FragmentActivity {
     public void showMapOfToLoc(View v) {
         try {
             String toAddress = destination.getText().toString(); // Get address
-            toAddress = toAddress.replace(' ' , '+');
+            //toAddress = toAddress.replace(' ' , '+');
             Intent intent = new Intent(this, DisplayMapActivity.class);
             intent.putExtra(ADDRSTR, toAddress);
             intent.putExtra(ORIGIN, false);
@@ -492,6 +626,7 @@ public class MainApp extends FragmentActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        placeAdapter.notifyDataSetChanged();
         switch(requestCode) {
             case (PICK_ADDRESS_REQUEST) : {
                 if (resultCode == Activity.RESULT_OK) {
@@ -553,6 +688,9 @@ public class MainApp extends FragmentActivity {
         super.onResume();
 
         locationConsent(false);
+        placeAdapter = new History.PlaceAdapter(this);
+        refreshYourAdapter();
+        myPlaces.setAdapter(placeAdapter);
     }
 
 

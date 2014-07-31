@@ -34,5 +34,27 @@
 
     <string name="histName">Name</string>
     <string name="histAddress">Address</string>
+    <string name="TabPlaces">Recent places</string>
+    <string name="TabPlacesMenuFrom">Set as From</string>
+    <string name="TabPlacesMenuTo">Set as To</string>
+    <string name="TabPlacesMenuDelete">Delete</string>
+    <string name="TabRoutes">Recent routes</string>
+    <string name="TabRoutesMenuSet">Set</string>
+    <string name="TabRoutesMenuSetBackwards">Set backwards</string>
+    <string name="TabRoutesMenuDelete">Delete</string>
+
+    <string name="RouteCancel">Route canceled</string>
+    <string name="RouteFinish">Route finished</string>
+    <string name="RouteFinishText">Your trip finished!</string>
+    <string name="RouteStart">Route started</string>
+    <string name="Timer">APTTimer</string>
+    <string name="DepartureText1">You need to start departure in less than %d minutes</string>
+    <string name="DepartureText2">You need to start departure as soon as possible, you are %d minutes late!</string>
+    <string name="DepartureTimer">Start departure</string>
+    <string name="NotifyExit">Exit from %s</string>
+    <string name="NotifyExitText">You need to exit on the next stop</string>
+    <string name="NotifyNextStop">Following the timetable you should exit on the next stop, please adjust if you are not going on time</string>
+    <string name="RouteDone">Route done!</string>
+    <string name="busNotifyExitText">You need to exit on the next stop</string>
 
 </resources>

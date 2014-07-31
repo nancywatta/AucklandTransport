@@ -24,10 +24,13 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
 public class RoutesActivity extends Activity {
+
+    private static final String TAG = RoutesActivity.class.getSimpleName();
     String fromLoc;
     String toLoc;
     String fromCoords = "";
@@ -39,6 +42,7 @@ public class RoutesActivity extends Activity {
     private ArrayList<Route> routes = null;
     TextView origin;
     TextView destination;
+    Boolean isRouteSave = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,16 +51,36 @@ public class RoutesActivity extends Activity {
 
         Intent intent = getIntent();
         fromLoc = intent.getStringExtra(MainApp.FROM_LOCATION);
+        try {
+            // encoding special characters like space in the user input place
+            fromLoc = URLDecoder.decode(fromLoc, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         toLoc = intent.getStringExtra(MainApp.TO_LOCATION);
+        try {
+            // encoding special characters like space in the user input place
+            toLoc = URLDecoder.decode(toLoc, "utf-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
         isDeparture = intent.getBooleanExtra(MainApp.ISDEPARTURE, true);
         timeSinceEpoch = intent.getLongExtra(MainApp.TIME, 0);
         fromCoords = intent.getStringExtra(MainApp.FROM_COORDS);
         toCoords = intent.getStringExtra(MainApp.TO_COORDS);
 
+        Log.d(TAG, "fromCoords" + fromCoords);
         if(fromCoords != "" && !fromCoords.equals(""))
             History.saveHistory(this, fromLoc, "", fromCoords);
         if(toCoords != "" && !toCoords.equals(""))
             History.saveHistory(this, toLoc, "", toCoords);
+        if(fromCoords != "" && !fromCoords.equals("") &&
+                toCoords != "" && !toCoords.equals("")) {
+            isRouteSave = true;
+            History.saveRoute(this, fromLoc, toLoc, fromCoords, toCoords);
+        }
 
         list=(ListView)findViewById(R.id.list);
         origin = (TextView)findViewById(R.id.textView1);
@@ -95,18 +119,20 @@ public class RoutesActivity extends Activity {
 
     private String getDirectionsUrl(){
 
+        String fromAdd = fromLoc;
+        String toAdd = toLoc;
         try {
             // encoding special characters like space in the user input place
-            fromLoc = URLEncoder.encode(fromLoc, "utf-8");
-            toLoc = URLEncoder.encode(toLoc, "utf-8");
+            fromAdd = URLEncoder.encode(fromLoc, "utf-8");
+            toAdd = URLEncoder.encode(toLoc, "utf-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
         // Origin of route
-        String str_origin = "origin="+fromLoc;
+        String str_origin = "origin="+fromAdd;
 
         // Destination of route
-        String str_dest = "destination="+toLoc;
+        String str_dest = "destination="+toAdd;
 
         // Sensor enabled
         String sensor = "sensor=false";
@@ -119,10 +145,10 @@ public class RoutesActivity extends Activity {
         String parameters = "";
         // Building the parameters to the web service
         if(isDeparture == true)
-            parameters = str_origin+"&"+str_dest+"&"+sensor+"&"+key + "&departure_time=" + Long.toString(timeSinceEpoch) +"&"+mode
+            parameters = str_origin+"&"+str_dest+"&"+sensor+"&"+key + "&region=nz" + "&departure_time=" + Long.toString(timeSinceEpoch) +"&"+mode
                     + "&alternatives=true";
         else
-            parameters = str_origin+"&"+str_dest+"&"+sensor+"&"+key + "&arrival_time=" + Long.toString(timeSinceEpoch) +"&"+mode
+            parameters = str_origin+"&"+str_dest+"&"+sensor+"&"+key + "&region=nz" + "&arrival_time=" + Long.toString(timeSinceEpoch) +"&"+mode
         + "&alternatives=true";
 
         // Output format
@@ -238,14 +264,18 @@ public class RoutesActivity extends Activity {
             }
 
             routes = result;
-            if(fromCoords!="" && !fromCoords.equals("")) {
+            if(fromCoords=="" || fromCoords.equals("") || fromCoords == null) {
+                Log.d(TAG, "post");
                 fromCoords = ((Route) result.get(0)).getStartLocation().toString();
                 History.saveHistory(RoutesActivity.this, fromLoc, "", fromCoords);
             }
-            if(toCoords!="" && !toCoords.equals("")) {
+            if(toCoords=="" || toCoords.equals("") || toCoords == null) {
+                Log.d(TAG, "postto");
                 toCoords = ((Route) result.get(0)).getEndLocation().toString();
                 History.saveHistory(RoutesActivity.this, toLoc, "", toCoords);
             }
+            if(!isRouteSave)
+                History.saveRoute(RoutesActivity.this, fromLoc, toLoc, fromCoords, toCoords);
 
             // Getting adapter by passing xml data ArrayList
             adapter=new RoutesAdaptar(RoutesActivity.this, result);

@@ -2,6 +2,8 @@ package com.example.nancy.aucklandtransport;
 
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,6 +11,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 
 /**
  * Created by Nancy on 7/9/14.
@@ -118,9 +121,17 @@ public class DirectionsJSONParser {
 
                     jArrivalTime = leg.getJSONObject("arrival_time");
 
+                    Double lat = leg.getJSONObject("start_location").getDouble("lat");
+                    Double lng = leg.getJSONObject("start_location").getDouble("lng");
+
+                    Double lat1 = leg.getJSONObject("end_location").getDouble("lat");
+                    Double lng1 = leg.getJSONObject("end_location").getDouble("lng");
+
                     Route route = new Route(jDistance.getString("text"), jDuration.getString("text"),
                             leg.getString("start_address"), leg.getString("end_address"),
-                            jDepartureTime.getString("text"), jArrivalTime.getString("text"), leg.toString());
+                            jDepartureTime.getString("text"), jDepartureTime.getLong("value"),
+                            jArrivalTime.getString("text"), jArrivalTime.getLong("value"),
+                            new LatLng(lat,lng), new LatLng(lat1,lng1), leg.toString());
 
                     jSteps = ( (JSONObject)jLegs.get(j)).getJSONArray("steps");
 

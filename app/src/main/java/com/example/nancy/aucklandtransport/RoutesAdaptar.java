@@ -58,7 +58,7 @@ public class RoutesAdaptar extends BaseAdapter {
         // Fetching i-th route
         Route path = result.get(position);
 
-        holder.text.setText(path.getDepTime() + " - " + path.getArrTime() + " (" + path.getDuration() + ")");
+        holder.text.setText(path.getDeparture().getTravelTime() + " - " + path.getArrival().getTravelTime() + " (" + path.getDuration() + ")");
         holder.text1.setText(path.getDistance());
 
         if(path.getSteps()!=null) {
