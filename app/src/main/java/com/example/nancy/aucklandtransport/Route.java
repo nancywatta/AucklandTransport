@@ -55,13 +55,13 @@ public class Route {
         JSONObject jArrivalTime = null;
         JSONArray jSteps = null;
         JSONObject transit = null;
-        //JSONArray Steps = null;
+        JSONArray Steps = null;
         String startAddr = "";
         String endAddr ="";
         String type = "";
         String departTime = "";
         String arrivalTime = "";
-        String shortName = ""; String name="";
+        String shortName = ""; String name=""; String travelMode = "";
         Double startLat, startLng, endLat, endLng;
         long arrSec, depSec;
 
@@ -87,18 +87,14 @@ public class Route {
         endLng = obj.getJSONObject("end_location").getDouble("lng");
         this.endLocation = new LatLng(endLat,endLng);
 
-        Log.d("Debug: ", "RouteStep: " + this.distance + " " + this.duration + " "
-        + this.startAddress + " " + this.endAddress );
-
         jSteps = obj.getJSONArray("steps");
 
-        Log.d("Length: ", "JSteps " + jSteps.length());
         this.steps = new ArrayList<RouteStep>();
 
         /** Traversing all steps */
         for(int k=0;k<jSteps.length();k++){
             transit = null; type = ""; name = ""; shortName = ""; arrSec = 0; depSec = 0;
-            endAddr = ""; startAddr = ""; departTime = ""; arrivalTime = "";
+            endAddr = ""; startAddr = ""; departTime = ""; arrivalTime = ""; travelMode = "";
             JSONObject step = jSteps.getJSONObject(k);
 
             jDistance = step.getJSONObject("distance");
@@ -108,7 +104,8 @@ public class Route {
                 transit = step.getJSONObject("transit_details");
             }catch (Exception e) {}
 
-            Log.d(" Reached ", " k: " + k + " " + "transit");
+            travelMode = step.getString("travel_mode");
+
             if(transit!=null) {
                 startAddr = transit.getJSONObject("departure_stop").getString("name");
                 endAddr = transit.getJSONObject("arrival_stop").getString("name");
@@ -133,21 +130,28 @@ public class Route {
             Log.d(" Reached ", " k: " + k + " " + "routeStep");
 
             String polyline = "";
-            polyline = (String)((JSONObject)((JSONObject)jSteps.get(k)).get("polyline")).get("points");
+            polyline = (String)((JSONObject)step.get("polyline")).get("points");
             List<LatLng> list = new ArrayList<LatLng>();
             list = PolyUtil.decode(polyline);
 
             RouteStep routeStep = new RouteStep(jDistance.getString("text"), jDuration.getString("text"),
                     step.getString("html_instructions"), startAddr, endAddr, type, departTime, depSec,
                     arrivalTime, arrSec, name,
-                    shortName, list, new LatLng(startLat,startLng), new LatLng(endLat,endLng));
+                    shortName, list, new LatLng(startLat,startLng), new LatLng(endLat,endLng), travelMode);
 
-            /*Steps = step.getJSONArray("steps");
+            if (transit==null) {
+                    Steps = ((JSONObject) jSteps.get(k)).getJSONArray("steps");
 
-            for(int i=0;i<Steps.length();i++) {
-                JSONObject path = Steps.getJSONObject(i);
-
-            }*/
+                for (int i = 0; i < Steps.length(); i++) {
+                    JSONObject path = Steps.getJSONObject(i);
+                    startLat = path.getJSONObject("start_location").getDouble("lat");
+                    startLng = path.getJSONObject("start_location").getDouble("lng");
+                    endLat = path.getJSONObject("end_location").getDouble("lat");
+                    endLng = path.getJSONObject("end_location").getDouble("lng");
+                    PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng));
+                    routeStep.add(p);
+                }
+            }
 
             steps.add(routeStep);
         }

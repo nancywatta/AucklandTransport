@@ -15,7 +15,7 @@
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-feature
         android:glEsVersion="0x00020000"
@@ -23,7 +23,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@drawable/launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <uses-library android:name="com.google.android.maps" />
@@ -77,14 +77,25 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.RouteInfoScreen" />
         </activity>
-        <service android:name=".BackgroundService"
+
+        <service
+            android:name=".BackgroundService"
+            android:enabled="true"
             android:label=".BackgroundService"
-            android:process=":remote"
-            android:enabled="true">
+            android:process=":remote" >
             <intent-filter>
                 <action android:name="com.example.nancy.aucklandtransport.BackgroundService" />
             </intent-filter>
         </service>
+
+        <activity
+            android:name=".PathElevation"
+            android:label="@string/title_activity_path_elevation"
+            android:parentActivityName=".RouteInfoScreen" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.nancy.aucklandtransport.RouteInfoScreen" />
+        </activity>
     </application>
 
 </manifest>

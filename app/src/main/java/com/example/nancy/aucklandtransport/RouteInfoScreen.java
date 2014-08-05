@@ -1,5 +1,6 @@
 package com.example.nancy.aucklandtransport;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
@@ -18,11 +19,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.ArrayList;
 
 public class RouteInfoScreen extends Activity {
     private static final String TAG = RouteInfoScreen.class.getSimpleName();
@@ -115,6 +121,41 @@ public class RouteInfoScreen extends Activity {
         startService(servIntent);
         Log.i(TAG, "starting service "+servIntent.toString());
         bindService(servIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        // Click event for single list row
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                                    int position, long id) {
+
+                if(route.getSteps().get(position).getTravelMode().equals("WALKING")) {
+                    SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+                    SharedPreferences.Editor editor = settings.edit();
+                    String coords = "";
+                    ArrayList<PathSegment> pathArray = route.getSteps().get(position).getPath();
+                    for (int i=0; i<pathArray.size();i++) {
+                        PathSegment p = pathArray.get(i);
+                        LatLng sLocation = p.getStartLoc();
+                        LatLng eLocation = p.getEndLoc();
+                        coords = coords + sLocation.latitude + "," + sLocation.longitude
+                        + "|" + eLocation.latitude + "," + eLocation.longitude;
+                        if(i<pathArray.size()-1)
+                            coords = coords + "|";
+                    }
+                    if(pathArray.size()<1) {
+                        LatLng sLocation = route.getSteps().get(position).getStartLoc();
+                        LatLng eLocation = route.getSteps().get(position).getEndLoc();
+                        coords = coords + sLocation.latitude + "," + sLocation.longitude
+                                + "|" + eLocation.latitude + "," + eLocation.longitude;
+                    }
+                    editor.putString("Path", coords);
+                    editor.commit();
+
+                    Intent myIntent = new Intent(view.getContext(), PathElevation.class);
+                    startActivity(myIntent);
+                }
+            }
+        });
     }
 
     private IBackgroundServiceAPI api = null;
@@ -155,6 +196,11 @@ public class RouteInfoScreen extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.route_info_screen, menu);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeButtonEnabled(false); // disable the button
+            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+        }
         return true;
     }
 

@@ -3,6 +3,7 @@ package com.example.nancy.aucklandtransport;
 import com.example.nancy.aucklandtransport.datatype.TravelTime;
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -32,10 +33,10 @@ public class RouteStep {
     List<LatLng> latlng;
     LatLng startLoc;
     LatLng endLoc;
+    //private String polyLine;
+    private String travelMode;
+    private ArrayList<PathSegment> path = new ArrayList<PathSegment>();
 
-        //public ArrayList<PathSegment> path;
-
-        //public boolean hasRemindedArr = false;
 
         public int getIconId() {
             if (iconId > -1) return iconId;
@@ -77,7 +78,7 @@ public class RouteStep {
     public RouteStep(String distance, String duration, String desc,
                      String firstLoc, String lastLoc, String type, String depTime, long depSec, String arrTime,
                      long arrSec, String vehicleName, String shortName, List<LatLng> latlng,
-                     LatLng startLoc, LatLng endLoc) {
+                     LatLng startLoc, LatLng endLoc, String travelMode) {
         this.distance = distance;
         this.duration = duration;
         this.desc = desc;
@@ -91,6 +92,8 @@ public class RouteStep {
         this.latlng = latlng;
         this.startLoc = startLoc;
         this.endLoc = endLoc;
+        //this.polyLine = polyline;
+        this.travelMode = travelMode;
     }
 
     public RouteStep(String type, String name) {
@@ -117,4 +120,14 @@ public class RouteStep {
     public LatLng getStartLoc() { return startLoc; }
 
     public LatLng getEndLoc() { return endLoc; }
+
+    //public String getPolyLine() { return polyLine;}
+
+    public String getTravelMode() { return travelMode; }
+
+    public void add(PathSegment p) {
+        this.path.add(p);
+    }
+
+    public ArrayList<PathSegment> getPath() { return path; }
 }

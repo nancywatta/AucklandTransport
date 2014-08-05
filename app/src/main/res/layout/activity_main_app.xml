@@ -109,6 +109,7 @@ android:windowSoftInputMode="stateHidden">
                 android:id="@+id/button1"
                 android:layout_width="fill_parent"
                 android:text="@string/go"
+                android:background="@color/green"
                 android:drawableLeft="@android:drawable/ic_menu_search"
                 android:onClick="showAllRoutes">
             </Button>
@@ -135,14 +136,16 @@ android:windowSoftInputMode="stateHidden">
                     android:layout_height="wrap_content"
                     android:onClick="onRadioButtonClicked"
                     android:text="@string/leave_after"
-                    android:checked="true" />
+                    android:checked="true"
+                    />
 
                 <RadioButton
                     android:id="@+id/radioButton3"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="onRadioButtonClicked"
-                    android:text="@string/arrive_before" />
+                    android:text="@string/arrive_before"
+                    />
 
             </RadioGroup>
         </TableRow>

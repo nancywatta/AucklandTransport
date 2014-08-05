@@ -1,5 +1,6 @@
 package com.example.nancy.aucklandtransport;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONObject;
 
@@ -266,12 +269,14 @@ public class RoutesActivity extends Activity {
             routes = result;
             if(fromCoords=="" || fromCoords.equals("") || fromCoords == null) {
                 Log.d(TAG, "post");
-                fromCoords = ((Route) result.get(0)).getStartLocation().toString();
+                LatLng temp = ((Route) result.get(0)).getStartLocation();
+                fromCoords = temp.latitude + "," + temp.longitude;
                 History.saveHistory(RoutesActivity.this, fromLoc, "", fromCoords);
             }
             if(toCoords=="" || toCoords.equals("") || toCoords == null) {
                 Log.d(TAG, "postto");
-                toCoords = ((Route) result.get(0)).getEndLocation().toString();
+                LatLng temp = ((Route) result.get(0)).getEndLocation();
+                toCoords = temp.latitude + "," + temp.longitude;
                 History.saveHistory(RoutesActivity.this, toLoc, "", toCoords);
             }
             if(!isRouteSave)
@@ -289,6 +294,11 @@ public class RoutesActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.routes, menu);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeButtonEnabled(false); // disable the button
+            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+        }
         return true;
     }
 

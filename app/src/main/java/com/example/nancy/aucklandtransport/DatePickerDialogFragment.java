@@ -39,7 +39,11 @@ public class DatePickerDialogFragment extends DialogFragment
         mYear = yearSelected;
         mMonth = monthOfYear;
         mDay = dayOfMonth;
-        ((Button)getActivity().findViewById(R.id.button3)).setText(dayOfMonth + "/" + monthOfYear + "/" + yearSelected);
+        ((Button)getActivity().findViewById(R.id.button3))
+                .setText(twodigits(dayOfMonth) + "/" + twodigits((monthOfYear+1)) + "/" + yearSelected);
     }
 
+    private String twodigits(int i) {
+        return (i > 9 ? "" + i : "0"+i);
+    }
 }

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -56,10 +57,12 @@ public class MainApp extends FragmentActivity {
     private static final String TAG = MainApp.class.getSimpleName();
     AutoCompleteTextView origin;
     AutoCompleteTextView destination;
+    Button date;
+    Button time;
     PlacesTask placesTask;
     ParserTask parserTask;
-    String fromCoords= "";
-    String toCoords = "";
+    String fromCoords ="";
+    String toCoords="";
     public final static String ADDRSTR = "com.example.nancy.aucklandtransport.ADDRESS";
     public final static String FROM_LOCATION = "com.example.nancy.aucklandtransport.FROMADDRESS";
     public final static String TO_LOCATION = "com.example.nancy.aucklandtransport.TOADDRESS";
@@ -85,7 +88,6 @@ public class MainApp extends FragmentActivity {
     DatePickerDialogFragment dateFragment = null;
     SharedPreferences prefs;
 
-    /* private ArrayAdapter<String> autoCompleteAdapter; */
     ArrayList<PlaceItem> history;
     ArrayList<RouteHistoryItem> routes;
     private int lastSelectedRoute = -1;
@@ -140,8 +142,6 @@ public class MainApp extends FragmentActivity {
         history = History.getHistory(this);
         routes = History.getRoutes(this);
 
-        /*autoCompleteAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, History.getHistoryAsArray());*/
-
         origin = (AutoCompleteTextView) findViewById(R.id.editText1);
         origin.setThreshold(1);
 
@@ -165,25 +165,6 @@ public class MainApp extends FragmentActivity {
             }
 
         });
-
-        /*origin.setAdapter(autoCompleteAdapter);*/
-
-        /* origin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                    origin.showDropDown();
-            }
-        });
-
-        origin.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if(hasFocus){
-                    origin.showDropDown();
-                }
-            }
-        });
-        */
 
         origin.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -232,7 +213,6 @@ public class MainApp extends FragmentActivity {
             }
         });
 
-        /*destination.setAdapter(autoCompleteAdapter); */
 
         TabHost tabs = (TabHost)findViewById(R.id.TabHost01);
         tabs.setup();
@@ -291,11 +271,9 @@ public class MainApp extends FragmentActivity {
                         switch(which) {
                             case 0: origin.setText(h.address);
                                 fromCoords = h.coords;
-                                //Log.i(TAG, "SET FROM COORDINATES!!!");
                                 break;
                             case 1: destination.setText(h.address);
                                 toCoords = h.coords;
-                                //Log.i(TAG, "SET TO COORDINATES!!!");
                                 break;
                             case 2:
                                 History.remove(MainApp.this, "history_"+history.get(lastSelectedPlace).address);
@@ -352,24 +330,23 @@ public class MainApp extends FragmentActivity {
             }
         });
 
-        /* destination.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean hasFocus) {
-                if(hasFocus){
-                    destination.showDropDown();
-                }
-            }
-        }); */
-
-        Calendar calendar = Calendar.getInstance();
-        ((Button)findViewById(R.id.button2)).setText(calendar.get(Calendar.HOUR_OF_DAY) + ":" + calendar.get(Calendar.MINUTE));
-        ((Button)findViewById(R.id.button3)).setText(calendar.get(Calendar.DAY_OF_MONTH) + "/" +
-                calendar.get(Calendar.MONTH) + "/" + calendar.get(Calendar.YEAR));
+        time = (Button)findViewById(R.id.button2);
+        date = (Button)findViewById(R.id.button3);
 
         if (savedInstanceState != null) {
             // Restore value of members from saved state
             origin.setText(savedInstanceState.getString("From Location"));
             destination.setText(savedInstanceState.getString("To Location"));
+            date.setText(savedInstanceState.getString("Date"));
+            time.setText(savedInstanceState.getString("Time"));
+        }
+        else
+        {
+            Calendar calendar = Calendar.getInstance();
+            time.setText(twodigits(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + twodigits(calendar.get(Calendar.MINUTE)));
+            int month = calendar.get(Calendar.MONTH) +1;
+            date.setText(twodigits(calendar.get(Calendar.DAY_OF_MONTH)) + "/" +
+                    twodigits(month) + "/" + calendar.get(Calendar.YEAR));
         }
 
         Bundle b = getIntent().getExtras();
@@ -385,6 +362,10 @@ public class MainApp extends FragmentActivity {
                 placeAdapter.refreshAdapter();
             }
         });
+    }
+
+    private String twodigits(int i) {
+        return (i > 9 ? "" + i : "0"+i);
     }
 
     /** A method to download json data from url */
@@ -545,8 +526,6 @@ public class MainApp extends FragmentActivity {
         AutoCompleteTextView origin1 = (AutoCompleteTextView) findViewById(R.id.editText1);
         try {
             String fromAddress = origin1.getText().toString(); // Get address
-            //fromAddress = fromAddress.replace(' ' , '+');
-            //Intent geoIntent = new Intent (android.content.Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + fromAddress));  Prepare intent
             Intent intent = new Intent(this, DisplayMapActivity.class);
             intent.putExtra(ADDRSTR, fromAddress);
             intent.putExtra(ORIGIN, true);
@@ -558,7 +537,6 @@ public class MainApp extends FragmentActivity {
     public void showMapOfToLoc(View v) {
         try {
             String toAddress = destination.getText().toString(); // Get address
-            //toAddress = toAddress.replace(' ' , '+');
             Intent intent = new Intent(this, DisplayMapActivity.class);
             intent.putExtra(ADDRSTR, toAddress);
             intent.putExtra(ORIGIN, false);
@@ -576,11 +554,8 @@ public class MainApp extends FragmentActivity {
 
         try {
             String toAddress = destination.getText().toString(); // Get address
-            //toAddress = toAddress.replace(' ' , '+');
             String fromAddress = origin.getText().toString(); // Get address
-            //fromAddress = fromAddress.replace(' ' , '+');
 
-            //Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             Calendar calendar = Calendar.getInstance(Locale.getDefault());
 
             if(dateFragment!=null && timeFragment !=null) {
@@ -637,11 +612,14 @@ public class MainApp extends FragmentActivity {
                     String toAddr = data.getStringExtra(TO_ADDRSTR);
                     if(toAddr!=null && !toAddr.equals(""))
                         destination.setText(toAddr);
+
                     String fCoords = data.getStringExtra(FROM_COORDS);
-                    if(fCoords!=null)
+                    Log.d(TAG, "fCoords" + fCoords);
+                    if(fCoords!=null && fCoords!="")
                         fromCoords = fCoords;
                     String tCoords = data.getStringExtra(TO_COORDS);
-                    if(tCoords!=null)
+                    Log.d(TAG, "tCoords" + tCoords);
+                    if(tCoords!=null && tCoords!="")
                         toCoords = tCoords;
                 }
                 break;
@@ -657,6 +635,8 @@ public class MainApp extends FragmentActivity {
         // Save the user's current game state
         savedInstanceState.putString("From Location", origin.getText().toString());
         savedInstanceState.putString("To Location", destination.getText().toString());
+        savedInstanceState.putString("Date", date.getText().toString());
+        savedInstanceState.putString("Time", time.getText().toString());
     }
 
     public void onRestoreInstanceState(Bundle savedInstanceState) {
@@ -666,6 +646,8 @@ public class MainApp extends FragmentActivity {
         // Restore state members from saved instance
         origin.setText(savedInstanceState.getString("From Location"));
         destination.setText(savedInstanceState.getString("To Location"));
+        date.setText(savedInstanceState.getString("Date"));
+        time.setText(savedInstanceState.getString("Time"));
     }
 
     @Override
@@ -676,11 +658,6 @@ public class MainApp extends FragmentActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        /*SharedPreferences settings = getSharedPreferences(getString(R.string.appSettings), MODE_PRIVATE);
-
-        origin = (AutoCompleteTextView) findViewById(R.id.editText1);
-        //Initialize to the default value if first run or restore the saved value
-        origin.setText(settings.getString(getString(R.string.fromLocation), null)); */
     }
 
     @Override
@@ -688,6 +665,9 @@ public class MainApp extends FragmentActivity {
         super.onResume();
 
         locationConsent(false);
+        myPlaces = (ListView)findViewById(R.id.myPlacesList);
+        history = History.getHistory(this);
+
         placeAdapter = new History.PlaceAdapter(this);
         refreshYourAdapter();
         myPlaces.setAdapter(placeAdapter);
@@ -698,23 +678,23 @@ public class MainApp extends FragmentActivity {
     protected void onStop()
     {
         super.onStop();
-
-        /*SharedPreferences settings = getSharedPreferences(getString(R.string.appSettings), MODE_PRIVATE);
-        SharedPreferences.Editor editor = settings.edit();
-
-        //Save Value
-        editor.putString(getString(R.string.fromLocation), origin.getText().toString());
-        editor.commit(); */
     }
 
     public void showTimePickerDialog(View v) {
-        timeFragment = new TimePickerFragment();
+        if(timeFragment==null)
+            timeFragment = new TimePickerFragment();
         timeFragment.show(getSupportFragmentManager(), "timePicker");
     }
 
     public void showDatePickerDialog(View v) {
-        dateFragment = new DatePickerDialogFragment();
+        if(dateFragment==null)
+            dateFragment = new DatePickerDialogFragment();
         dateFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+    }
 }

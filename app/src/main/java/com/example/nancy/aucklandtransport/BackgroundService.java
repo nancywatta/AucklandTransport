@@ -471,7 +471,7 @@ public class BackgroundService extends Service implements LocationListener {
             depTime = Calendar.getInstance();
             arrTime = Calendar.getInstance();
             depTime.setTimeInMillis(route.getDeparture().getSeconds()*1000L - reminderTime);
-            arrTime.setTimeInMillis(route.getArrival().getSeconds());
+            arrTime.setTimeInMillis(route.getArrival().getSeconds()*1000L);
 
             Log.i(TAG, "DATES: " + arrTime + " " + depTime);
 
@@ -601,7 +601,11 @@ public class BackgroundService extends Service implements LocationListener {
         final NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
 
         long when = System.currentTimeMillis();
-
+        if (notification == null) {
+            notificationIntent = new Intent(this, RouteInfoScreen.class);
+//            notificationIntent.putExtra("currentStep", currentStep);
+            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        }
         notification = new Notification(R.drawable.notification, ticker, when);
         contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         notification.defaults = 0;

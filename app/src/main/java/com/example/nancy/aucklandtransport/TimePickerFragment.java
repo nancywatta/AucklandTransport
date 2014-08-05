@@ -40,6 +40,11 @@ public class TimePickerFragment extends DialogFragment
         mHour = hourOfDay;
         mMinute = minute;
         isTimeSet = true;
-        ((Button)getActivity().findViewById(R.id.button2)).setText(hourOfDay + ":" + minute);
+        ((Button)getActivity().findViewById(R.id.button2))
+                .setText(twodigits(hourOfDay) + ":" + twodigits(minute));
+    }
+
+    private String twodigits(int i) {
+        return (i > 9 ? "" + i : "0"+i);
     }
 }

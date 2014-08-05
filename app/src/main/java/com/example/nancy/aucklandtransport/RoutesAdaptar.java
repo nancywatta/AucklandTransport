@@ -2,7 +2,6 @@ package com.example.nancy.aucklandtransport;
 
 import android.app.Activity;
 import android.content.Context;
-import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,7 +96,6 @@ public class RoutesAdaptar extends BaseAdapter {
 
         Display display = activity.getWindowManager().getDefaultDisplay();
         int maxWidth = display.getWidth() - 100;
-        Log.d("maxWidth ", "is : " + maxWidth);
 
         if (collection.size() > 0) {
             LinearLayout llAlso = new LinearLayout(activity.getApplicationContext());
@@ -112,10 +110,8 @@ public class RoutesAdaptar extends BaseAdapter {
                 image.setImageResource(samItem.getIconId());
                 image.measure(0, 0);
                 widthSoFar += image.getMeasuredWidth();
-                Log.d("Width ", "so far : " + widthSoFar);
 
                 if (widthSoFar >= maxWidth) {
-                    Log.d("Limit", "cross");
                     ll.addView(llAlso);
 
                     llAlso = new LinearLayout(activity.getApplicationContext());
@@ -135,10 +131,8 @@ public class RoutesAdaptar extends BaseAdapter {
                     name.setText(samItem.getShortName());
                     name.measure(0,0);
                     widthSoFar += name.getMeasuredWidth();
-                    Log.d("Width ", "so far : " + widthSoFar);
 
                     if (widthSoFar >= maxWidth) {
-                        Log.d("Limit", "cross");
                         ll.addView(llAlso);
 
                         llAlso = new LinearLayout(activity.getApplicationContext());
@@ -158,10 +152,8 @@ public class RoutesAdaptar extends BaseAdapter {
                     next.setImageResource(R.drawable.ic_action_next_item);
                     next.measure(0,0);
                     widthSoFar += next.getMeasuredWidth();
-                    Log.d("Width ", "so far : " + widthSoFar);
 
                     if (widthSoFar >= maxWidth) {
-                        Log.d("Limit", "cross");
                         ll.addView(llAlso);
 
                         llAlso = new LinearLayout(activity.getApplicationContext());

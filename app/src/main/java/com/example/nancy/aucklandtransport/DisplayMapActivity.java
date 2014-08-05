@@ -1,18 +1,24 @@
 package com.example.nancy.aucklandtransport;
 
+import android.app.ActionBar;
 import android.app.Dialog;
 import android.app.FragmentManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
@@ -78,6 +84,18 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
             }
         });
 
+        etLocation.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(etLocation.getWindowToken(),
+                            InputMethodManager.RESULT_UNCHANGED_SHOWN);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
@@ -374,10 +392,11 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                     etLocation.setText(name);
+                    String temp = latLng.latitude + "," + latLng.longitude;
                     if(isOrigin == true)
-                        output.putExtra(MainApp.FROM_COORDS, latLng);
+                        output.putExtra(MainApp.FROM_COORDS, temp);
                     else
-                        output.putExtra(MainApp.TO_COORDS, latLng);
+                        output.putExtra(MainApp.TO_COORDS, temp);
                     setResult(RESULT_OK, output);
                 }
             }
@@ -394,6 +413,11 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.display_map, menu);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeButtonEnabled(false); // disable the button
+            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+        }
         return true;
     }
 
