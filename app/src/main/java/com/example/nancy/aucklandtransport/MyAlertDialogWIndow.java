@@ -57,8 +57,10 @@ public class MyAlertDialogWIndow extends DialogFragment {
         /** Creating a builder object for the AlertDialog*/
         AlertDialog.Builder b = new AlertDialog.Builder(getActivity());
 
+        String message = getArguments().getString("message");
+
         /**  Setting the message */
-        b.setMessage("Do you want to set this location ?");
+        b.setMessage(message);
 
         /** Setting the Negative button */
         b.setNegativeButton("No", negativeClick);

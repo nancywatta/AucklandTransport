@@ -176,6 +176,10 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                         /** Instantiating the DialogFragment */
                         MyAlertDialogWIndow alert = new MyAlertDialogWIndow();
 
+                        Bundle args = new Bundle();
+                        args.putString("message", "Do you want to set this location ?");
+                        alert.setArguments(args);
+
                         /** Opening the dialog window */
                         alert.show(fm, "Alert_Dialog");
                     }

@@ -54,5 +54,4 @@
     <string name="RouteDone">Route done!</string>
     <string name="busNotifyExitText">You need to exit on the next stop</string>
     <string name="title_activity_path_elevation">PathElevation</string>
-
 </resources>

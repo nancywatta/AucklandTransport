@@ -3,6 +3,7 @@ package com.example.nancy.aucklandtransport;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.FragmentManager;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -25,12 +26,13 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
+import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
-public class RouteInfoScreen extends Activity {
+public class RouteInfoScreen extends Activity implements AlertPositiveListener {
     private static final String TAG = RouteInfoScreen.class.getSimpleName();
 
     private String routeString;
@@ -325,6 +327,27 @@ public class RouteInfoScreen extends Activity {
     }
     @Override
     public void onBackPressed() {
+        if(isRouteSet) {
+            FragmentManager fm = getFragmentManager();
+
+            /** Instantiating the DialogFragment */
+            MyAlertDialogWIndow alert = new MyAlertDialogWIndow();
+
+            Bundle args = new Bundle();
+            args.putString("message", "Do you want to cancel the route?");
+            alert.setArguments(args);
+
+            /** Opening the dialog window */
+            alert.show(fm, "Alert_Dialog");
+        }
+        else
+            super.onBackPressed();
+        //cancelRoute();
+    }
+
+    /** Defining button click listener for the OK button of the alert dialog window */
+    @Override
+    public void onPositiveClick(boolean isLocationSet) {
         cancelRoute();
         super.onBackPressed();
     }

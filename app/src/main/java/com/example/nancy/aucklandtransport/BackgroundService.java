@@ -113,7 +113,7 @@ public class BackgroundService extends Service implements LocationListener {
 
         api = new GoogleAPI();
 
-        // get a hangle on the location manager
+        // get a handle on the location manager
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         currentState = STATE_DO_NOTHING;
 
@@ -141,6 +141,7 @@ public class BackgroundService extends Service implements LocationListener {
                     currentTime = Calendar.getInstance();
                         if (currentTime.compareTo(depTime) > 0) {
                             long diff = route.getDeparture().getSeconds()*1000L - currentTime.getTimeInMillis(); // depTime.getTimeInMillis();
+
                             if (!hasRemindedDep) {
                                 String str = String.format(getString(R.string.DepartureText1), Math.round(diff/(1000*60)));
                                 if (diff <= 0) str = String.format(getString(R.string.DepartureText2), Math.round(-diff/(1000*60)));
@@ -158,7 +159,7 @@ public class BackgroundService extends Service implements LocationListener {
                         changeState(STATE_DO_NOTHING);
                     }
 
-                    processRoute();
+                    //processRoute();
                 }
                 Log.i("DEBUG!", ""+allowCoords);
             }
