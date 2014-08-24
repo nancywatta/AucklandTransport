@@ -57,30 +57,12 @@ public class RoutesAdaptar extends BaseAdapter {
         // Fetching i-th route
         Route path = result.get(position);
 
-        holder.text.setText(path.getDeparture().getTravelTime() + " - " + path.getArrival().getTravelTime() + " (" + path.getDuration() + ")");
+        holder.text.setText(path.getDeparture().getTravelTime() + " - " + path.getArrival().getTravelTime() + " (" + path.getDuration().getTravelTime() + ")");
         holder.text1.setText(path.getDistance());
 
         if(path.getSteps()!=null) {
             holder.ly.removeAllViews();
             populateLinks(holder.ly, path.getSteps());
-
-            /*for(int pos=0; pos< path.getSteps().size(); pos++ ) {
-                RouteStep routeStep = path.getSteps().get(pos);
-                ImageView image = new ImageView(activity.getApplicationContext());
-                image.setImageResource(routeStep.getIconId());
-                holder.ly.addView(image);
-
-                if(routeStep.getVehicleName() != "" && !routeStep.getVehicleName().equals("")) {
-                    TextView name = new TextView(activity.getApplicationContext());
-                    name.setText(routeStep.getVehicleName());
-                    holder.ly.addView(name);
-                }
-                if(pos < path.getSteps().size() -1 ) {
-                    ImageView next = new ImageView(activity.getApplicationContext());
-                    next.setImageResource(R.drawable.ic_action_next_item);
-                    holder.ly.addView(next);
-                }
-            }*/
         }
 
         return convertView;

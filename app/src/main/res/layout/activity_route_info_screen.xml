@@ -17,7 +17,7 @@
             android:id="@+id/mapButton"
             android:layout_width="wrap_content"
             android:text="@string/Map"
-            android:onClick="ShowMap">
+            >
         </Button>
 
         <Button
@@ -25,7 +25,7 @@
             android:id="@+id/startNavigation"
             android:layout_width="wrap_content"
             android:text="@string/Navigation"
-            android:onClick="StartTracking">
+            >
         </Button>
     </LinearLayout>
 

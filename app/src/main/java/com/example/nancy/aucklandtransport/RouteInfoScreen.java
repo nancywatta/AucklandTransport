@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,13 +27,20 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TableRow;
 import android.widget.TextView;
-import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
+import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
-public class RouteInfoScreen extends Activity implements AlertPositiveListener {
+public class RouteInfoScreen extends Activity implements AlertPositiveListener,
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener{
     private static final String TAG = RouteInfoScreen.class.getSimpleName();
 
     private String routeString;
@@ -40,6 +48,14 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener {
     ListView listView;
     private boolean isRouteSet = false;
     private Boolean routeStarted = false;
+    private ActivityRecognitionClient arclient;
+    private PendingIntent pIntent;
+    private Boolean mInProgress;
+    // Constants that define the activity detection interval
+    public static final int MILLISECONDS_PER_SECOND = 1000;
+    public static final int DETECTION_INTERVAL_SECONDS = 20;
+    public static final int DETECTION_INTERVAL_MILLISECONDS =
+            MILLISECONDS_PER_SECOND * DETECTION_INTERVAL_SECONDS;
 
     private static class EfficientAdapter extends BaseAdapter {
         private LayoutInflater mInflater;
@@ -151,6 +167,7 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener {
                                 + "|" + eLocation.latitude + "," + eLocation.longitude;
                     }
                     editor.putString("Path", coords);
+                    editor.putString("PathJSON", route.getSteps().get(position).getJsonString());
                     editor.commit();
 
                     Intent myIntent = new Intent(view.getContext(), PathElevation.class);
@@ -219,6 +236,7 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener {
     }
 
     public void ShowMap(View v){
+        //android:onClick="ShowMap"
         try {
             Intent myIntent = new Intent(this, RouteMapActivity.class);
             startActivity(myIntent);
@@ -234,6 +252,11 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener {
         } catch(Exception e) {
             Log.e(TAG, "ERROR!!", e);
         }
+        if(arclient!=null){
+            arclient.removeActivityUpdates(pIntent);
+            arclient.disconnect();
+        }
+
     }
 
     @Override
@@ -305,13 +328,62 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener {
 
     public void startNavigation() {
         isRouteSet = true;
+        mInProgress = false;
+        arclient = new ActivityRecognitionClient(this, this, this);
+        Intent intent = new Intent(this, ActivityRecognitionService.class);
+        pIntent = PendingIntent.getService(this, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Check for Google Play services
+        int resp = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (resp == ConnectionResult.SUCCESS) {
+            startUpdates();
+
+        } else {
+            Toast.makeText(this, "Please install Google Play Service.",
+                    Toast.LENGTH_SHORT).show();
+        }
+
             Intent setIntent = new Intent(Intent.ACTION_MAIN);
             setIntent.addCategory(Intent.CATEGORY_HOME);
             setIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(setIntent);
     }
 
+    public void startUpdates() {
+
+        // If a request is not already underway
+        if (!mInProgress) {
+            // Indicate that a request is in progress
+            mInProgress = true;
+            // Request a connection to Location Services
+            arclient.connect();
+            //
+        }
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult arg0) {
+        Toast.makeText(this, "Connection Failed", Toast.LENGTH_SHORT).show();
+        // Turn off the request flag
+        mInProgress = false;
+    }
+
+    @Override
+    public void onConnected(Bundle arg0) {
+        arclient.requestActivityUpdates(DETECTION_INTERVAL_MILLISECONDS, pIntent);
+        mInProgress = false;
+    }
+
+    @Override
+    public void onDisconnected() {
+        // Turn off the request flag
+        mInProgress = false;
+        // Delete the client
+        arclient = null;
+    }
+
     public void StartTracking(View v){
+        //android:onClick="StartTracking"
         if (!setRoute()) return;
         startNavigation();
     }

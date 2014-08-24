@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">APT</string>
+    <string name="curr_loc">Your Current Location!</string>
     <string name="hello_world">Hello world!</string>
     <string name="go">Go</string>
     <string name="Time">Set Time</string>
@@ -46,6 +47,8 @@
     <string name="RouteStart">Route started</string>
     <string name="Timer">APTTimer</string>
     <string name="DepartureText1">You need to start departure in less than %d minutes</string>
+    <string name="RunningLateText">You need to walk faster</string>
+    <string name="OffRouteText">You are walking off the route</string>
     <string name="DepartureText2">You need to start departure as soon as possible, you are %d minutes late!</string>
     <string name="DepartureTimer">Start departure</string>
     <string name="NotifyExit">Exit from %s</string>
@@ -54,4 +57,6 @@
     <string name="RouteDone">Route done!</string>
     <string name="busNotifyExitText">You need to exit on the next stop</string>
     <string name="title_activity_path_elevation">PathElevation</string>
+    <string name="title_activity_path_tracker">pathTrackerActivity</string>
+
 </resources>

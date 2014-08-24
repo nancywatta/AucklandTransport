@@ -4,8 +4,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -35,7 +37,8 @@ import java.util.TimerTask;
 /**
  * Created by Nancy on 7/29/14.
  */
-public class BackgroundService extends Service implements LocationListener {
+public class BackgroundService extends Service implements
+        LocationListener {
     private static final String TAG = BackgroundService.class.getSimpleName();
     private LocationManager locationManager;
     private int currentState = 0;
@@ -96,6 +99,16 @@ public class BackgroundService extends Service implements LocationListener {
     public float prevSpeed = 0;
     private boolean hasRemindedDep = false;
     float prevMinDist, prevMinDistIdx;
+    private BroadcastReceiver myReceiver;
+    String mActivity="Still";
+
+    // Flags for routeEngine
+    private int routeState = Constant.INIT ;
+    private int nextStop = 0;
+    private long searchInterval =0;
+    private boolean firstTime = true;
+    private float prevDistance = 0;
+    private boolean getRealTime = false;
 
     public BackgroundService() {
         super();
@@ -104,6 +117,22 @@ public class BackgroundService extends Service implements LocationListener {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        myReceiver = new BroadcastReceiver() {
+
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                String action = intent.getAction();
+                if(action.equals("com.example.nancy.aucklandtransport.ACTIVITY_RECOGNITION_DATA")){
+                    mActivity = intent.getExtras().getString("Activity");
+                }
+            }
+        };
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("com.example.nancy.aucklandtransport.ACTIVITY_RECOGNITION_DATA");
+        registerReceiver(myReceiver, filter);
 
         timer = new Timer(getString(R.string.Timer));
         timer.schedule(updateTask, 0, timerInverval);
@@ -160,13 +189,14 @@ public class BackgroundService extends Service implements LocationListener {
                     }
 
                     //processRoute();
+                    routeEngine();
                 }
                 Log.i("DEBUG!", ""+allowCoords);
             }
         }
     };
 
-    private void processRoute() {
+    /*private void processRoute() {
         if (route == null || currentLocation == null) {
             if (route == null && !isRouteSet && !isNotRouteInSettings) {
                 getRouteFromSettings();
@@ -192,21 +222,23 @@ public class BackgroundService extends Service implements LocationListener {
             currentTime = Calendar.getInstance();
             long now =  currentTime.getTimeInMillis() /1000L;
 
-            //for (int i=0; i < s.path.size(); i++) {
-              //  PathSegment p = s.path.get(i);
+            if (s.getTransportName() == R.string.tr_walk) {
+                for (int i=0; i < s.getPath().size(); i++) {
+                    PathSegment p = s.getPath().get(i);
 
-                Location dest = new Location("");
-                dest.setLatitude(s.getEndLoc().latitude);
-                dest.setLongitude(s.getEndLoc().longitude);
-                float dist = currentLocation.distanceTo(dest); // Approximate distance in meters
+                    Location dest = new Location("");
+                    dest.setLatitude(p.getEndLoc().latitude);
+                    dest.setLongitude(p.getEndLoc().longitude);
+                    float dist = currentLocation.distanceTo(dest); // Approximate distance in meters
 
-                if (dist < minDist) {
-                    minDist = dist;
-                    minDistIdx = j;
-                    currentStep = j;
-                    lastRouteStep = s;
+                    if (dist < 40) {
+                        minDist = dist;
+                        minDistIdx = j;
+                        currentStep = j;
+                        lastRouteStep = s;
+                    }
                 }
-
+            }
                 if (s.getTransportName() == R.string.tr_metro
                         || s.getTransportName() == R.string.tr_train) {
 
@@ -218,7 +250,6 @@ public class BackgroundService extends Service implements LocationListener {
                                 getString(R.string.NotifyNextStop), true, true, Toast.LENGTH_LONG);
                     }
                 }
-            //}
             if ( dist < 2 ) {
                 //! This is the next to last stop and probably were getting away from it
                 if (s.getTransportName() != R.string.tr_walk 			// currentState == STATE_IM_INBUS
@@ -242,6 +273,174 @@ public class BackgroundService extends Service implements LocationListener {
             nextRouteStep();
 
         }
+    }
+*/
+    private void routeEngine() {
+        if (route == null || currentLocation == null) {
+            if (route == null && !isRouteSet && !isNotRouteInSettings) {
+                getRouteFromSettings();
+            }
+            Log.i(TAG, "processRoute error: "+String.valueOf(route)+" "+String.valueOf(currentLocation));
+            return;
+        }
+
+        RouteStep s = route.getSteps().get(currentStep);
+        Location dest = new Location("");
+        PathSegment pathSegment = s.getPath().get(nextStop);
+        float dist;
+
+        switch(routeState)
+        {
+            case Constant.INIT:
+                nextStop = 0;
+                searchInterval= 0;
+                firstTime = true;
+                prevDistance = 0;
+                getRealTime = false;
+                routeState = Constant.CHANGE_OVER;
+                break;
+            case Constant.CHANGE_OVER:
+                if (s.getTransportName() == R.string.tr_walk && mActivity.compareTo("On Foot") == 0) {
+                    routeState = Constant.WALKING;
+                    changeState(STATE_LAST_STOP);
+                }
+                else if((s.getTransportName() == R.string.tr_train || s.getTransportName() == R.string.tr_bus
+                        || s.getTransportName() == R.string.tr_boat || s.getTransportName() == R.string.tr_metro)
+                        && mActivity.compareTo("In Vehicle") == 0) {
+                    routeState = Constant.TRANSIT;
+                    changeState(STATE_IM_INBUS);
+                }
+                else
+                    return;
+                searchInterval = 0;
+                prevDistance = 0;
+                firstTime = true;
+                getRealTime = false;
+                currentStep++;
+                if(currentStep >= route.getSteps().size())
+                    routeState = Constant.FINISHED;
+                break;
+            case Constant.PRE_CHANGE_OVER:
+                dest.setLatitude(s.getEndLoc().latitude);
+                dest.setLongitude(s.getEndLoc().longitude);
+                dist = currentLocation.distanceTo(dest); // Approximate distance in meters
+                if(dist<2)
+                    routeState = Constant.CHANGE_OVER;
+                break;
+
+            case Constant.WALKING:
+                long maxSeconds = pathSegment.getTravelTime().getSeconds();
+
+                if(searchInterval==0 && !pathSegment.isNotified) {
+                    if(firstTime) {
+                        searchInterval = fixInterval(maxSeconds);
+                        if(searchInterval > 5)
+                            getRealTime = true;
+                        firstTime = false;
+                    }
+                    else {
+                        if(getRealTime) {
+                            GoogleAPI googleAPI = new GoogleAPI();
+                            long seconds = googleAPI.getDuration(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
+                                    pathSegment.getEndLoc());
+                            searchInterval = fixInterval(seconds);
+
+                            if(searchInterval == 5)
+                                getRealTime = false;
+
+                            if (route.getSteps().get(currentStep + 1).isTransit()) {
+                                Calendar c = Calendar.getInstance();
+                                c.add(Calendar.SECOND, (int) seconds);
+                                long diff = (route.getSteps().get(currentStep + 1).getDeparture().getSeconds() * 1000L) - c.getTimeInMillis();
+                                if (diff < 120) {
+                                    createNotification(getString(R.string.RunningLateText),
+                                            getString(R.string.app_name),
+                                            getString(R.string.RunningLateText), true, true, Toast.LENGTH_LONG);
+                                }
+                            }
+                        }
+                        else
+                            searchInterval = 5;
+                    }
+                    dest.setLatitude(pathSegment.getEndLoc().latitude);
+                    dest.setLongitude(pathSegment.getEndLoc().longitude);
+                    dist = currentLocation.distanceTo(dest); // Approximate distance in meters
+                    if(prevDistance !=0) {
+                        long nextdist = 0;
+                        if(nextStop < s.getPath().size())
+                            nextdist = s.getPath().get(nextStop+1).getDistance();
+                        if(prevDistance + nextdist <= dist + nextdist)
+                            routeState = Constant.OFF_ROUTE;
+                    }
+                    prevDistance = dist;
+                    if(dist < 10) {
+                        createNotification(pathSegment.getInstruction(),
+                                getString(R.string.app_name),
+                                pathSegment.getInstruction(), true, true, Toast.LENGTH_LONG);
+                        pathSegment.isNotified = true;
+                        nextStop++;
+                        prevDistance = 0;
+                        if(nextStop >= s.getPath().size())
+                            routeState = Constant.PRE_CHANGE_OVER;
+                        //searchInterval = 0;
+                        firstTime = true;
+                    }
+                }
+                else if(searchInterval>0)
+                {
+                    searchInterval--;
+                }
+
+                break;
+            case Constant.TRANSIT:
+
+                break;
+            case Constant.STOPPED:
+                break;
+            case Constant.OFF_ROUTE:
+                createNotification(getString(R.string.OffRouteText),
+                        getString(R.string.app_name),
+                        getString(R.string.OffRouteText), true, true, Toast.LENGTH_LONG);
+                routeState = Constant.WALKING;
+                break;
+            case Constant.FINISHED:
+                routeDone();
+                break;
+            default:
+                break;
+
+        }
+
+    }
+
+    long fixInterval(long maxTime)
+    {
+        long interval;
+        /*if(maxTime >200)
+        {
+            interval = 140;
+        }
+        else if(maxTime>160)
+        {
+            interval = 100;
+        }
+        else if(maxTime>120)
+        {
+            interval = 60;
+        }
+        else if(maxTime>80)
+        {
+            interval = 20;
+        }
+        else*/ if(maxTime > 59)
+        {
+            interval = 25;
+        }
+        else
+        {
+            interval = 5;
+        }
+        return interval;
     }
 
     private void nextRouteStep() {
@@ -322,8 +521,8 @@ public class BackgroundService extends Service implements LocationListener {
         SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.remove("route");
-        editor.remove("routeStarted");
-        editor.remove("isRouteSet");
+        editor.remove("routeStarted").commit();
+        editor.remove("isRouteSet").commit();
         editor.commit();
         locationManager.removeUpdates(this);
         currentState = STATE_DO_NOTHING;
@@ -332,7 +531,7 @@ public class BackgroundService extends Service implements LocationListener {
     }
 
     public void startRoute() {
-        Log.i(TAG, "SERVICE deleteRoute");
+        Log.i(TAG, "SERVICE startRoute");
         allowCoords = prefs.getString("allowLoc", "dgdsfg").equals("Yes") ? true : false;
         Log.i("DEBUG!!", prefs.getString("allowLoc", "Yes"));
         SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
@@ -520,8 +719,8 @@ public class BackgroundService extends Service implements LocationListener {
         Log.i(TAG, "getAddressFromGoogle "+l);
         new Thread(new Runnable() {
             public void run() {
-
-                List<HashMap<String, String>> recs = api.getReverseGeocode(new LatLng(l.getLatitude(), l.getLongitude()));
+                api.getReverseGeocode(new LatLng(l.getLatitude(), l.getLongitude()));
+                List<HashMap<String, String>> recs = api.geoPlaces;
                 if (recs.size() > 0) {
                     HashMap<String, String> hmPlace = recs.get(0);
                     lastKnownAddress = hmPlace.get("formatted_address");

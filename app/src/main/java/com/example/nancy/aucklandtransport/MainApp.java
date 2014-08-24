@@ -34,6 +34,7 @@ import android.widget.TextView;
 
 import com.example.nancy.aucklandtransport.History.PlaceItem;
 import com.example.nancy.aucklandtransport.History.RouteHistoryItem;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONObject;
 
@@ -96,6 +97,9 @@ public class MainApp extends FragmentActivity {
     History.RoutesAdapter routesAdapter;
     private int lastSelectedPlace = -1;
 
+    GPSTracker gps;
+    GoogleAPI googleAPI;
+
     private void locationConsent(boolean showDialog) {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -143,6 +147,14 @@ public class MainApp extends FragmentActivity {
         routes = History.getRoutes(this);
 
         origin = (AutoCompleteTextView) findViewById(R.id.editText1);
+        gps = new GPSTracker(getBaseContext());
+        googleAPI = new GoogleAPI();
+
+        googleAPI.getReverseGeocode(new LatLng(gps.getLatitude(), gps.getLongitude()));
+
+        if(googleAPI.geoPlaces != null)
+            origin.setText(googleAPI.geoPlaces.get(0).get("formatted_address"));
+
         origin.setThreshold(1);
 
         origin.addTextChangedListener(new TextWatcher() {
@@ -556,45 +568,65 @@ public class MainApp extends FragmentActivity {
             String toAddress = destination.getText().toString(); // Get address
             String fromAddress = origin.getText().toString(); // Get address
 
-            Calendar calendar = Calendar.getInstance(Locale.getDefault());
+            if(toAddress.equals("") || toAddress==null) {
+                AlertDialog alertDialog = new AlertDialog.Builder(MainApp.this).create();
+                alertDialog.setTitle("Validation Error");
+                alertDialog.setMessage("Please enter the Destination");
+                alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
 
-            if(dateFragment!=null && timeFragment !=null) {
-                calendar.clear();
-                calendar.set(Calendar.MONTH, dateFragment.mMonth);
-                calendar.set(Calendar.YEAR, dateFragment.mYear);
-                calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
-                calendar.set(Calendar.HOUR_OF_DAY, timeFragment.mHour);
-                calendar.set(Calendar.MINUTE, timeFragment.mMinute);
+                    } });
+                alertDialog.show();
+
             }
-            else if(timeFragment !=null) {
-                calendar.set(Calendar.HOUR_OF_DAY, timeFragment.mHour);
-                calendar.set(Calendar.MINUTE, timeFragment.mMinute);
+            else {
+                if (fromAddress.equals("") || fromAddress == null) {
+
+                    if(googleAPI.geoPlaces != null)
+                        fromAddress = googleAPI.geoPlaces.get(0).get("formatted_address");
+                    Log.d(TAG, "fromAdd " + fromAddress);
+                }
+
+                Calendar calendar = Calendar.getInstance(Locale.getDefault());
+
+                if (dateFragment != null && timeFragment != null) {
+                    calendar.clear();
+                    calendar.set(Calendar.MONTH, dateFragment.mMonth);
+                    calendar.set(Calendar.YEAR, dateFragment.mYear);
+                    calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
+                    calendar.set(Calendar.HOUR_OF_DAY, timeFragment.mHour);
+                    calendar.set(Calendar.MINUTE, timeFragment.mMinute);
+                } else if (timeFragment != null) {
+                    calendar.set(Calendar.HOUR_OF_DAY, timeFragment.mHour);
+                    calendar.set(Calendar.MINUTE, timeFragment.mMinute);
+                } else if (dateFragment != null) {
+                    calendar.set(Calendar.MONTH, dateFragment.mMonth);
+                    calendar.set(Calendar.YEAR, dateFragment.mYear);
+                    calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
+                }
+
+                long secondsSinceEpoch = calendar.getTimeInMillis() / 1000L;
+
+                Log.d("MainApp", "secondsSinceEpoch " + secondsSinceEpoch +
+                        " Hour: " + calendar.get(Calendar.HOUR_OF_DAY)
+                        + " Month: " + calendar.get(Calendar.MONTH) + " Year: " + calendar.get(Calendar.YEAR) + " Date: " + calendar.get(Calendar.DAY_OF_MONTH)
+                        + " Day of Month: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + calendar.getTime());
+
+                Intent intent = new Intent(this, RoutesActivity.class);
+                intent.putExtra(FROM_LOCATION, fromAddress);
+                intent.putExtra(TO_LOCATION, toAddress);
+                intent.putExtra(TIME, secondsSinceEpoch);
+                intent.putExtra(FROM_COORDS, fromCoords);
+                intent.putExtra(TO_COORDS, toCoords);
+                if (leaveAfter.isChecked() == true)
+                    intent.putExtra(ISDEPARTURE, true);
+                else
+                    intent.putExtra(ISDEPARTURE, false);
+                startActivity(intent);
             }
-            else if (dateFragment!=null){
-                calendar.set(Calendar.MONTH, dateFragment.mMonth);
-                calendar.set(Calendar.YEAR, dateFragment.mYear);
-                calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
-            }
-
-            long secondsSinceEpoch = calendar.getTimeInMillis() / 1000L;
-
-            Log.d("MainApp", "secondsSinceEpoch " + secondsSinceEpoch +
-                     " Hour: " + calendar.get(Calendar.HOUR_OF_DAY)
-            + " Month: " + calendar.get(Calendar.MONTH) + " Year: " + calendar.get(Calendar.YEAR) + " Date: " + calendar.get(Calendar.DAY_OF_MONTH)
-            + " Day of Month: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + calendar.getTime());
-
-            Intent intent = new Intent(this, RoutesActivity.class);
-            intent.putExtra(FROM_LOCATION, fromAddress);
-            intent.putExtra(TO_LOCATION, toAddress);
-            intent.putExtra(TIME, secondsSinceEpoch);
-            intent.putExtra(FROM_COORDS, fromCoords);
-            intent.putExtra(TO_COORDS, toCoords);
-            if(leaveAfter.isChecked() == true)
-                intent.putExtra(ISDEPARTURE, true);
-            else
-                intent.putExtra(ISDEPARTURE, false);
-            startActivity(intent);
         } catch (Exception e){
+            e.printStackTrace();
+
         }
     }
 

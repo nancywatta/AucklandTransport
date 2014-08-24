@@ -2,14 +2,22 @@ package com.example.nancy.aucklandtransport;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.achartengine.ChartFactory;
@@ -32,7 +40,56 @@ import java.util.ArrayList;
 public class PathElevation extends Activity {
     private static final String TAG = PathElevation.class.getSimpleName();
     String pathCoords;
+    String pathString;
     LinearLayout ly;
+    RouteStep routeStep = null;
+    ListView listView;
+
+    private static class EfficientAdapter extends BaseAdapter {
+        private LayoutInflater mInflater;
+        private Context context;
+        private RouteStep routeStep;
+
+        public EfficientAdapter(Context context, RouteStep routeStep1) {
+            mInflater = LayoutInflater.from(context);
+            this.context = context;
+            this.routeStep = routeStep1;
+        }
+
+        public int getCount() {
+            return routeStep.getPath().size();
+        }
+
+        public Object getItem(int position) {
+            return position;
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder holder;
+            if (convertView == null) {
+                convertView = mInflater.inflate(R.layout.path_list_row, null);
+                holder = new ViewHolder();
+                holder.text = (TextView) convertView.findViewById(R.id.TextPath);
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
+            }
+
+            PathSegment step = routeStep.getPath().get(position);
+
+            holder.text.setText(Html.fromHtml(step.getInstruction()));
+
+            return convertView;
+        }
+
+        static class ViewHolder {
+            TextView text;
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +97,11 @@ public class PathElevation extends Activity {
         setContentView(R.layout.activity_path_elevation);
         ly = (LinearLayout)findViewById(R.id.chart);
         getPolyLine();
+
+        listView = (ListView) findViewById(R.id.WalkingInfoListView);
+        if(routeStep!=null)
+            listView.setAdapter(new EfficientAdapter(PathElevation.this, routeStep));
+
         // Getting URL to the Google Directions API
         String url = getDirectionsUrl();
 
@@ -204,6 +266,8 @@ public class PathElevation extends Activity {
         SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         try {
             pathCoords = settings.getString("Path", "");
+            pathString = settings.getString("PathJSON", "");
+            if (!pathString.equals("")) routeStep = new RouteStep(pathString);
         } catch ( Exception e ) {
             Log.e(TAG, "Couldn't get the polylines");
         }

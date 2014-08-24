@@ -61,6 +61,7 @@ public class DirectionsJSONParser {
                     Double lng1 = leg.getJSONObject("end_location").getDouble("lng");
 
                     Route route = new Route(jDistance.getString("text"), jDuration.getString("text"),
+                            jDuration.getLong("value"),
                             leg.getString("start_address"), leg.getString("end_address"),
                             jDepartureTime.getString("text"), jDepartureTime.getLong("value"),
                             jArrivalTime.getString("text"), jArrivalTime.getLong("value"),
@@ -85,6 +86,58 @@ public class DirectionsJSONParser {
 
                         route.getSteps().add(routeStep);
                     }
+                    if(route!=null) {
+                        Log.i("routes", "added");
+                        routes.add(route);
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }catch (Exception e){
+        }
+        return routes;
+    }
+
+    public ArrayList<Route> parse1(JSONObject jObject){
+
+        ArrayList<Route> routes = new ArrayList<Route>() ;
+        JSONArray jRoutes = null;
+        JSONArray jLegs = null;
+        JSONObject jDistance = null;
+        JSONObject jDuration = null;
+
+        try {
+
+            jRoutes = jObject.getJSONArray("routes");
+
+            /** Traversing all routes */
+            for(int i=0;i<jRoutes.length();i++){
+                jLegs = ( (JSONObject)jRoutes.get(i)).getJSONArray("legs");
+
+
+                /** Traversing all legs */
+                for(int j=0;j<jLegs.length();j++){
+
+                    JSONObject leg = jLegs.getJSONObject(j);
+
+                    /** Getting distance from the json data */
+                    jDistance = leg.getJSONObject("distance");
+
+                    /** Getting duration from the json data */
+                    jDuration = leg.getJSONObject("duration");
+
+                    Double lat = leg.getJSONObject("start_location").getDouble("lat");
+                    Double lng = leg.getJSONObject("start_location").getDouble("lng");
+
+                    Double lat1 = leg.getJSONObject("end_location").getDouble("lat");
+                    Double lng1 = leg.getJSONObject("end_location").getDouble("lng");
+
+                    Route route = new Route(jDistance.getString("text"), jDuration.getString("text"),
+                            jDuration.getLong("value"),
+                            leg.getString("start_address"), leg.getString("end_address"),
+                            new LatLng(lat,lng), new LatLng(lat1,lng1), leg.toString());
+
                     if(route!=null) {
                         Log.i("routes", "added");
                         routes.add(route);

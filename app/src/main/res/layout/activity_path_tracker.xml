@@ -1,0 +1,28 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
+    tools:context="com.example.nancy.aucklandtransport.pathTrackerActivity">
+
+    <TextView
+        android:text="@string/curr_loc"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/mapPath"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:clickable="true"
+        android:apiKey="AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw"
+        class="com.google.android.gms.maps.SupportMapFragment" />
+    <EditText
+        android:id ="@+id/et_path_tracker"
+        android:layout_width="match_parent"
+        android:hint="textbox is here"
+        android:layout_height="wrap_content" />
+</LinearLayout>

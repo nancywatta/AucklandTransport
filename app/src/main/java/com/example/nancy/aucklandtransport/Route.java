@@ -20,7 +20,6 @@ public class Route {
     private ArrayList<RouteStep> steps;
 
     protected String distance;
-    protected String duration;
     protected TravelTime departure;
     protected TravelTime arrival;
     protected String endAddress;
@@ -28,11 +27,12 @@ public class Route {
     protected String jsonString;
     LatLng startLocation;
     LatLng endLocation;
+    private TravelTime duration;
 
-    public Route(String distance, String duration, String startAddress, String endAddress,
+    public Route(String distance, String duration, long durSeconds, String startAddress, String endAddress,
                  String depTime, long depSeconds, String arrTime, long arrSeconds, LatLng startLocation, LatLng endLocation, String jsonString) {
         this.distance = distance;
-        this.duration = duration;
+        this.duration = new TravelTime(duration, durSeconds);
         this.startAddress = startAddress;
         this.endAddress = endAddress;
         this.departure = new TravelTime(depTime,depSeconds);
@@ -41,6 +41,17 @@ public class Route {
         this.endLocation = endLocation;
         this.jsonString = jsonString;
         steps = new ArrayList<RouteStep>();
+    }
+
+    public Route(String distance, String duration, long durSeconds, String startAddress, String endAddress,
+                 LatLng startLocation, LatLng endLocation, String jsonString) {
+        this.distance = distance;
+        this.duration = new TravelTime(duration, durSeconds);
+        this.startAddress = startAddress;
+        this.endAddress = endAddress;
+        this.startLocation = startLocation;
+        this.endLocation = endLocation;
+        this.jsonString = jsonString;
     }
 
     public Route(String json) throws JSONException {
@@ -75,7 +86,7 @@ public class Route {
         jArrivalTime = obj.getJSONObject("arrival_time");
 
         this.distance = jDistance.getString("text");
-        this.duration = jDuration.getString("text");
+        this.duration = new TravelTime(jDuration.getString("text"), jDuration.getLong("value"));
         this.startAddress = obj.getString("start_address");
         this.endAddress = obj.getString("end_address");
         this.departure = new TravelTime(jDepartureTime.getString("text"), jDepartureTime.getLong("value"));
@@ -137,7 +148,8 @@ public class Route {
             RouteStep routeStep = new RouteStep(jDistance.getString("text"), jDuration.getString("text"),
                     step.getString("html_instructions"), startAddr, endAddr, type, departTime, depSec,
                     arrivalTime, arrSec, name,
-                    shortName, list, new LatLng(startLat,startLng), new LatLng(endLat,endLng), travelMode);
+                    shortName, list, new LatLng(startLat,startLng), new LatLng(endLat,endLng), travelMode,
+                    step.toString());
 
             if (transit==null) {
                     Steps = ((JSONObject) jSteps.get(k)).getJSONArray("steps");
@@ -148,7 +160,11 @@ public class Route {
                     startLng = path.getJSONObject("start_location").getDouble("lng");
                     endLat = path.getJSONObject("end_location").getDouble("lat");
                     endLng = path.getJSONObject("end_location").getDouble("lng");
-                    PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng));
+                    departTime = path.getJSONObject("duration").getString("text");
+                    depSec = path.getJSONObject("duration").getLong("value");
+                    PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng),
+                            departTime,depSec, path.getString("html_instructions"),
+                            path.getJSONObject("distance").getLong("value"));
                     routeStep.add(p);
                 }
             }
@@ -165,7 +181,7 @@ public class Route {
 
     public String getDistance() { return distance; }
 
-    public String getDuration() { return  duration; }
+    public TravelTime getDuration() { return  duration; }
 
     public TravelTime getDeparture() { return departure;}
 
