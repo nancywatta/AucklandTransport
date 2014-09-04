@@ -46,6 +46,7 @@ android:windowSoftInputMode="stateHidden">
                 android:nextFocusUp="@+id/editText1"
                 android:nextFocusLeft="@+id/editText1"
                 android:hint="Current Location"
+                android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
                 android:background="@drawable/rounded_edittext"
             />
             <Button
@@ -82,6 +83,7 @@ android:windowSoftInputMode="stateHidden">
                 android:scrollHorizontally="true"
                 android:layout_weight="1"
                 android:hint="Address or Location"
+                android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
                 android:background="@drawable/rounded_edittext"
             />
             <Button

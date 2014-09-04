@@ -39,6 +39,23 @@ public class History {
         public String coords, coords2;
     }
 
+    public static String[] getHistoryAsArray() {
+        ArrayList<String> s = new ArrayList<String>();
+        for (int i=0; i<history.size(); i++) {
+            s.add(history.get(i).address);
+        }
+        String[] res = (String[])s.toArray(new String[1]);
+        return res;
+    }
+
+    public static ArrayList<String> getHistoryArray() {
+        ArrayList<String> s = new ArrayList<String>();
+        for (int i=0; i<history.size(); i++) {
+            s.add(history.get(i).address);
+        }
+        return s;
+    }
+
     public static class PlaceItem {
         PlaceItem(String n, String a, int c, String crds) {
             name = n; useCount = c; address = a; coords = crds;
@@ -267,7 +284,7 @@ public class History {
     }
 
     public static String used(int t) {
-        return "used "+( t > 1 ? t+" times" : "one time");
+        return "selected "+( t > 1 ? t+" times" : "one time");
     }
 
     public static void remove(Context context, String key) {

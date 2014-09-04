@@ -73,6 +73,7 @@ public class Route {
         String departTime = "";
         String arrivalTime = "";
         String shortName = ""; String name=""; String travelMode = "";
+        String departureStop = "", arrivalStop = "", instruc = "";
         Double startLat, startLng, endLat, endLng;
         long arrSec, depSec;
 
@@ -106,6 +107,7 @@ public class Route {
         for(int k=0;k<jSteps.length();k++){
             transit = null; type = ""; name = ""; shortName = ""; arrSec = 0; depSec = 0;
             endAddr = ""; startAddr = ""; departTime = ""; arrivalTime = ""; travelMode = "";
+            departureStop = ""; arrivalStop = "";
             JSONObject step = jSteps.getJSONObject(k);
 
             jDistance = step.getJSONObject("distance");
@@ -131,6 +133,8 @@ public class Route {
                 endLng = transit.getJSONObject("departure_stop").getJSONObject("location").getDouble("lng");
                 arrSec = transit.getJSONObject("arrival_time").getLong("value");
                 depSec = transit.getJSONObject("departure_time").getLong("value");
+                departureStop = transit.getJSONObject("departure_stop").getString("name");
+                arrivalStop = transit.getJSONObject("arrival_stop").getString("name");
             }
             else {
                 startLat = step.getJSONObject("start_location").getDouble("lat");
@@ -149,21 +153,25 @@ public class Route {
                     step.getString("html_instructions"), startAddr, endAddr, type, departTime, depSec,
                     arrivalTime, arrSec, name,
                     shortName, list, new LatLng(startLat,startLng), new LatLng(endLat,endLng), travelMode,
-                    step.toString());
+                    departureStop, arrivalStop, step.toString());
 
             if (transit==null) {
                     Steps = ((JSONObject) jSteps.get(k)).getJSONArray("steps");
 
                 for (int i = 0; i < Steps.length(); i++) {
                     JSONObject path = Steps.getJSONObject(i);
+                    instruc = "";
                     startLat = path.getJSONObject("start_location").getDouble("lat");
                     startLng = path.getJSONObject("start_location").getDouble("lng");
                     endLat = path.getJSONObject("end_location").getDouble("lat");
                     endLng = path.getJSONObject("end_location").getDouble("lng");
                     departTime = path.getJSONObject("duration").getString("text");
                     depSec = path.getJSONObject("duration").getLong("value");
+                    try {
+                        instruc = path.getString("html_instructions");
+                    } catch (Exception e) {}
                     PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng),
-                            departTime,depSec, path.getString("html_instructions"),
+                            departTime,depSec, instruc,
                             path.getJSONObject("distance").getLong("value"));
                     routeStep.add(p);
                 }

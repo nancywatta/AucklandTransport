@@ -52,7 +52,7 @@
         android:layout_below="@id/routeImage"
         android:textColor="#343434"
         android:textSize="10dip"
-        android:layout_marginTop="1dip"
+        android:layout_marginTop="10dp"
         android:layout_alignParentLeft="true"
         android:text="" />
 

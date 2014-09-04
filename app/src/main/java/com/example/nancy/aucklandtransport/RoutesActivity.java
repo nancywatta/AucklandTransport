@@ -3,7 +3,6 @@ package com.example.nancy.aucklandtransport;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -106,12 +105,13 @@ public class RoutesActivity extends Activity {
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
 
-                SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("route", routes.get(position).getJsonString());
-                editor.commit();
+//                SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+//                SharedPreferences.Editor editor = settings.edit();
+//                editor.putString("route", routes.get(position).getJsonString());
+//                editor.commit();
 
                 Intent myIntent = new Intent(view.getContext(), RouteInfoScreen.class);
+                myIntent.putExtra("route", routes.get(position).getJsonString());
                 myIntent.putExtra("from", fromLoc);
                 myIntent.putExtra("to", toLoc);
                 startActivity(myIntent);

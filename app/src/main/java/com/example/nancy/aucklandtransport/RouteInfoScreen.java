@@ -16,17 +16,11 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TableRow;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
@@ -34,9 +28,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
-import com.google.android.gms.maps.model.LatLng;
-
-import java.util.ArrayList;
 
 public class RouteInfoScreen extends Activity implements AlertPositiveListener,
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -57,75 +48,6 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener,
     public static final int DETECTION_INTERVAL_MILLISECONDS =
             MILLISECONDS_PER_SECOND * DETECTION_INTERVAL_SECONDS;
 
-    private static class EfficientAdapter extends BaseAdapter {
-        private LayoutInflater mInflater;
-        private Context context;
-        private Route route;
-
-        public EfficientAdapter(Context context, Route route) {
-            mInflater = LayoutInflater.from(context);
-            this.context = context;
-            this.route = route;
-        }
-
-        public int getCount() {
-            return route.getSteps().size();
-        }
-
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.route_list_row, null);
-                holder = new ViewHolder();
-                holder.text1 = (TextView) convertView.findViewById(R.id.TextRouteDur);
-                holder.image = (ImageView) convertView.findViewById(R.id.RouteInfoIcon);
-                holder.text4 = (TextView) convertView.findViewById(R.id.TextRouteBus);
-                holder.text5 = (TextView) convertView.findViewById(R.id.TextRouteAddress);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            RouteStep step = route.getSteps().get(position);
-
-            if(!step.getDeparture().getTravelTime().equals("")) {
-                holder.text1.setText(step.getDeparture().getTravelTime() + " - " + step.getArrival().getTravelTime());
-            }
-            else
-                holder.text1.setText(step.getDistance() + " (" + step.getDuration() + ")");
-            holder.image.setImageResource(step.getIconId());
-
-            holder.text4.setText(step.getDesc());
-
-            if(!step.getShortName().equals("") && step.getShortName()!="")
-                holder.text5.setText(step.getShortName() + " --- " + step.getVehicleName());
-            else
-            holder.text5.setText("");
-
-            return convertView;
-        }
-
-        static class ViewHolder {
-            TextView text;
-            TextView text1;
-            ImageView image;
-            TextView text2;
-            TextView text3;
-            TextView text4;
-            TextView text5;
-            TableRow row1;
-            TableRow row2;
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -134,7 +56,7 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener,
         getRoute();
         listView = (ListView) findViewById(R.id.RouteInfoScreenListView);
         if(route!=null)
-        listView.setAdapter(new EfficientAdapter(RouteInfoScreen.this, route));
+        listView.setAdapter(new RouteInfoAdapter(RouteInfoScreen.this, route));
         Intent servIntent = new Intent(BackgroundService.class.getName());
         startService(servIntent);
         Log.i(TAG, "starting service "+servIntent.toString());
@@ -145,34 +67,10 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener,
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-
-                if(route.getSteps().get(position).getTravelMode().equals("WALKING")) {
-                    SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
-                    SharedPreferences.Editor editor = settings.edit();
-                    String coords = "";
-                    ArrayList<PathSegment> pathArray = route.getSteps().get(position).getPath();
-                    for (int i=0; i<pathArray.size();i++) {
-                        PathSegment p = pathArray.get(i);
-                        LatLng sLocation = p.getStartLoc();
-                        LatLng eLocation = p.getEndLoc();
-                        coords = coords + sLocation.latitude + "," + sLocation.longitude
-                        + "|" + eLocation.latitude + "," + eLocation.longitude;
-                        if(i<pathArray.size()-1)
-                            coords = coords + "|";
-                    }
-                    if(pathArray.size()<1) {
-                        LatLng sLocation = route.getSteps().get(position).getStartLoc();
-                        LatLng eLocation = route.getSteps().get(position).getEndLoc();
-                        coords = coords + sLocation.latitude + "," + sLocation.longitude
-                                + "|" + eLocation.latitude + "," + eLocation.longitude;
-                    }
-                    editor.putString("Path", coords);
-                    editor.putString("PathJSON", route.getSteps().get(position).getJsonString());
-                    editor.commit();
-
                     Intent myIntent = new Intent(view.getContext(), PathElevation.class);
+                    myIntent.putExtra("IS_TRANSIT", route.getSteps().get(position).isTransit());
+                    myIntent.putExtra("PathJSON", route.getSteps().get(position).getJsonString());
                     startActivity(myIntent);
-                }
             }
         });
     }
@@ -203,11 +101,15 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener,
             if (routeStarted) isRouteSet = routeStarted;
             if (!routeString.equals("")) route = new Route(routeString);
             else {
+                Intent intent = getIntent();
+                routeString = intent.getStringExtra("route");
+                route = new Route(routeString);
                 Log.d("Shared Not Working", ":(");
             }
 
         } catch ( Exception e ) {
             Log.e("ERROR", "Couldn't get the route from JSONobj");
+            e.printStackTrace();
         }
     }
 
@@ -239,6 +141,7 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener,
         //android:onClick="ShowMap"
         try {
             Intent myIntent = new Intent(this, RouteMapActivity.class);
+            myIntent.putExtra("route", routeString);
             startActivity(myIntent);
         }catch (Exception e) {}
     }
@@ -256,7 +159,6 @@ public class RouteInfoScreen extends Activity implements AlertPositiveListener,
             arclient.removeActivityUpdates(pIntent);
             arclient.disconnect();
         }
-
     }
 
     @Override

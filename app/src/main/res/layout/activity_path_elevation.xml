@@ -4,16 +4,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context="com.example.nancy.aucklandtransport.PathElevation">
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
+    </LinearLayout>
     <ListView
         android:layout_height="wrap_content"
         android:id="@+id/WalkingInfoListView"
         android:layout_width="fill_parent">
     </ListView>
-    <LinearLayout
+    <ImageView
+        android:id="@+id/ElevationImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/WalkingInfoListView"
+        />
+    <!--LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:id="@+id/chart"
         android:orientation="horizontal"
         android:layout_alignEnd="@id/WalkingInfoListView"
-        android:layout_alignParentEnd="false" />
+        android:layout_alignParentEnd="false" /-->
 </RelativeLayout>

@@ -393,7 +393,6 @@ public class BackgroundService extends Service implements
 
                 break;
             case Constant.TRANSIT:
-
                 break;
             case Constant.STOPPED:
                 break;

@@ -2,32 +2,26 @@ package com.example.nancy.aucklandtransport;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.text.Html;
 import android.util.Log;
-import android.view.LayoutInflater;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import org.achartengine.ChartFactory;
-import org.achartengine.GraphicalView;
-import org.achartengine.chart.PointStyle;
-import org.achartengine.model.XYMultipleSeriesDataset;
-import org.achartengine.model.XYSeries;
-import org.achartengine.renderer.XYMultipleSeriesRenderer;
-import org.achartengine.renderer.XYSeriesRenderer;
-import org.json.JSONObject;
+import com.google.android.gms.maps.model.LatLng;
+
+import org.json.JSONException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,96 +33,143 @@ import java.util.ArrayList;
 
 public class PathElevation extends Activity {
     private static final String TAG = PathElevation.class.getSimpleName();
-    String pathCoords;
+    String pathCoords ="";
     String pathString;
     LinearLayout ly;
     RouteStep routeStep = null;
     ListView listView;
-
-    private static class EfficientAdapter extends BaseAdapter {
-        private LayoutInflater mInflater;
-        private Context context;
-        private RouteStep routeStep;
-
-        public EfficientAdapter(Context context, RouteStep routeStep1) {
-            mInflater = LayoutInflater.from(context);
-            this.context = context;
-            this.routeStep = routeStep1;
-        }
-
-        public int getCount() {
-            return routeStep.getPath().size();
-        }
-
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public View getView(int position, View convertView, ViewGroup parent) {
-            ViewHolder holder;
-            if (convertView == null) {
-                convertView = mInflater.inflate(R.layout.path_list_row, null);
-                holder = new ViewHolder();
-                holder.text = (TextView) convertView.findViewById(R.id.TextPath);
-                convertView.setTag(holder);
-            } else {
-                holder = (ViewHolder) convertView.getTag();
-            }
-
-            PathSegment step = routeStep.getPath().get(position);
-
-            holder.text.setText(Html.fromHtml(step.getInstruction()));
-
-            return convertView;
-        }
-
-        static class ViewHolder {
-            TextView text;
-        }
-    }
+    Boolean isTransit;
+    ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_path_elevation);
-        ly = (LinearLayout)findViewById(R.id.chart);
-        getPolyLine();
 
         listView = (ListView) findViewById(R.id.WalkingInfoListView);
-        if(routeStep!=null)
-            listView.setAdapter(new EfficientAdapter(PathElevation.this, routeStep));
 
-        // Getting URL to the Google Directions API
-        String url = getDirectionsUrl();
+        Intent intent = getIntent();
+        isTransit = intent.getBooleanExtra("IS_TRANSIT", false);
+        pathString = intent.getStringExtra("PathJSON");
 
-        DownloadTask downloadTask = new DownloadTask();
+        if (!pathString.equals("")) try {
+            routeStep = new RouteStep(pathString);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
-        // Start downloading json data from Google Directions API
-        downloadTask.execute(url);
+        if(!isTransit) {
+            Log.d(TAG, "Walking");
+            //ly = (LinearLayout) findViewById(R.id.chart);
+            imageView = (ImageView) findViewById(R.id.ElevationImage);
+            getPolyLine();
+
+            if (routeStep != null) {
+                listView.setAdapter(new PathAdapter(PathElevation.this, routeStep));
+            }
+
+            // Getting URL to the Google Elevation API
+            /*String url = getDirectionsUrl();
+
+            DownloadTask downloadTask = new DownloadTask();
+
+            // Start downloading json data from Google Directions API
+            downloadTask.execute(url); */
+
+            // Getting URL to our private Application server for Elevation Image
+            String url =  getElevationUrl();
+
+            ElevationTask elevationTask = new ElevationTask();
+
+            // Start downloading image source from private server
+            elevationTask.execute(url);
+        }
+        else {
+            Log.d(TAG, "Transit");
+            displayTransitInfo();
+        }
     }
 
-    private String getDirectionsUrl(){
-
-        // Sensor enabled
-        String sensor = "sensor=false";
-
-        String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
-
-        String parameters = "path=" + pathCoords + "&samples=10" + "&" + sensor + "&" + key;
-
-        // Output format
-        String output = "json";
+    private String getElevationUrl() {
 
         // Building the url to the web service
-        String url = "https://maps.googleapis.com/maps/api/elevation/"+output+"?"+parameters;
+        String url = "http://172.23.208.76:8080/apt-server/showElevationProfile?pathStr="
+                + pathCoords.trim();
 
         Log.d("url", url);
 
         return url;
+    }
+
+    // Fetches data from url passed
+    private class ElevationTask extends AsyncTask<String, Void, String> {
+
+        // Downloading data in non-ui thread
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try{
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+            }catch(Exception e){
+                Log.d("Background Task",e.toString());
+            }
+            return data;
+        }
+
+        // Executes in UI thread, after the execution of
+        // doInBackground()
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            Log.d(TAG, "Response : " + result);
+
+            new ImageLoadTask(result, imageView).execute(null, null);
+        }
+    }
+
+    public class ImageLoadTask extends AsyncTask<Void, Void, Bitmap> {
+
+        private String url;
+        private ImageView imageView;
+
+        public ImageLoadTask(String url, ImageView imageView) {
+            this.url = url;
+            this.imageView = imageView;
+        }
+
+        @Override
+        protected Bitmap doInBackground(Void... params) {
+            try {
+                URL urlConnection = new URL(url);
+                HttpURLConnection connection = (HttpURLConnection) urlConnection
+                        .openConnection();
+                connection.setDoInput(true);
+                connection.connect();
+                InputStream input = connection.getInputStream();
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inSampleSize = 2048;
+                Bitmap myBitmap = BitmapFactory.decodeStream(input);
+                return myBitmap;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            super.onPostExecute(result);
+            imageView.setImageBitmap(result);
+            imageView.setLayoutParams(
+                    new LinearLayout.LayoutParams(
+                            result.getWidth(),
+                            result.getHeight()));
+        }
+
     }
 
     /** A method to download json data from url */
@@ -170,6 +211,115 @@ public class PathElevation extends Activity {
         return data;
     }
 
+    private void getPolyLine() {
+        if (routeStep != null) {
+            ArrayList<PathSegment> pathArray = routeStep.getPath();
+            for (int i=0; i<pathArray.size();i++) {
+                PathSegment p = pathArray.get(i);
+                LatLng sLocation = p.getStartLoc();
+                LatLng eLocation = p.getEndLoc();
+                pathCoords = pathCoords + sLocation.latitude + "," + sLocation.longitude
+                        + "|" + eLocation.latitude + "," + eLocation.longitude;
+                if(i<pathArray.size()-1)
+                    pathCoords = pathCoords + "|";
+            }
+            if(pathArray.size()<1) {
+                LatLng sLocation = routeStep.getStartLoc();
+                LatLng eLocation = routeStep.getEndLoc();
+                pathCoords = pathCoords + sLocation.latitude + "," + sLocation.longitude
+                        + "|" + eLocation.latitude + "," + eLocation.longitude;
+            }
+        }
+    }
+
+    private void displayTransitInfo() {
+        ly = (LinearLayout) findViewById(R.id.linearLayout);
+        if(routeStep != null) {
+
+            TextView et5 = new TextView(this);
+            et5.setText("Bus No: " + routeStep.getShortName());
+            et5.setTextSize(25);
+            et5.setTextColor(Color.parseColor("#10bcc9"));
+            et5.setTypeface(Typeface.DEFAULT_BOLD);
+            ly.addView(et5);
+
+            View v1 = new View(this);
+            v1.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    5
+            ));
+            v1.setBackgroundColor(Color.parseColor("#10bcc9"));
+            v1.setPadding(0,2,0,2);
+            ly.addView(v1);
+
+            TextView et = new TextView(this);
+            et.setText("From ");
+            //et.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.bustop, 0);
+            et.setTextSize(20);
+            et.setGravity(Gravity.CENTER);
+            ly.addView(et);
+
+                /*ImageView iV = new ImageView(this);
+                iV.setImageResource(R.drawable.bustop);
+                llAlso.addView(iV); */
+
+            TextView et3 = new TextView(this);
+            et3.setText(routeStep.getDepartureStop());
+            et3.setTextSize(25);
+            et3.setTypeface(Typeface.DEFAULT_BOLD);
+            et3.setGravity(Gravity.CENTER);
+            ly.addView(et3);
+
+            View v = new View(this);
+            v.setLayoutParams(new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    5
+            ));
+            v.setBackgroundColor(Color.parseColor("#B3B3B3"));
+            v.setPadding(0,2,0,2);
+            ly.addView(v);
+
+            TextView et2 = new TextView(this);
+            et2.setText("To ");
+            //et2.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.bustop, 0);
+            et2.setTextSize(20);
+            et2.setGravity(Gravity.CENTER);
+            ly.addView(et2);
+
+            TextView et4 = new TextView(this);
+            et4.setText(routeStep.getArrivalStop());
+            et4.setTextSize(25);
+            et4.setTypeface(Typeface.DEFAULT_BOLD);
+            et4.setGravity(Gravity.CENTER);
+            ly.addView(et4);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.path_elevation, menu);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeButtonEnabled(false); // disable the button
+            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+        }
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    /*
     // Fetches data from url passed
     private class DownloadTask extends AsyncTask<String, Void, String> {
 
@@ -202,7 +352,7 @@ public class PathElevation extends Activity {
         }
     }
 
-    /** A class to parse the Google Places in JSON format */
+    /$$ A class to parse the Google Elevation in JSON format $/
     private class ParserTask extends AsyncTask<String, Integer, ArrayList<Double>>{
 
         // Parsing the data in non-ui thread
@@ -262,38 +412,24 @@ public class PathElevation extends Activity {
         return mRenderer;
     }
 
-    private void getPolyLine() {
-        SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
-        try {
-            pathCoords = settings.getString("Path", "");
-            pathString = settings.getString("PathJSON", "");
-            if (!pathString.equals("")) routeStep = new RouteStep(pathString);
-        } catch ( Exception e ) {
-            Log.e(TAG, "Couldn't get the polylines");
-        }
-    }
+    private String getDirectionsUrl(){
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.path_elevation, menu);
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(false); // disable the button
-            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
-        }
-        return true;
-    }
+        // Sensor enabled
+        String sensor = "sensor=false";
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
+
+        String parameters = "path=" + pathCoords + "&samples=10" + "&" + sensor + "&" + key;
+
+        // Output format
+        String output = "json";
+
+        // Building the url to the web service
+        String url = "https://maps.googleapis.com/maps/api/elevation/"+output+"?"+parameters;
+
+        Log.d("url", url);
+
+        return url;
     }
+    */
 }

@@ -19,10 +19,13 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -64,6 +67,7 @@ public class MainApp extends FragmentActivity {
     ParserTask parserTask;
     String fromCoords ="";
     String toCoords="";
+    String prefix="";
     public final static String ADDRSTR = "com.example.nancy.aucklandtransport.ADDRESS";
     public final static String FROM_LOCATION = "com.example.nancy.aucklandtransport.FROMADDRESS";
     public final static String TO_LOCATION = "com.example.nancy.aucklandtransport.TOADDRESS";
@@ -95,6 +99,7 @@ public class MainApp extends FragmentActivity {
     ListView myPlaces, myRoutes;
     History.PlaceAdapter placeAdapter;
     History.RoutesAdapter routesAdapter;
+    private ArrayAdapter<String> autoCompleteAdapter;
     private int lastSelectedPlace = -1;
 
     GPSTracker gps;
@@ -161,6 +166,7 @@ public class MainApp extends FragmentActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                prefix = s.toString();
                 placesTask = new PlacesTask();
                 placesTask.execute(s.toString());
             }
@@ -189,6 +195,20 @@ public class MainApp extends FragmentActivity {
             }
         });
 
+        origin.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_RIGHT = 2;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (origin.getRight() - origin.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        origin.setText("");
+                    }
+                }
+                return false;
+            }
+        });
+
         destination = (AutoCompleteTextView) findViewById(R.id.editText2);
         destination.setThreshold(1);
 
@@ -196,6 +216,7 @@ public class MainApp extends FragmentActivity {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                prefix = s.toString();
                 placesTask = new PlacesTask();
                 placesTask.execute(s.toString());
             }
@@ -225,6 +246,19 @@ public class MainApp extends FragmentActivity {
             }
         });
 
+        destination.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_RIGHT = 2;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (destination.getRight() - destination.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        destination.setText("");
+                    }
+                }
+                return false;
+            }
+        });
 
         TabHost tabs = (TabHost)findViewById(R.id.TabHost01);
         tabs.setup();
@@ -341,6 +375,11 @@ public class MainApp extends FragmentActivity {
                 builder.show();
             }
         });
+
+//        autoCompleteAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, History.getHistoryAsArray());
+//
+//        origin.setAdapter(autoCompleteAdapter);
+//        destination.setAdapter(autoCompleteAdapter);
 
         time = (Button)findViewById(R.id.button2);
         date = (Button)findViewById(R.id.button3);
@@ -502,8 +541,19 @@ public class MainApp extends FragmentActivity {
             String[] from = new String[] { "description"};
             int[] to = new int[] { android.R.id.text1 };
 
+            List<HashMap<String, String>> finalResult = new ArrayList<HashMap<String, String>>();
+            ArrayList<String> historyPlaces = History.getHistoryArray();
+            for(String place:historyPlaces) {
+                if(place.startsWith(prefix)) {
+                    HashMap<String, String> hm = new HashMap<String, String>();
+                    hm.put("description", place);
+                    finalResult.add(hm);
+                }
+            }
+            finalResult.addAll(result);
+
             // Creating a SimpleAdapter for the AutoCompleteTextView
-            SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), result, android.R.layout.simple_list_item_1, from, to);
+            SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), finalResult, android.R.layout.simple_list_item_1, from, to);
 
             // Setting the adapter
             origin.setEllipsize(TextUtils.TruncateAt.END);

@@ -17,8 +17,12 @@ public class CustomAutoCompleteTextView extends AutoCompleteTextView {
     /** Returns the place description corresponding to the selected item */
     @Override
     protected CharSequence convertSelectionToString(Object selectedItem) {
-        /** Each item in the autocompetetextview suggestion list is a hashmap object */
-        HashMap<String, String> hm = (HashMap<String, String>) selectedItem;
-        return hm.get("description");
+        try {
+            /** Each item in the autocompetetextview suggestion list is a hashmap object */
+            HashMap<String, String> hm = (HashMap<String, String>) selectedItem;
+            return hm.get("description");
+        }catch (Exception e) {
+            return (String)selectedItem;
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.nancy.aucklandtransport;
 
 import android.app.ActionBar;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -91,7 +92,9 @@ public class RouteMapActivity extends FragmentActivity {
 
             if (!routeString.equals("")) route = new Route(routeString);
             else {
-                Log.d("Shared Not Working", ":(");
+                Intent intent = getIntent();
+                routeString = intent.getStringExtra("route");
+                route = new Route(routeString);
             }
 
         } catch ( Exception e ) {

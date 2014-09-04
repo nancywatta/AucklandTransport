@@ -41,6 +41,8 @@ public class RouteStep {
     private String travelMode;
     private ArrayList<PathSegment> path = new ArrayList<PathSegment>();
     private String jsonString;
+    private String departureStop;
+    private String arrivalStop;
 
 
         public int getIconId() {
@@ -105,7 +107,8 @@ public class RouteStep {
     public RouteStep(String distance, String duration, String desc,
                      String firstLoc, String lastLoc, String type, String depTime, long depSec, String arrTime,
                      long arrSec, String vehicleName, String shortName, List<LatLng> latlng,
-                     LatLng startLoc, LatLng endLoc, String travelMode, String jsonString) {
+                     LatLng startLoc, LatLng endLoc, String travelMode,
+                     String departureStop, String arrivalStop, String jsonString) {
         this.distance = distance;
         this.duration = duration;
         this.desc = desc;
@@ -122,6 +125,8 @@ public class RouteStep {
         //this.polyLine = polyline;
         this.travelMode = travelMode;
         this.jsonString = jsonString;
+        this.departureStop = departureStop;
+        this.arrivalStop = arrivalStop;
     }
 
     public RouteStep(String type, String name) {
@@ -151,6 +156,8 @@ public class RouteStep {
 
     //public String getPolyLine() { return polyLine;}
 
+    public String getType() { return type; }
+
     public String getTravelMode() { return travelMode; }
 
     public void add(PathSegment p) {
@@ -168,7 +175,9 @@ public class RouteStep {
         JSONArray Steps = null;
         Double startLat, startLng, endLat, endLng;
         long depSec;
-        String departTime = "";
+        String departTime = "", instruction = "";
+
+        this.desc = obj.getString("html_instructions");
 
         try {
             transit = obj.getJSONObject("transit_details");
@@ -179,19 +188,32 @@ public class RouteStep {
 
             for (int i = 0; i < Steps.length(); i++) {
                 JSONObject pathS = Steps.getJSONObject(i);
+                instruction = "";
                 startLat = pathS.getJSONObject("start_location").getDouble("lat");
                 startLng = pathS.getJSONObject("start_location").getDouble("lng");
                 endLat = pathS.getJSONObject("end_location").getDouble("lat");
                 endLng = pathS.getJSONObject("end_location").getDouble("lng");
                 departTime = pathS.getJSONObject("duration").getString("text");
                 depSec = pathS.getJSONObject("duration").getLong("value");
+                try {
+                    instruction = pathS.getString("html_instructions");
+                } catch (Exception e ) {}
                 PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng),
-                        departTime,depSec, pathS.getString("html_instructions"),
+                        departTime,depSec, instruction,
                         pathS.getJSONObject("distance").getLong("value"));
                 path.add(p);
             }
         }
+        else {
+            this.shortName = transit.getJSONObject("line").getString("short_name");
+            this.departureStop = transit.getJSONObject("departure_stop").getString("name");
+            this.arrivalStop = transit.getJSONObject("arrival_stop").getString("name");
+        }
     }
 
     public String getJsonString() { return jsonString; }
+
+    public String getDepartureStop() { return departureStop; }
+
+    public String getArrivalStop() { return arrivalStop;}
 }
