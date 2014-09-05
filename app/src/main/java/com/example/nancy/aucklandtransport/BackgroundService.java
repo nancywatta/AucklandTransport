@@ -188,7 +188,6 @@ public class BackgroundService extends Service implements
                         changeState(STATE_DO_NOTHING);
                     }
 
-                    //processRoute();
                     routeEngine();
                 }
                 Log.i("DEBUG!", ""+allowCoords);
@@ -196,85 +195,6 @@ public class BackgroundService extends Service implements
         }
     };
 
-    /*private void processRoute() {
-        if (route == null || currentLocation == null) {
-            if (route == null && !isRouteSet && !isNotRouteInSettings) {
-                getRouteFromSettings();
-            }
-            Log.i(TAG, "processRoute error: "+String.valueOf(route)+" "+String.valueOf(currentLocation));
-            return;
-        }
-        prevMinDist = minDist;
-        prevMinDistIdx = minDistIdx;
-
-        minDist = 9999999;
-        minDistIdx = -1;
-
-        int lastCurrentStep = currentStep;
-        //Log.i(TAG, "lastCurrentStep: "+lastCurrentStep+" "+currentStep);
-        RouteStep lastRouteStep = null;
-        //RouteStep lastRouteStep = null;
-        String lastName = "";
-
-        for (int j=0; j<route.getSteps().size(); j++) {
-            RouteStep s = route.getSteps().get(j);
-
-            currentTime = Calendar.getInstance();
-            long now =  currentTime.getTimeInMillis() /1000L;
-
-            if (s.getTransportName() == R.string.tr_walk) {
-                for (int i=0; i < s.getPath().size(); i++) {
-                    PathSegment p = s.getPath().get(i);
-
-                    Location dest = new Location("");
-                    dest.setLatitude(p.getEndLoc().latitude);
-                    dest.setLongitude(p.getEndLoc().longitude);
-                    float dist = currentLocation.distanceTo(dest); // Approximate distance in meters
-
-                    if (dist < 40) {
-                        minDist = dist;
-                        minDistIdx = j;
-                        currentStep = j;
-                        lastRouteStep = s;
-                    }
-                }
-            }
-                if (s.getTransportName() == R.string.tr_metro
-                        || s.getTransportName() == R.string.tr_train) {
-
-                    long time1 = s.getDeparture().getSeconds();
-                    long time2 = s.getArrival().getSeconds();
-                    if (now>time1 && now + 120 >= time2  && now < time2 && time1 >0) {
-                        createNotification(String.format(getString(R.string.NotifyExit), getString( s.getTransportName() )),
-                                getString(R.string.app_name),
-                                getString(R.string.NotifyNextStop), true, true, Toast.LENGTH_LONG);
-                    }
-                }
-            if ( dist < 2 ) {
-                //! This is the next to last stop and probably were getting away from it
-                if (s.getTransportName() != R.string.tr_walk 			// currentState == STATE_IM_INBUS
-                        && s.getTransportName() != R.string.tr_metro
-                        && s.getTransportName() != R.string.tr_train) {
-
-                    //showDialog(getString(R.string.appName), getString(R.string.bsDialogNextStop));
-                    createNotification(String.format(getString(R.string.NotifyExit), getString( s.getTransportName() )),
-                            getString(R.string.app_name),
-                            getString(R.string.busNotifyExitText), true, true, Toast.LENGTH_LONG);
-                }
-            }
-        }
-
-
-        if ((minDistIdx == prevMinDistIdx && prevMinDist < minDist) // Probably were leaving the last route leg
-                ||
-                (minDistIdx < prevMinDistIdx)) // Probably we are moving to the next step
-        {
-            Log.i(TAG, "Probably we are leaving the last route leg: "+minDistIdx+" "+minDist);
-            nextRouteStep();
-
-        }
-    }
-*/
     private void routeEngine() {
         if (route == null || currentLocation == null) {
             if (route == null && !isRouteSet && !isNotRouteInSettings) {

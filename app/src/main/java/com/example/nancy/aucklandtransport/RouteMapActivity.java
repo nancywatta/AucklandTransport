@@ -50,7 +50,7 @@ public class RouteMapActivity extends FragmentActivity {
 
             if(route != null) {
 
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(route.getStartLocation(), 10));
+                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(route.getStartLocation(), 15));
                 Marker marker = googleMap.addMarker(new MarkerOptions()
                         .position(route.getStartLocation()));
                 marker.showInfoWindow();
@@ -74,10 +74,13 @@ public class RouteMapActivity extends FragmentActivity {
                         points.add(path.getLatlng().get(l));
                     }
 
+                    if(path.isTransit())
+                        lineOptions.color(Color.RED);
+                    else
+                        lineOptions.color(Color.BLUE);
                     // Adding all the points in the route to LineOptions
                     lineOptions.addAll(points);
                     lineOptions.width(5);
-                    lineOptions.color(Color.RED);
                     googleMap.addPolyline(lineOptions);
                 }
 
