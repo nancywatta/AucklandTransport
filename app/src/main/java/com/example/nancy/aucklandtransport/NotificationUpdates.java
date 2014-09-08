@@ -1,23 +1,37 @@
 package com.example.nancy.aucklandtransport;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
-public class pathTrackerActivity extends Activity {
+import org.androidpn.client.Constants;
+
+public class NotificationUpdates extends Activity {
+
+    Intent intent;
+    String notifText;
+    TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_path_tracker);
+        setContentView(R.layout.activity_notification_updates);
+
+        textView = (TextView)findViewById(R.id.notifyText);
+        intent = getIntent();
+        notifText = intent.getStringExtra(Constants.NOTIFICATION_MESSAGE);
+
+        textView.setText(notifText);
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.path_tracker, menu);
+        getMenuInflater().inflate(R.menu.notification_updates, menu);
         return true;
     }
 

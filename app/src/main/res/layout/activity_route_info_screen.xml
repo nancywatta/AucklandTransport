@@ -26,6 +26,7 @@
             android:id="@+id/startNavigation"
             android:layout_width="wrap_content"
             android:text="@string/Navigation"
+            android:onClick="StartTracking"
             >
         </Button>
     </LinearLayout>

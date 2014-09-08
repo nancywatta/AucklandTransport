@@ -26,6 +26,8 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.androidpn.client.Constants;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -718,15 +720,21 @@ public class BackgroundService extends Service implements
     public void createNotification(String ticker, String title, String text,  boolean vibrate, boolean sound, int tlength) {
         String ns = Context.NOTIFICATION_SERVICE;
         final NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
-
         long when = System.currentTimeMillis();
-        if (notification == null) {
-            notificationIntent = new Intent(this, RouteInfoScreen.class);
-//            notificationIntent.putExtra("currentStep", currentStep);
-            notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        }
+
+        //if (notification == null) {
+            notificationIntent = new Intent(this, NotificationUpdates.class);
+            notificationIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
+            notificationIntent
+                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        //}
         notification = new Notification(R.drawable.notification, ticker, when);
-        contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+        notificationIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
+        Log.d(TAG, "notification text : " + text);
+        contentIntent =
+                PendingIntent.getActivity(this, 0, notificationIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+
         notification.defaults = 0;
         notification.defaults |= Notification.DEFAULT_LIGHTS;
 

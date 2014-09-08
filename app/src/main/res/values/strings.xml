@@ -58,5 +58,6 @@
     <string name="busNotifyExitText">You need to exit on the next stop</string>
     <string name="title_activity_path_elevation">RouteInfo</string>
     <string name="title_activity_path_tracker">pathTrackerActivity</string>
+    <string name="title_activity_notification_updates">NotificationUpdates</string>
 
 </resources>
