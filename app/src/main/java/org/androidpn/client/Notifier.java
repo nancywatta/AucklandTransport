@@ -24,6 +24,8 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.NotificationUpdates;
+
 import java.util.Random;
 
 /** 
@@ -98,8 +100,10 @@ public class Notifier {
             //                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             //            }
 
+//            Intent intent = new Intent(context,
+//                    NotificationDetailsActivity.class);
             Intent intent = new Intent(context,
-                    NotificationDetailsActivity.class);
+                    NotificationUpdates.class);
             intent.putExtra(Constants.NOTIFICATION_ID, notificationId);
             intent.putExtra(Constants.NOTIFICATION_API_KEY, apiKey);
             intent.putExtra(Constants.NOTIFICATION_TITLE, title);

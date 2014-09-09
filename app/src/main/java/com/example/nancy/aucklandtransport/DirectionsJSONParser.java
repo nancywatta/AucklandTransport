@@ -16,9 +16,9 @@ import java.util.ArrayList;
  */
 public class DirectionsJSONParser {
 
-    public ArrayList<Route> parse(JSONObject jObject){
+    public ArrayList<Route> parse(JSONObject jObject) {
 
-        ArrayList<Route> routes = new ArrayList<Route>() ;
+        ArrayList<Route> routes = new ArrayList<Route>();
         JSONArray jRoutes = null;
         JSONArray jLegs = null;
         JSONArray jSteps = null;
@@ -29,18 +29,24 @@ public class DirectionsJSONParser {
         String type = "";
         String name = "";
         JSONObject transit = null;
+        long depSec=0, arrSec=0;
+        String depTime="", arrTime="";
 
         try {
 
             jRoutes = jObject.getJSONArray("routes");
 
             /** Traversing all routes */
-            for(int i=0;i<jRoutes.length();i++){
-                jLegs = ( (JSONObject)jRoutes.get(i)).getJSONArray("legs");
+            for (int i = 0; i < jRoutes.length(); i++) {
+                jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");
 
 
                 /** Traversing all legs */
-                for(int j=0;j<jLegs.length();j++){
+                for (int j = 0; j < jLegs.length(); j++) {
+                    jDistance = null; jDuration = null;
+                    jDepartureTime = null;
+                    jArrivalTime = null; jSteps = null;
+                    depSec=0; arrSec=0; depTime=""; arrTime="";
 
                     JSONObject leg = jLegs.getJSONObject(j);
 
@@ -50,9 +56,18 @@ public class DirectionsJSONParser {
                     /** Getting duration from the json data */
                     jDuration = leg.getJSONObject("duration");
 
-                    jDepartureTime = leg.getJSONObject("departure_time");
+                    try {
 
-                    jArrivalTime = leg.getJSONObject("arrival_time");
+                        jDepartureTime = leg.getJSONObject("departure_time");
+                        jArrivalTime = leg.getJSONObject("arrival_time");
+                        depSec = jDepartureTime.getLong("value");
+                        arrSec = jArrivalTime.getLong("value");
+                        depTime = jDepartureTime.getString("text");
+                        arrTime =jArrivalTime.getString("text");
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
                     Double lat = leg.getJSONObject("start_location").getDouble("lat");
                     Double lng = leg.getJSONObject("start_location").getDouble("lng");
@@ -63,30 +78,32 @@ public class DirectionsJSONParser {
                     Route route = new Route(jDistance.getString("text"), jDuration.getString("text"),
                             jDuration.getLong("value"),
                             leg.getString("start_address"), leg.getString("end_address"),
-                            jDepartureTime.getString("text"), jDepartureTime.getLong("value"),
-                            jArrivalTime.getString("text"), jArrivalTime.getLong("value"),
-                            new LatLng(lat,lng), new LatLng(lat1,lng1), leg.toString());
+                            depTime, depSec, arrTime, arrSec,
+                            new LatLng(lat, lng), new LatLng(lat1, lng1), leg.toString());
 
-                    jSteps = ( (JSONObject)jLegs.get(j)).getJSONArray("steps");
+                    jSteps = ((JSONObject) jLegs.get(j)).getJSONArray("steps");
 
                     /** Traversing all steps */
-                    for(int k=0;k<jSteps.length();k++){
-                        transit = null; type = ""; name = "";
+                    for (int k = 0; k < jSteps.length(); k++) {
+                        transit = null;
+                        type = "";
+                        name = "";
                         JSONObject step = jSteps.getJSONObject(k);
                         try {
                             transit = step.getJSONObject("transit_details");
-                        }catch (Exception e) {}
+                        } catch (Exception e) {
+                        }
 
 
-                        if(transit!=null) {
+                        if (transit != null) {
                             type = transit.getJSONObject("line").getJSONObject("vehicle").getString("type");
                             name = transit.getJSONObject("line").getString("short_name");
                         }
-                        RouteStep routeStep = new RouteStep(type,name);
+                        RouteStep routeStep = new RouteStep(type, name);
 
                         route.getSteps().add(routeStep);
                     }
-                    if(route!=null) {
+                    if (route != null) {
                         Log.i("routes", "added");
                         routes.add(route);
                     }
@@ -94,14 +111,14 @@ public class DirectionsJSONParser {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-        }catch (Exception e){
+        } catch (Exception e) {
         }
         return routes;
     }
 
-    public ArrayList<Route> parse1(JSONObject jObject){
+    public ArrayList<Route> parse1(JSONObject jObject) {
 
-        ArrayList<Route> routes = new ArrayList<Route>() ;
+        ArrayList<Route> routes = new ArrayList<Route>();
         JSONArray jRoutes = null;
         JSONArray jLegs = null;
         JSONObject jDistance = null;
@@ -112,12 +129,12 @@ public class DirectionsJSONParser {
             jRoutes = jObject.getJSONArray("routes");
 
             /** Traversing all routes */
-            for(int i=0;i<jRoutes.length();i++){
-                jLegs = ( (JSONObject)jRoutes.get(i)).getJSONArray("legs");
+            for (int i = 0; i < jRoutes.length(); i++) {
+                jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");
 
 
                 /** Traversing all legs */
-                for(int j=0;j<jLegs.length();j++){
+                for (int j = 0; j < jLegs.length(); j++) {
 
                     JSONObject leg = jLegs.getJSONObject(j);
 
@@ -136,9 +153,9 @@ public class DirectionsJSONParser {
                     Route route = new Route(jDistance.getString("text"), jDuration.getString("text"),
                             jDuration.getLong("value"),
                             leg.getString("start_address"), leg.getString("end_address"),
-                            new LatLng(lat,lng), new LatLng(lat1,lng1), leg.toString());
+                            new LatLng(lat, lng), new LatLng(lat1, lng1), leg.toString());
 
-                    if(route!=null) {
+                    if (route != null) {
                         Log.i("routes", "added");
                         routes.add(route);
                     }
@@ -146,7 +163,7 @@ public class DirectionsJSONParser {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-        }catch (Exception e){
+        } catch (Exception e) {
         }
         return routes;
     }

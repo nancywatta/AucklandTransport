@@ -135,6 +135,7 @@ public class MainApp extends FragmentActivity {
         super.onCreate(savedInstanceState);
         // Check whether we're recreating a previously destroyed instance
         setContentView(R.layout.activity_main_app);
+
         // creating connection detector class instance
         cd = new ConnectionDetector(getApplicationContext());
         // Check if Internet present

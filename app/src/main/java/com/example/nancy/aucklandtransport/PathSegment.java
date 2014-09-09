@@ -1,5 +1,7 @@
 package com.example.nancy.aucklandtransport;
 
+import android.text.Html;
+
 import com.example.nancy.aucklandtransport.datatype.TravelTime;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -20,7 +22,7 @@ public class PathSegment {
         this.endLoc = endLoc;
         this.travelTime = new TravelTime(time, value);
         this.isNotified = false;
-        this.instruction = instruction;
+        this.instruction = Html.fromHtml(instruction).toString();
         this.distance = distance;
     }
 

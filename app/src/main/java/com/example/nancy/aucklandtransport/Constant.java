@@ -13,4 +13,5 @@ public class Constant {
     public final static int STOPPED=6;
     public final static int FINISHED=7;
     public final static int MAXSTATE=8;
+    public final static int DEFAULT=9;
 }

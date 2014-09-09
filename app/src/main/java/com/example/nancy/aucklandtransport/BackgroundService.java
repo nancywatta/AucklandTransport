@@ -10,9 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.media.AsyncPlayer;
 import android.media.AudioManager;
 import android.net.Uri;
@@ -24,6 +22,12 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesClient;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.location.LocationClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.androidpn.client.Constants;
@@ -35,38 +39,35 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+//import android.location.LocationListener;
+
 
 /**
  * Created by Nancy on 7/29/14.
  */
 public class BackgroundService extends Service implements
-        LocationListener {
+        LocationListener,
+        GooglePlayServicesClient.ConnectionCallbacks,
+        GooglePlayServicesClient.OnConnectionFailedListener{
+
     private static final String TAG = BackgroundService.class.getSimpleName();
-    private LocationManager locationManager;
+    //private LocationManager locationManager;
     private int currentState = 0;
     public static int STATE_DO_NOTHING	= 0;
     public static int STATE_START_ROUTE	= 1;
-    public static int STATE_IM_INBUS	= 2;
-    public static int STATE_LAST_STOP	= 3;
-    public static int STATE_LAZY_MODE	= 4;
-    private static final int TWO_MINUTES = 1000 * 60 * 2;
+
     private Location currentLocation = null;
     private Location previousLocation = null;
     private Boolean discoverAddress = false;
     private int currentStep = 0;
-    float minDist = 9999999;
-    int minDistIdx = -1;
-    public int minTimeGPS = 2 * 1000;
-    public int minTimeNetwork = 1 * 1000;
+
     private Boolean isRouteStartedShown = false;
     private GoogleAPI api;
     float angle = 0;
     double lat, lng;
 
     private String lastKnownAddress = "";
-    public boolean isGPSProviderOn		= false;
-    public boolean isNetworkProviderOn	= false;
-    public boolean isWIFIProviderOn		= false;
+
     public Route route;
 
     Calendar currentTime;
@@ -96,11 +97,9 @@ public class BackgroundService extends Service implements
     String lastText = "";
     private AsyncPlayer aPlayer = new AsyncPlayer("aPlayer");
     public long timerInverval = 1000L;
-    public float BUS_SPEED = 4.5f; // m/s
 
-    public float prevSpeed = 0;
     private boolean hasRemindedDep = false;
-    float prevMinDist, prevMinDistIdx;
+
     private BroadcastReceiver myReceiver;
     String mActivity="Still";
 
@@ -111,6 +110,13 @@ public class BackgroundService extends Service implements
     private boolean firstTime = true;
     private float prevDistance = 0;
     private boolean getRealTime = false;
+    RouteStep s= null;
+
+    // A request to connect to Location Services
+    private LocationRequest mLocationRequest;
+
+    // Stores the current instantiation of the location client in this object
+    private LocationClient mLocationClient;
 
     public BackgroundService() {
         super();
@@ -145,10 +151,35 @@ public class BackgroundService extends Service implements
         api = new GoogleAPI();
 
         // get a handle on the location manager
-        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         currentState = STATE_DO_NOTHING;
 
-        Log.i(TAG, "SERVICE CREATED");
+        // Create a new global location parameters object
+        mLocationRequest = LocationRequest.create();
+
+        /*
+         * Set the update interval
+         */
+        mLocationRequest.setInterval(LocationUtils.UPDATE_INTERVAL_IN_MILLISECONDS);
+
+        // Use high accuracy
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        // Set the interval ceiling to one minute
+        mLocationRequest.setFastestInterval(LocationUtils.FAST_INTERVAL_CEILING_IN_MILLISECONDS);
+
+        /*
+         * Create a new location client, using the enclosing class to
+         * handle callbacks.
+         */
+        mLocationClient = new LocationClient(this, this, this);
+
+        /*
+         * Connect the client. Don't re-start any requests here;
+         * instead, wait for onResume()
+         */
+        mLocationClient.connect();
+
         handle = new Handler();
 
         alarmSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.alarm_clock);
@@ -158,16 +189,7 @@ public class BackgroundService extends Service implements
         @Override
         public void run() {
             if (route != null && currentLocation != null) {
-                float speed = currentLocation.getSpeed();
 
-                if (currentLocation != null) { //  && currentLocation.getProvider() == LocationManager.GPS_PROVIDER
-                    if (prevSpeed > 0) {
-                        if (speed >= BUS_SPEED && prevSpeed < BUS_SPEED && currentState != STATE_IM_INBUS) {
-                            changeState(STATE_IM_INBUS);
-                        }
-                    }
-                    prevSpeed = speed;
-                }
                 if (currentState != STATE_DO_NOTHING && route != null) {
                     currentTime = Calendar.getInstance();
                         if (currentTime.compareTo(depTime) > 0) {
@@ -192,7 +214,6 @@ public class BackgroundService extends Service implements
 
                     routeEngine();
                 }
-                Log.i("DEBUG!", ""+allowCoords);
             }
         }
     };
@@ -206,9 +227,8 @@ public class BackgroundService extends Service implements
             return;
         }
 
-        RouteStep s = route.getSteps().get(currentStep);
         Location dest = new Location("");
-        PathSegment pathSegment = s.getPath().get(nextStop);
+        PathSegment pathSegment;
         float dist;
 
         switch(routeState)
@@ -219,38 +239,38 @@ public class BackgroundService extends Service implements
                 firstTime = true;
                 prevDistance = 0;
                 getRealTime = false;
+                s = route.getSteps().get(currentStep);
                 routeState = Constant.CHANGE_OVER;
                 break;
             case Constant.CHANGE_OVER:
-                if (s.getTransportName() == R.string.tr_walk && mActivity.compareTo("On Foot") == 0) {
+                if(currentStep >= route.getSteps().size())
+                    routeState = Constant.FINISHED;
+                if (s.getTransportName() == R.string.tr_walk) {
+                        //&& mActivity.compareTo("On Foot") == 0) {
+                    Log.d(TAG, "I am Walking");
                     routeState = Constant.WALKING;
-                    changeState(STATE_LAST_STOP);
+                    currentStep++;
+                    break;
                 }
                 else if((s.getTransportName() == R.string.tr_train || s.getTransportName() == R.string.tr_bus
                         || s.getTransportName() == R.string.tr_boat || s.getTransportName() == R.string.tr_metro)
                         && mActivity.compareTo("In Vehicle") == 0) {
                     routeState = Constant.TRANSIT;
-                    changeState(STATE_IM_INBUS);
+                    currentStep++;
+                    break;
                 }
                 else
-                    return;
-                searchInterval = 0;
-                prevDistance = 0;
-                firstTime = true;
-                getRealTime = false;
-                currentStep++;
-                if(currentStep >= route.getSteps().size())
-                    routeState = Constant.FINISHED;
-                break;
+                    break;
             case Constant.PRE_CHANGE_OVER:
                 dest.setLatitude(s.getEndLoc().latitude);
                 dest.setLongitude(s.getEndLoc().longitude);
                 dist = currentLocation.distanceTo(dest); // Approximate distance in meters
                 if(dist<2)
-                    routeState = Constant.CHANGE_OVER;
+                    routeState = Constant.INIT;
                 break;
 
             case Constant.WALKING:
+                pathSegment = s.getPath().get(nextStop);
                 long maxSeconds = pathSegment.getTravelTime().getSeconds();
 
                 if(searchInterval==0 && !pathSegment.isNotified) {
@@ -270,10 +290,10 @@ public class BackgroundService extends Service implements
                             if(searchInterval == 5)
                                 getRealTime = false;
 
-                            if (route.getSteps().get(currentStep + 1).isTransit()) {
+                            if (route.getSteps().get(currentStep).isTransit()) {
                                 Calendar c = Calendar.getInstance();
                                 c.add(Calendar.SECOND, (int) seconds);
-                                long diff = (route.getSteps().get(currentStep + 1).getDeparture().getSeconds() * 1000L) - c.getTimeInMillis();
+                                long diff = (route.getSteps().get(currentStep).getDeparture().getSeconds() * 1000L) - c.getTimeInMillis();
                                 if (diff < 120) {
                                     createNotification(getString(R.string.RunningLateText),
                                             getString(R.string.app_name),
@@ -289,10 +309,14 @@ public class BackgroundService extends Service implements
                     dist = currentLocation.distanceTo(dest); // Approximate distance in meters
                     if(prevDistance !=0) {
                         long nextdist = 0;
-                        if(nextStop < s.getPath().size())
+                        if(nextStop < s.getPath().size() - 1 )
                             nextdist = s.getPath().get(nextStop+1).getDistance();
-                        if(prevDistance + nextdist <= dist + nextdist)
+                        if(prevDistance + nextdist + 5 < dist + nextdist) {
                             routeState = Constant.OFF_ROUTE;
+                            Log.d(TAG, "Off Route : " + nextStop + " : prev " +
+                                    prevDistance + " : dist " + dist);
+                            Log.i(TAG, "Off Route LOCATION!!!!! " + currentLocation.getLatitude() + " " + currentLocation.getLongitude());
+                        }
                     }
                     prevDistance = dist;
                     if(dist < 10) {
@@ -326,6 +350,7 @@ public class BackgroundService extends Service implements
                 break;
             case Constant.FINISHED:
                 routeDone();
+                routeState = Constant.DEFAULT;
                 break;
             default:
                 break;
@@ -365,7 +390,6 @@ public class BackgroundService extends Service implements
     }
 
     private void nextRouteStep() {
-        changeState(STATE_LAST_STOP);
         if (currentStep + 1 < route.getSteps().size()) {}
         else routeDone();
     }
@@ -374,13 +398,19 @@ public class BackgroundService extends Service implements
         createNotification(getString(R.string.RouteDone),
                 getString(R.string.app_name),
                 getString(R.string.RouteDone), false, false, Toast.LENGTH_LONG);
-
-        changeState(STATE_LAZY_MODE);
     }
 
     @Override
     public void onDestroy() {
-        locationManager.removeUpdates(this);
+        // If the client is connected
+        if (mLocationClient.isConnected()) {
+            stopPeriodicUpdates();
+        }
+
+        // After disconnect() is called, the client is considered "dead".
+        mLocationClient.disconnect();
+
+        //locationManager.removeUpdates(this);
 
         super.onDestroy();
         timer.cancel();
@@ -389,27 +419,72 @@ public class BackgroundService extends Service implements
         Log.i(TAG, "SERVICE DESTROYED");
     }
 
-    public void onProviderDisabled(String pr) {
-        Log.v(TAG, "ProviderEnabled: " + pr);
-    }
+    /**
+     * Verify that Google Play services is available before making a request.
+     *
+     * @return true if Google Play services is available, otherwise false
+     */
+    private boolean servicesConnected() {
 
-    public void onProviderEnabled(String pr) {
-        Log.v(TAG, "ProviderEnabled: "+pr);
-    }
+        // Check that Google Play services is available
+        int resultCode =
+                GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 
-    public void onStatusChanged(String provider, int status, Bundle extras) {
+        // If Google Play services is available
+        if (ConnectionResult.SUCCESS == resultCode) {
+            // In debug mode, log the status
+            Log.d(LocationUtils.APPTAG, getString(R.string.play_services_available));
 
-        switch (status) {
-            case LocationProvider.OUT_OF_SERVICE:
-                Log.v(TAG, "Status Changed: Out of Service");
-                break;
-            case LocationProvider.TEMPORARILY_UNAVAILABLE:
-                Log.v(TAG, "Status Changed: Temporarily Unavailable");
-                break;
-            case LocationProvider.AVAILABLE:
-                Log.v(TAG, "Status Changed: Available");
-                break;
+            // Continue
+            return true;
+            // Google Play services was not available for some reason
+        } else {
+            return false;
         }
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+            startPeriodicUpdates();
+        mLocationClient.setMockMode(true);
+
+    }
+
+    /*
+     * Called by Location Services if the connection to the
+     * location client drops because of an error.
+     */
+    @Override
+    public void onDisconnected() {
+
+    }
+
+    /*
+     * Called by Location Services if the attempt to
+     * Location Services fails.
+     */
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
+    }
+
+    /**
+     * In response to a request to start updates, send a request
+     * to Location Services
+     */
+    private void startPeriodicUpdates() {
+
+        mLocationClient.requestLocationUpdates(mLocationRequest, this);
+
+    }
+
+    /**
+     * In response to a request to stop updates, send a request to
+     * Location Services
+     */
+    private void stopPeriodicUpdates() {
+        mLocationClient.removeLocationUpdates(this);
+
     }
 
     public void onLocationChanged(Location loc) {
@@ -422,7 +497,7 @@ public class BackgroundService extends Service implements
 
         lat = (int) (currentLocation.getLatitude()*1E6);
         lng = (int) (currentLocation.getLongitude()*1E6);
-        Log.i(TAG, "LOCATION!!!!! "+currentLocation.getLatitude()+" "+currentLocation.getLongitude());
+        Log.i(TAG, "LOCATION!!!!! " + currentLocation.getLatitude() + " " + currentLocation.getLongitude());
         synchronized (listeners) {
             for (IBackgroundServiceListener listener : listeners) {
                 try {
@@ -445,7 +520,16 @@ public class BackgroundService extends Service implements
         editor.remove("routeStarted").commit();
         editor.remove("isRouteSet").commit();
         editor.commit();
-        locationManager.removeUpdates(this);
+
+        // If the client is connected
+        if (mLocationClient.isConnected()) {
+            stopPeriodicUpdates();
+        }
+
+        mLocationClient.disconnect();
+
+        //locationManager.removeUpdates(this);
+
         currentState = STATE_DO_NOTHING;
         route = null;
         prevRouteString = "";
@@ -454,7 +538,6 @@ public class BackgroundService extends Service implements
     public void startRoute() {
         Log.i(TAG, "SERVICE startRoute");
         allowCoords = prefs.getString("allowLoc", "dgdsfg").equals("Yes") ? true : false;
-        Log.i("DEBUG!!", prefs.getString("allowLoc", "Yes"));
         SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("routeStarted", true);
@@ -475,75 +558,6 @@ public class BackgroundService extends Service implements
         } catch ( Exception e ) {
         }
         isNotRouteInSettings = true;
-    }
-
-    public Location getServiceLastKnownLocation() {
-        Location l1 = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        Location l2 = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        Location l3 = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
-        if (l1 == null && l2 == null && l3 != null) return l3;
-
-        Log.i(TAG, "getServiceLastKnownLocation:\n"+String.valueOf(l1)+"\n"+String.valueOf(l2)+"\n"+String.valueOf(l2)+"\n");
-
-        if ((l1 != null || l2 != null )) {
-            if (isBetterLocation(l1, l2)) return l1;
-        }
-        return l2;
-    }
-
-    /** Taken from http://developer.android.com/guide/topics/location/obtaining-user-location.html
-     * Determines whether one Location reading is better than the current Location fix
-     * @param location  The new Location that you want to evaluate
-     * @param currentBestLocation  The current Location fix, to which you want to compare the new one
-     */
-    protected boolean isBetterLocation(Location location, Location currentBestLocation) {
-        if (currentBestLocation == null) {
-            // A new location is always better than no location
-            return true;
-        } else if (location == null) return false;
-
-        // Check whether the new location fix is newer or older
-        long timeDelta = location.getTime() - currentBestLocation.getTime();
-        boolean isSignificantlyNewer = timeDelta > TWO_MINUTES;
-        boolean isSignificantlyOlder = timeDelta < -TWO_MINUTES;
-        boolean isNewer = timeDelta > 0;
-
-        // If it's been more than two minutes since the current location, use the new location
-        // because the user has likely moved
-        if (isSignificantlyNewer) {
-            return true;
-            // If the new location is more than two minutes older, it must be worse
-        } else if (isSignificantlyOlder) {
-            return false;
-        }
-
-        // Check whether the new location fix is more or less accurate
-        int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
-        boolean isLessAccurate = accuracyDelta > 0;
-        boolean isMoreAccurate = accuracyDelta < 0;
-        boolean isSignificantlyLessAccurate = accuracyDelta > 200;
-
-        // Check if the old and new location are from the same provider
-        boolean isFromSameProvider = isSameProvider(location.getProvider(),
-                currentBestLocation.getProvider());
-
-        // Determine location quality using a combination of timeliness and accuracy
-        if (isMoreAccurate) {
-            return true;
-        } else if (isNewer && !isLessAccurate) {
-            return true;
-        } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
-            return true;
-        }
-        return false;
-    }
-
-    /** Checks whether two providers are the same */
-    private boolean isSameProvider(String provider1, String provider2) {
-        if (provider1 == null) {
-            return provider2 == null;
-        }
-        return provider1.equals(provider2);
     }
 
     public void addressDiscovered(String s) {
@@ -577,6 +591,7 @@ public class BackgroundService extends Service implements
     public void setServiceRoute(String r) {
         Log.i("FROM SERVICE", r);
         try {
+
             Log.i(TAG, "is not new? "+prevRouteString.equals(r));
             if (route != null && prevRouteString.equals(r)) {
                 // This is the same route
@@ -611,23 +626,12 @@ public class BackgroundService extends Service implements
     private void changeState(int state) {
         currentState = state;
         if (state == STATE_START_ROUTE) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTimeGPS,  0, this);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTimeNetwork,  0, this);
+            mLocationClient.requestLocationUpdates(mLocationRequest, this);
             currentStep = 0;
             if (!isSameRoute) {
                 createNotification(getString(R.string.RouteStart), getString(R.string.app_name), getString(R.string.RouteStart), false, false, Toast.LENGTH_LONG);
-                isRouteStartedShown = false;
+                isRouteStartedShown = true;
             }
-        } else if (state == STATE_IM_INBUS) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0,  0, this);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0,  0,this);
-
-        } else if (state == STATE_LAST_STOP) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, minTimeGPS,  0, this);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, minTimeNetwork,  0, this);
-        } else if (state == STATE_LAZY_MODE) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000 * 60*60,  0, this);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000 * 60*60,  0, this);
         } else if (state == STATE_DO_NOTHING) {
             deleteRoute();
             createNotification(getString(R.string.RouteFinish), getString(R.string.app_name), getString(R.string.RouteFinishText), false, false, Toast.LENGTH_LONG);
@@ -695,7 +699,8 @@ public class BackgroundService extends Service implements
 
         public int requestLastKnownAddress(int getAddress) {
             Log.i(TAG, "SERVICE requestLastKnownAddress");
-            Location l1 = getServiceLastKnownLocation();
+            Location l1 = mLocationClient.getLastLocation();
+                    //getServiceLastKnownLocation();
             Log.i(TAG, "requestLastKnownAddress:\n"+String.valueOf(l1));
             previousLocation = currentLocation;
             currentLocation = l1;
@@ -711,7 +716,8 @@ public class BackgroundService extends Service implements
         }
 
         public boolean isGPSOn() {
-            boolean gpson = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean gpson = servicesConnected();
+                    //locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
             Log.i(TAG,"GPS status: "+gpson);
             return gpson;
         }
@@ -722,15 +728,14 @@ public class BackgroundService extends Service implements
         final NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
         long when = System.currentTimeMillis();
 
-        //if (notification == null) {
-            notificationIntent = new Intent(this, NotificationUpdates.class);
-            notificationIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
-            notificationIntent
-                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        //}
-        notification = new Notification(R.drawable.notification, ticker, when);
+        notificationIntent = new Intent(this, NotificationUpdates.class);
         notificationIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
-        Log.d(TAG, "notification text : " + text);
+        notificationIntent
+                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        notification = new Notification(R.drawable.notification, ticker, when);
+
+        notificationIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
+
         contentIntent =
                 PendingIntent.getActivity(this, 0, notificationIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT);
@@ -786,4 +791,5 @@ public class BackgroundService extends Service implements
         });
 
     }
+
 }

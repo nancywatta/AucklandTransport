@@ -60,4 +60,8 @@
     <string name="title_activity_path_tracker">pathTrackerActivity</string>
     <string name="title_activity_notification_updates">NotificationUpdates</string>
 
+    <!-- Latitude, longitude format -->
+    <string name="latitude_longitude">%1$.8f, %2$.8f</string>
+    <string name="play_services_available">Google Play services is available</string>
+
 </resources>

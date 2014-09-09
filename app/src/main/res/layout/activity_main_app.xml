@@ -1,209 +1,233 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:tools="http://schemas.android.com/tools"
-android:id="@+id/scroller"
-android:layout_width="fill_parent"
-android:layout_height="fill_parent"
-android:fillViewport="true"
-android:windowSoftInputMode="stateHidden">
-
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:id="@+id/searchLayout">
-    <TableLayout
-        android:layout_height="wrap_content"
-        android:id="@+id/tableLayout1"
-        android:layout_width="match_parent"
-        android:padding="3dip">
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tableRow1"
-            android:focusable="true"
-            android:focusableInTouchMode="true">
-            <TextView
-                android:id="@+id/text_view1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/from" />
-            <com.example.nancy.aucklandtransport.CustomAutoCompleteTextView
-                android:id="@+id/editText1"
-                android:layout_height="wrap_content"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:text=""
-                android:autoText="true"
-                android:bufferType="normal"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:maxLines="1"
-                android:scrollHorizontally="true"
-                android:nextFocusUp="@+id/editText1"
-                android:nextFocusLeft="@+id/editText1"
-                android:hint="Current Location"
-                android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
-                android:background="@drawable/rounded_edittext"
-            />
-            <Button
-                android:id="@+id/fromButton"
-                android:layout_height="wrap_content"
-                android:drawableRight="@android:drawable/ic_dialog_map"
-                android:maxWidth="50dip"
-                android:width="50dip"
-                android:layout_width="50dip"
-                android:onClick="showMapOfFromLoc">
-            </Button>
-        </TableRow>
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tableRow2">
-            <TextView
-                android:id="@+id/text_view2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/to"
-                android:width="1dp" />
-            <com.example.nancy.aucklandtransport.CustomAutoCompleteTextView
-                android:layout_height="wrap_content"
-                android:id="@+id/editText2"
-                android:layout_width="fill_parent"
-                android:text=""
-                android:autoText="true"
-                android:bufferType="normal"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:ellipsize="end"
-                android:singleLine="true"
-                android:scrollHorizontally="true"
-                android:layout_weight="1"
-                android:hint="Address or Location"
-                android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
-                android:background="@drawable/rounded_edittext"
-            />
-            <Button
-                android:id="@+id/toButton"
-                android:layout_height="wrap_content"
-                android:drawableRight="@android:drawable/ic_dialog_map"
-                android:maxWidth="50dip"
-                android:width="50dip"
-                android:layout_width="50dip"
-                android:onClick="showMapOfToLoc">
-            </Button>
-        </TableRow>
-    </TableLayout>
-    <TableLayout
-        android:layout_height="wrap_content"
-        android:id="@+id/tableLayout2"
-        android:layout_width="match_parent"
-        android:stretchColumns="*">
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/tableRow3">
-            <Button
-                android:layout_height="wrap_content"
-                android:id="@+id/button1"
-                android:layout_width="fill_parent"
-                android:text="@string/go"
-                android:background="@color/green"
-                android:drawableLeft="@android:drawable/ic_menu_search"
-                android:onClick="showAllRoutes">
-            </Button>
-        </TableRow>
-    </TableLayout>
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.nancy.aucklandtransport.MainApp">
 
-    <TableLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:stretchColumns="*">
-        <TableRow
+    <ScrollView
+        android:id="@+id/scroller"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fillViewport="true"
+        android:windowSoftInputMode="stateHidden">
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/searchLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/tableRow4">
-            <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical">
+
+            <TableLayout
+                android:id="@+id/tableLayout1"
                 android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="3dip">
+
+                <TableRow
+                    android:id="@+id/tableRow1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true">
+
+                    <TextView
+                        android:id="@+id/text_view1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/from" />
+
+                    <com.example.nancy.aucklandtransport.CustomAutoCompleteTextView
+                        android:id="@+id/editText1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:autoText="true"
+                        android:background="@drawable/rounded_edittext"
+                        android:bufferType="normal"
+                        android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:hint="Current Location"
+                        android:maxLines="1"
+                        android:nextFocusLeft="@+id/editText1"
+                        android:nextFocusUp="@+id/editText1"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true"
+                        android:text="" />
+
+                    <Button
+                        android:id="@+id/fromButton"
+                        android:layout_width="50dip"
+                        android:layout_height="wrap_content"
+                        android:width="50dip"
+                        android:drawableRight="@android:drawable/ic_dialog_map"
+                        android:maxWidth="50dip"
+                        android:onClick="showMapOfFromLoc"></Button>
+                </TableRow>
+
+                <TableRow
+                    android:id="@+id/tableRow2"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/text_view2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:width="1dp"
+                        android:text="@string/to" />
+
+                    <com.example.nancy.aucklandtransport.CustomAutoCompleteTextView
+                        android:id="@+id/editText2"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:autoText="true"
+                        android:background="@drawable/rounded_edittext"
+                        android:bufferType="normal"
+                        android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
+                        android:ellipsize="end"
+                        android:focusable="true"
+                        android:focusableInTouchMode="true"
+                        android:hint="Address or Location"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true"
+                        android:text="" />
+
+                    <Button
+                        android:id="@+id/toButton"
+                        android:layout_width="50dip"
+                        android:layout_height="wrap_content"
+                        android:width="50dip"
+                        android:drawableRight="@android:drawable/ic_dialog_map"
+                        android:maxWidth="50dip"
+                        android:onClick="showMapOfToLoc"></Button>
+                </TableRow>
+            </TableLayout>
+
+            <TableLayout
+                android:id="@+id/tableLayout2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:stretchColumns="*">
+
+                <TableRow
+                    android:id="@+id/tableRow3"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <Button
+                        android:id="@+id/button1"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/green"
+                        android:drawableLeft="@android:drawable/ic_menu_search"
+                        android:onClick="showAllRoutes"
+                        android:text="@string/go"></Button>
+                </TableRow>
+            </TableLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:stretchColumns="*">
+
+                <TableRow
+                    android:id="@+id/tableRow4"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <RadioButton
+                            android:id="@+id/radioButton2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:onClick="onRadioButtonClicked"
+                            android:text="@string/leave_after" />
+
+                        <RadioButton
+                            android:id="@+id/radioButton3"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:onClick="onRadioButtonClicked"
+                            android:text="@string/arrive_before" />
+
+                    </RadioGroup>
+                </TableRow>
+            </TableLayout>
+
+            <LinearLayout
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <RadioButton
-                    android:id="@+id/radioButton2"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/button3"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:onClick="onRadioButtonClicked"
-                    android:text="@string/leave_after"
-                    android:checked="true"
-                    />
+                    android:layout_weight="0.66"
+                    android:drawableLeft="@android:drawable/arrow_down_float"
+                    android:onClick="showDatePickerDialog"
+                    android:text="@string/Date"></Button>
 
-                <RadioButton
-                    android:id="@+id/radioButton3"
-                    android:layout_width="wrap_content"
+                <Button
+                    android:id="@+id/button2"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:onClick="onRadioButtonClicked"
-                    android:text="@string/arrive_before"
-                    />
+                    android:layout_weight="0.33"
+                    android:drawableLeft="@android:drawable/arrow_down_float"
+                    android:onClick="showTimePickerDialog"
+                    android:text="@string/Time"></Button>
 
-            </RadioGroup>
-        </TableRow>
-    </TableLayout>
+            </LinearLayout>
 
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" >
-
-    <Button
-        android:layout_height="wrap_content"
-        android:id="@+id/button3"
-        android:layout_width="0dp"
-        android:layout_weight="0.66"
-        android:text="@string/Date"
-        android:drawableLeft="@android:drawable/arrow_down_float"
-        android:onClick="showDatePickerDialog">
-    </Button>
-
-    <Button
-        android:layout_height="wrap_content"
-        android:id="@+id/button2"
-        android:layout_width="0dp"
-        android:layout_weight="0.33"
-        android:text="@string/Time"
-        android:drawableLeft="@android:drawable/arrow_down_float"
-        android:onClick="showTimePickerDialog">
-    </Button>
-
-    </LinearLayout>
-    <TabHost android:id="@+id/TabHost01"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
-            <TabWidget
-                android:id="@android:id/tabs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
-            <FrameLayout android:id="@android:id/tabcontent"
+            <TabHost
+                android:id="@+id/TabHost01"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-                <ListView
-                    android:id="@+id/myPlacesList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-                <ListView
-                    android:id="@+id/myRoutesList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
-            </FrameLayout>
-        </LinearLayout>
-    </TabHost>
 
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TabWidget
+                        android:id="@android:id/tabs"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+
+                    <FrameLayout
+                        android:id="@android:id/tabcontent"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ListView
+                            android:id="@+id/myPlacesList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+
+                        <ListView
+                            android:id="@+id/myRoutesList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" />
+                    </FrameLayout>
+                </LinearLayout>
+            </TabHost>
+
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
-</ScrollView>

@@ -1,9 +1,13 @@
 package com.example.nancy.aucklandtransport;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -33,6 +37,9 @@ import java.util.ArrayList;
 public class RoutesActivity extends Activity {
 
     private static final String TAG = RoutesActivity.class.getSimpleName();
+    private View mProgressView;
+    private View mRouteInfoView;
+
     String fromLoc;
     String toLoc;
     String fromCoords = "";
@@ -50,6 +57,9 @@ public class RoutesActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_routes);
+
+        mRouteInfoView = findViewById(R.id.route_info_form);
+        mProgressView = findViewById(R.id.login_progress);
 
         Intent intent = getIntent();
         fromLoc = intent.getStringExtra(MainApp.FROM_LOCATION);
@@ -90,6 +100,8 @@ public class RoutesActivity extends Activity {
         origin.setText("From : " + fromLoc);
         destination.setText("To :   " + toLoc);
 
+        showProgress(true);
+
         // Getting URL to the Google Directions API
         String url = getDirectionsUrl();
 
@@ -118,6 +130,42 @@ public class RoutesActivity extends Activity {
 
             }
         });
+    }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public void showProgress(final boolean show) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            mRouteInfoView.setVisibility(show ? View.GONE : View.VISIBLE);
+            mRouteInfoView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRouteInfoView.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mRouteInfoView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
     }
 
     private String getDirectionsUrl(){
@@ -261,6 +309,8 @@ public class RoutesActivity extends Activity {
         // Executes in UI thread, after the parsing process
         @Override
         protected void onPostExecute(ArrayList<Route> result) {
+            showProgress(false);
+
             if(result.size()<1){
                 Toast.makeText(getBaseContext(), "No Routes Available", Toast.LENGTH_SHORT).show();
                 return;
@@ -285,7 +335,6 @@ public class RoutesActivity extends Activity {
             // Getting adapter by passing xml data ArrayList
             adapter=new RoutesAdaptar(RoutesActivity.this, result);
             list.setAdapter(adapter);
-
         }
     }
 
