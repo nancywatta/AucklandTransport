@@ -417,6 +417,7 @@ public class BackgroundService extends Service implements
         timer = null;
 
         Log.i(TAG, "SERVICE DESTROYED");
+        unregisterReceiver(myReceiver);
     }
 
     /**

@@ -112,6 +112,15 @@
             android:name=".NotificationUpdates"
             android:label="@string/title_activity_notification_updates" >
         </activity>
+        <activity
+            android:name=".ManageRoute"
+            android:label="@string/title_activity_manage_route"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:parentActivityName=".RoutesActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.nancy.aucklandtransport.RoutesActivity" />
+        </activity>
     </application>
 
 </manifest>

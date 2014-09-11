@@ -158,9 +158,9 @@ public class Route {
             if (transit==null) {
                     Steps = ((JSONObject) jSteps.get(k)).getJSONArray("steps");
 
-                for (LatLng subList: list) {
-                    Log.d(" Mock Locations : " , subList.latitude + " " + subList.longitude);
-                }
+//                for (LatLng subList: list) {
+//                    Log.d(" Mock Locations : " , subList.latitude + " " + subList.longitude);
+//                }
 
                 for (int i = 0; i < Steps.length(); i++) {
                     JSONObject path = Steps.getJSONObject(i);

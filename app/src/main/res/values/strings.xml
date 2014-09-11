@@ -63,5 +63,38 @@
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
     <string name="play_services_available">Google Play services is available</string>
+    <string name="title_activity_manage_route">ManageRoute</string>
+    <string name="title_section1">Route Information</string>
+    <string name="title_section2">Places Of Interest</string>
+    <string name="title_activity_route_details">RouteDetails</string>
+    <string name="title_activity_route_info_fragment">RouteInfoFragment</string>
+
+    <string name="Places">Places</string>
+    <string-array name="place_type">
+        <item>airport</item>
+        <item>atm</item>
+        <item>bank</item>
+        <item>bus_station</item>
+        <item>church</item>
+        <item>doctor</item>
+        <item>hospital</item>
+        <item>mosque</item>
+        <item>movie_theater</item>
+        <item>hindu_temple</item>
+        <item>restaurant</item>
+    </string-array>
+    <string-array name="place_type_name">
+        <item>Airport</item>
+        <item>ATM</item>
+        <item>Bank</item>
+        <item>Bus Station</item>
+        <item>Church</item>
+        <item>Doctor</item>
+        <item>Hospital</item>
+        <item>Mosque</item>
+        <item>Movie Theater</item>
+        <item>Hindu Temple</item>
+        <item>Restaurant</item>
+    </string-array>
 
 </resources>

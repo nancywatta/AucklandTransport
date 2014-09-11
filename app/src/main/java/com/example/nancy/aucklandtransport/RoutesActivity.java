@@ -122,7 +122,7 @@ public class RoutesActivity extends Activity {
 //                editor.putString("route", routes.get(position).getJsonString());
 //                editor.commit();
 
-                Intent myIntent = new Intent(view.getContext(), RouteInfoScreen.class);
+                Intent myIntent = new Intent(view.getContext(), ManageRoute.class);
                 myIntent.putExtra("route", routes.get(position).getJsonString());
                 myIntent.putExtra("from", fromLoc);
                 myIntent.putExtra("to", toLoc);

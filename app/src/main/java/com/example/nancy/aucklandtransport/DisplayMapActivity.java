@@ -2,7 +2,6 @@ package com.example.nancy.aucklandtransport;
 
 import android.app.ActionBar;
 import android.app.Dialog;
-import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -171,7 +170,7 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                     @Override
                     public void onInfoWindowClick(Marker marker) {
 
-                        FragmentManager fm = getFragmentManager();
+                        //FragmentManager fm = getFragmentManager();
 
                         /** Instantiating the DialogFragment */
                         MyAlertDialogWIndow alert = new MyAlertDialogWIndow();
@@ -181,7 +180,7 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                         alert.setArguments(args);
 
                         /** Opening the dialog window */
-                        alert.show(fm, "Alert_Dialog");
+                        alert.show(getSupportFragmentManager(), "Alert_Dialog");
                     }
                 });
             }

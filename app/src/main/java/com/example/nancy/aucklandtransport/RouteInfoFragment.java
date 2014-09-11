@@ -1,6 +1,5 @@
 package com.example.nancy.aucklandtransport;
 
-import android.app.ActionBar;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -13,29 +12,36 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
 
-public class RouteInfoScreen extends FragmentActivity implements AlertPositiveListener,
+public class RouteInfoFragment extends Fragment implements
         GooglePlayServicesClient.ConnectionCallbacks,
-        GooglePlayServicesClient.OnConnectionFailedListener{
-    private static final String TAG = RouteInfoScreen.class.getSimpleName();
+        GooglePlayServicesClient.OnConnectionFailedListener,
+        ServiceConnection{
+
+    private static final String TAG = RouteInfoFragment.class.getSimpleName();
+    Context context;
 
     private String routeString;
     Route route = null;
+
     ListView listView;
+    private Button mapBtn=null;
+    private Button navigationBtn=null;
+
     private boolean isRouteSet = false;
     private Boolean routeStarted = false;
     private ActivityRecognitionClient arclient;
@@ -47,51 +53,91 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
     public static final int DETECTION_INTERVAL_MILLISECONDS =
             MILLISECONDS_PER_SECOND * DETECTION_INTERVAL_SECONDS;
 
+    private IBackgroundServiceAPI api = null;
+    private boolean isGPSon = false;
+
+    public boolean getRouteSet() { return isRouteSet;}
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_route_info_screen);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View dataView = inflater.inflate(R.layout.fragment_route_info,
+                container, false);
+
+        context = container.getContext();
         isRouteSet = false;
+
+        mapBtn=(Button)dataView.findViewById(R.id.mapButton);
+        mapBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                ShowMap(v);
+            }
+        });
+
+        navigationBtn=(Button)dataView.findViewById(R.id.startNavigation);
+        navigationBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                StartTracking(v);
+            }
+        });
+
         getRoute();
-        listView = (ListView) findViewById(R.id.RouteInfoScreenListView);
+
+        listView = (ListView)dataView.findViewById(R.id.RouteInfoScreenListView);
         if(route!=null)
-        listView.setAdapter(new RouteInfoAdapter(RouteInfoScreen.this, route));
-        Intent servIntent = new Intent(BackgroundService.class.getName());
-        startService(servIntent);
-        Log.i(TAG, "starting service "+servIntent.toString());
-        bindService(servIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+            listView.setAdapter(new RouteInfoAdapter(getActivity(), route));
+
+        //Intent servIntent = new Intent(BackgroundService.class.getName());
+        //startService(servIntent);
+        //Log.i(TAG, "starting service " + servIntent.toString());
+        //bindService(servIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
         // Click event for single list row
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                                     int position, long id) {
-                    Intent myIntent = new Intent(view.getContext(), PathElevation.class);
-                    myIntent.putExtra("IS_TRANSIT", route.getSteps().get(position).isTransit());
-                    myIntent.putExtra("PathJSON", route.getSteps().get(position).getJsonString());
-                    startActivity(myIntent);
+                Intent myIntent = new Intent(view.getContext(), PathElevation.class);
+                myIntent.putExtra("IS_TRANSIT", route.getSteps().get(position).isTransit());
+                myIntent.putExtra("PathJSON", route.getSteps().get(position).getJsonString());
+                startActivity(myIntent);
             }
         });
+
+        return dataView;
     }
 
-    private IBackgroundServiceAPI api = null;
-    private boolean isGPSon = false;
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
+        getActivity().getApplicationContext()
+                .bindService(new Intent(getActivity(),
+                                BackgroundService.class), this,
+                        Context.BIND_AUTO_CREATE);
+    }
 
-        public void onServiceDisconnected(ComponentName name) {
-            Log.i(TAG, "Service disconnected!");
-            api = null;
-        }
+    @Override
+    public void onServiceConnected(ComponentName className, IBinder binder) {
+        api=(IBackgroundServiceAPI)binder;
+        Log.i(TAG, "Service connected! "+api.toString());
+    }
 
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            api = IBackgroundServiceAPI.Stub.asInterface(service);
-            Log.i(TAG, "Service connected! "+api.toString());
-        }
-    };
+    @Override
+    public void onServiceDisconnected(ComponentName className) {
+        disconnect();
+    }
+
+    private void disconnect() {
+        Log.i(TAG, "Service disconnected!");
+        api=null;
+    }
 
     private void getRoute() {
-        SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+        SharedPreferences settings = context.getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         try {
             routeString = settings.getString("route", "");
             routeStarted = settings.getBoolean("routeStarted", false);
@@ -100,7 +146,7 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
             if (routeStarted) isRouteSet = routeStarted;
             if (!routeString.equals("")) route = new Route(routeString);
             else {
-                Intent intent = getIntent();
+                Intent intent = getActivity().getIntent();
                 routeString = intent.getStringExtra("route");
                 route = new Route(routeString);
                 Log.d("Shared Not Working", ":(");
@@ -112,44 +158,23 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.route_info_screen, menu);
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(false); // disable the button
-            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
-        }
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
     public void ShowMap(View v){
         //android:onClick="ShowMap"
         try {
-            Intent myIntent = new Intent(this, RouteMapActivity.class);
+            Intent myIntent = new Intent(getActivity(), RouteMapActivity.class);
             myIntent.putExtra("route", routeString);
             startActivity(myIntent);
         }catch (Exception e) {}
     }
 
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
         super.onDestroy();
         try {
-            unbindService(serviceConnection);
+            getActivity().getApplicationContext().unbindService(this);
+            disconnect();
+
+            //unbindService(serviceConnection);
             Log.i(TAG, "unbind ");
         } catch(Exception e) {
             Log.e(TAG, "ERROR!!", e);
@@ -161,7 +186,7 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
     }
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
 
         getRoute();
@@ -171,7 +196,8 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
         try {
             if (api != null) {
                 api.setRoute(routeString);
-                SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+                SharedPreferences settings =
+                        context.getSharedPreferences(getString(R.string.PREFS_NAME), 0);
                 SharedPreferences.Editor editor = settings.edit();
                 editor.putString("route", routeString);
                 editor.putBoolean("isRouteSet", true);
@@ -190,7 +216,7 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
     }
 
     public void showSettingsAlert() {
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(RouteInfoScreen.this);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
 
         // Setting Dialog Title
         alertDialog.setTitle("GPS Not Enabled");
@@ -222,7 +248,7 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         startNavigation();
     }
@@ -230,24 +256,24 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
     public void startNavigation() {
         isRouteSet = true;
         mInProgress = false;
-        arclient = new ActivityRecognitionClient(this, this, this);
-        Intent intent = new Intent(this, ActivityRecognitionService.class);
-        pIntent = PendingIntent.getService(this, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT);
+        arclient = new ActivityRecognitionClient(context, this, this);
+        Intent intent = new Intent(context, ActivityRecognitionService.class);
+        pIntent = PendingIntent.getService(context, 0, intent,PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Check for Google Play services
-        int resp = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        int resp = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (resp == ConnectionResult.SUCCESS) {
             startUpdates();
 
         } else {
-            Toast.makeText(this, "Please install Google Play Service.",
+            Toast.makeText(context, "Please install Google Play Service.",
                     Toast.LENGTH_SHORT).show();
         }
 
-            Intent setIntent = new Intent(Intent.ACTION_MAIN);
-            setIntent.addCategory(Intent.CATEGORY_HOME);
-            setIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(setIntent);
+        Intent setIntent = new Intent(Intent.ACTION_MAIN);
+        setIntent.addCategory(Intent.CATEGORY_HOME);
+        setIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(setIntent);
     }
 
     public void startUpdates() {
@@ -264,7 +290,7 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
 
     @Override
     public void onConnectionFailed(ConnectionResult arg0) {
-        Toast.makeText(this, "Connection Failed", Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, "Connection Failed", Toast.LENGTH_SHORT).show();
         // Turn off the request flag
         mInProgress = false;
     }
@@ -289,39 +315,13 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
         startNavigation();
     }
 
-    private void cancelRoute() {
+    public void cancelRoute() {
         isRouteSet = false;
         try {
             if (api != null) api.cancelRoute(1);
-            ((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(BackgroundService.NOTIFICATION_ID);
+            ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(BackgroundService.NOTIFICATION_ID);
         } catch(Exception e) {
             Log.e(TAG, "ERROR!!", e);
         }
-    }
-    @Override
-    public void onBackPressed() {
-        if(isRouteSet) {
-            //FragmentManager fm = getFragmentManager();
-
-            /** Instantiating the DialogFragment */
-            MyAlertDialogWIndow alert = new MyAlertDialogWIndow();
-
-            Bundle args = new Bundle();
-            args.putString("message", "Do you want to cancel the route?");
-            alert.setArguments(args);
-
-            /** Opening the dialog window */
-            alert.show(getSupportFragmentManager(), "Alert_Dialog");
-        }
-        else
-            super.onBackPressed();
-        //cancelRoute();
-    }
-
-    /** Defining button click listener for the OK button of the alert dialog window */
-    @Override
-    public void onPositiveClick(boolean isLocationSet) {
-        cancelRoute();
-        super.onBackPressed();
     }
 }
