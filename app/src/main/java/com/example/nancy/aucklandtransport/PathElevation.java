@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -93,7 +94,7 @@ public class PathElevation extends Activity {
     private String getElevationUrl() {
 
         // Building the url to the web service
-        String url = "http://172.23.208.76:8080/apt-server/showElevationProfile?pathStr="
+        String url = "http://172.23.4.11:8080/apt-server/showElevationProfile?pathStr="
                 + pathCoords.trim();
 
         Log.d("url", url);
@@ -164,10 +165,17 @@ public class PathElevation extends Activity {
         protected void onPostExecute(Bitmap result) {
             super.onPostExecute(result);
             imageView.setImageBitmap(result);
-            imageView.setLayoutParams(
-                    new LinearLayout.LayoutParams(
-                            result.getWidth(),
-                            result.getHeight()));
+            View parentView= findViewById(R.id.pathView);
+            int height=parentView.getHeight();
+            int width=parentView.getWidth();
+
+            RelativeLayout.LayoutParams lp=
+                    (RelativeLayout.LayoutParams)imageView.getLayoutParams();
+            int percentHeight= (int)(height*.75);
+            int percentWidth= width*1;
+            lp.height=percentHeight;
+            lp.width=percentWidth;
+            imageView.setLayoutParams(lp);
         }
 
     }

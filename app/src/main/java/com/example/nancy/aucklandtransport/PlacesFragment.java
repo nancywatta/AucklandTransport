@@ -2,6 +2,9 @@ package com.example.nancy.aucklandtransport;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,12 +22,15 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import org.json.JSONObject;
 
@@ -34,6 +40,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -50,19 +57,19 @@ public class PlacesFragment extends Fragment {
     Spinner mSprPlaceType;
 
     // A button to find the near by places
-    Button mBtnFind=null;
+    Button mBtnFind = null;
 
     // Stores near by places
     Place[] mPlaces = null;
 
     // A String array containing place types sent to Google Place service
-    String[] mPlaceType=null;
+    String[] mPlaceType = null;
 
     // A String array containing place types displayed to user
-    String[] mPlaceTypeName=null;
+    String[] mPlaceTypeName = null;
 
     // The location at which user touches the Google Map
-    LatLng mLocation=null;
+    LatLng mLocation = null;
 
     // Links marker id and place object
     HashMap<String, Place> mHMReference = new HashMap<String, Place>();
@@ -70,12 +77,39 @@ public class PlacesFragment extends Fragment {
     // Specifies the drawMarker() to draw the marker with default color
     private static final float UNDEFINED_COLOR = -1;
 
+    private String routeString;
+    Route route = null;
+
+    private void getRoute() {
+        SharedPreferences settings = context.getSharedPreferences(getString(R.string.PREFS_NAME), 0);
+        try {
+            routeString = settings.getString("route", "");
+
+            if (!routeString.equals("")) route = new Route(routeString);
+            else {
+                Intent intent = getActivity().getIntent();
+                routeString = intent.getStringExtra("route");
+                route = new Route(routeString);
+                Log.d("Shared Not Working", ":(");
+            }
+
+        } catch (Exception e) {
+            Log.e("ERROR", "Couldn't get the route from JSONobj");
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View dataView = inflater.inflate(R.layout.fragment_places,
                 container, false);
         context = container.getContext();
+
+        getRoute();
+
+        if (route != null)
+            mLocation = route.getStartLocation();
 
         // Array of place types
         mPlaceType = getResources().getStringArray(R.array.place_type);
@@ -90,28 +124,28 @@ public class PlacesFragment extends Fragment {
                 mPlaceTypeName);
 
         // Getting reference to the Spinner
-        mSprPlaceType = (Spinner)dataView.findViewById(R.id.spr_place_type);
+        mSprPlaceType = (Spinner) dataView.findViewById(R.id.spr_place_type);
 
         // Setting adapter on Spinner to set place types
         mSprPlaceType.setAdapter(adapter);
 
         // Getting reference to Find Button
-        mBtnFind = ( Button )dataView.findViewById(R.id.btn_find);
+        mBtnFind = (Button) dataView.findViewById(R.id.btn_find);
 
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
 
-        if(status!= ConnectionResult.SUCCESS){ // Google Play Services are not available
+        if (status != ConnectionResult.SUCCESS) { // Google Play Services are not available
 
             int requestCode = 10;
             Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, getActivity(), requestCode);
             dialog.show();
 
-        }else { // Google Play Services are available
+        } else { // Google Play Services are available
 
             // Getting reference to the SupportMapFragment
             SupportMapFragment fragment =
-                    ( SupportMapFragment) getActivity().getSupportFragmentManager()
+                    (SupportMapFragment) getActivity().getSupportFragmentManager()
                             .findFragmentById(R.id.map);
 
             // Getting Google Map
@@ -121,26 +155,26 @@ public class PlacesFragment extends Fragment {
             mGoogleMap.setMyLocationEnabled(true);
 
             // Handling screen rotation
-            if(savedInstanceState !=null) {
+            if (savedInstanceState != null) {
 
                 // Removes all the existing links from marker id to place object
                 mHMReference.clear();
 
                 //If near by places are already saved
-                if(savedInstanceState.containsKey("places")){
+                if (savedInstanceState.containsKey("places")) {
 
                     // Retrieving the array of place objects
                     mPlaces = (Place[]) savedInstanceState.getParcelableArray("places");
 
                     // Traversing through each near by place object
-                    for(int i=0;i<mPlaces.length;i++){
+                    for (int i = 0; i < mPlaces.length; i++) {
 
                         // Getting latitude and longitude of the i-th place
                         LatLng point = new LatLng(Double.parseDouble(mPlaces[i].mLat),
                                 Double.parseDouble(mPlaces[i].mLng));
 
                         // Drawing the marker corresponding to the i-th place
-                        Marker m = drawMarker(point,UNDEFINED_COLOR);
+                        Marker m = drawMarker(point, UNDEFINED_COLOR);
 
                         // Linkng i-th place and its marker id
                         mHMReference.put(m.getId(), mPlaces[i]);
@@ -148,7 +182,7 @@ public class PlacesFragment extends Fragment {
                 }
 
                 // If a touched location is already saved
-                if(savedInstanceState.containsKey("location")){
+                if (savedInstanceState.containsKey("location")) {
 
                     // Retrieving the touched location and setting in member variable
                     mLocation = (LatLng) savedInstanceState.getParcelable("location");
@@ -169,7 +203,10 @@ public class PlacesFragment extends Fragment {
 
                     mGoogleMap.clear();
 
-                    if(mLocation==null){
+                    if (route != null)
+                        addPolyLine();
+
+                    if (mLocation == null) {
                         Toast.makeText(context, "Please mark a location", Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -177,9 +214,9 @@ public class PlacesFragment extends Fragment {
                     drawMarker(mLocation, BitmapDescriptorFactory.HUE_GREEN);
 
                     StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-                    sb.append("location="+mLocation.latitude+","+mLocation.longitude);
-                    sb.append("&radius=5000");
-                    sb.append("&types="+type);
+                    sb.append("location=" + mLocation.latitude + "," + mLocation.longitude);
+                    sb.append("&radius=500");
+                    sb.append("&types=" + type);
                     sb.append("&sensor=true");
                     sb.append("&key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw");
 
@@ -191,6 +228,13 @@ public class PlacesFragment extends Fragment {
                 }
             });
 
+            if (route != null) {
+                CameraUpdate cameraUpdate =
+                        CameraUpdateFactory.newLatLngZoom(route.getStartLocation(), 15);
+                mGoogleMap.animateCamera(cameraUpdate);
+                addPolyLine();
+            }
+
             // Map Click listener
             mGoogleMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
 
@@ -200,11 +244,14 @@ public class PlacesFragment extends Fragment {
                     // Clears all the existing markers
                     mGoogleMap.clear();
 
+                    if (route != null)
+                        addPolyLine();
+
                     // Setting the touched location in member variable
                     mLocation = point;
 
                     // Drawing a marker at the touched location
-                    drawMarker(mLocation,BitmapDescriptorFactory.HUE_GREEN);
+                    drawMarker(mLocation, BitmapDescriptorFactory.HUE_GREEN);
                 }
             });
 
@@ -215,7 +262,7 @@ public class PlacesFragment extends Fragment {
                 public boolean onMarkerClick(Marker marker) {
 
                     // If touched at User input location
-                    if(!mHMReference.containsKey(marker.getId()))
+                    if (!mHMReference.containsKey(marker.getId()))
                         return false;
 
                     // Getting place object corresponding to the currently clicked Marker
@@ -228,7 +275,7 @@ public class PlacesFragment extends Fragment {
                     getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
 
                     // Creating a dialog fragment to display the photo
-                    PlaceDialogFragment dialogFragment = new PlaceDialogFragment(place,dm, context);
+                    PlaceDialogFragment dialogFragment = new PlaceDialogFragment(place, dm, context);
 
                     // Getting a reference to Fragment Manager
                     FragmentManager fm = getActivity().getSupportFragmentManager();
@@ -249,6 +296,38 @@ public class PlacesFragment extends Fragment {
         return dataView;
     }
 
+    private void addPolyLine() {
+
+        drawMarker(route.getStartLocation(), BitmapDescriptorFactory.HUE_VIOLET);
+
+        drawMarker(route.getEndLocation(), BitmapDescriptorFactory.HUE_VIOLET);
+
+        Log.d("Inside ", "Polyline");
+        ArrayList<LatLng> points = null;
+        PolylineOptions lineOptions = null;
+        // Traversing through all the routes
+        for (int i = 0; i < route.getSteps().size(); i++) {
+            points = new ArrayList<LatLng>();
+            lineOptions = new PolylineOptions();
+
+            // Fetching i-th route
+            RouteStep path = route.getSteps().get(i);
+
+            for (int l = 0; l < path.getLatlng().size(); l++) {
+                points.add(path.getLatlng().get(l));
+            }
+
+            if (path.isTransit())
+                lineOptions.color(Color.RED);
+            else
+                lineOptions.color(Color.BLUE);
+            // Adding all the points in the route to LineOptions
+            lineOptions.addAll(points);
+            lineOptions.width(5);
+            mGoogleMap.addPolyline(lineOptions);
+        }
+    }
+
     /**
      * A callback function, executed on screen rotation
      */
@@ -256,22 +335,24 @@ public class PlacesFragment extends Fragment {
     public void onSaveInstanceState(Bundle outState) {
 
         // Saving all the near by places objects
-        if(mPlaces!=null)
+        if (mPlaces != null)
             outState.putParcelableArray("places", mPlaces);
 
         // Saving the touched location
-        if(mLocation!=null)
+        if (mLocation != null)
             outState.putParcelable("location", mLocation);
 
         super.onSaveInstanceState(outState);
     }
 
-    /** A method to download json data from argument url */
+    /**
+     * A method to download json data from argument url
+     */
     private String downloadUrl(String strUrl) throws IOException {
         String data = "";
         InputStream iStream = null;
         HttpURLConnection urlConnection = null;
-        try{
+        try {
             URL url = new URL(strUrl);
 
             // Creating an http connection to communicate with url
@@ -288,7 +369,7 @@ public class PlacesFragment extends Fragment {
             StringBuffer sb = new StringBuffer();
 
             String line = "";
-            while( ( line = br.readLine()) != null){
+            while ((line = br.readLine()) != null) {
                 sb.append(line);
             }
 
@@ -296,15 +377,18 @@ public class PlacesFragment extends Fragment {
 
             br.close();
 
-        }catch(Exception e){
+        } catch (Exception e) {
             Log.d("Exception while downloading url", e.toString());
-        }finally{
+        } finally {
             iStream.close();
             urlConnection.disconnect();
         }
         return data;
     }
-    /** A class, to download Google Places */
+
+    /**
+     * A class, to download Google Places
+     */
     private class PlacesTask extends AsyncTask<String, Integer, String> {
 
         String data = null;
@@ -312,17 +396,17 @@ public class PlacesFragment extends Fragment {
         // Invoked by execute() method of this object
         @Override
         protected String doInBackground(String... url) {
-            try{
+            try {
                 data = downloadUrl(url[0]);
-            }catch(Exception e){
-                Log.d("Background Task",e.toString());
+            } catch (Exception e) {
+                Log.d("Background Task", e.toString());
             }
             return data;
         }
 
         // Executed after the complete execution of doInBackground() method
         @Override
-        protected void onPostExecute(String result){
+        protected void onPostExecute(String result) {
             ParserTask parserTask = new ParserTask();
 
             // Start parsing the Google places in JSON format
@@ -331,8 +415,10 @@ public class PlacesFragment extends Fragment {
         }
     }
 
-    /** A class to parse the Google Places in JSON format */
-    private class ParserTask extends AsyncTask<String, Integer, Place[]>{
+    /**
+     * A class to parse the Google Places in JSON format
+     */
+    private class ParserTask extends AsyncTask<String, Integer, Place[]> {
 
         JSONObject jObject;
 
@@ -343,24 +429,24 @@ public class PlacesFragment extends Fragment {
             Place[] places = null;
             PlaceJSONParser placeJsonParser = new PlaceJSONParser();
 
-            try{
+            try {
                 jObject = new JSONObject(jsonData[0]);
                 /** Getting the parsed data as a List construct */
                 places = placeJsonParser.placeParse(jObject);
 
-            }catch(Exception e){
-                Log.d("Exception",e.toString());
+            } catch (Exception e) {
+                Log.d("Exception", e.toString());
             }
             return places;
         }
 
         // Executed after the complete execution of doInBackground() method
         @Override
-        protected void onPostExecute(Place[] places){
+        protected void onPostExecute(Place[] places) {
 
             mPlaces = places;
 
-            for(int i=0;i< places.length ;i++){
+            for (int i = 0; i < places.length; i++) {
                 Place place = places[i];
 
                 // Getting latitude of the place
@@ -371,7 +457,7 @@ public class PlacesFragment extends Fragment {
 
                 LatLng latLng = new LatLng(lat, lng);
 
-                Marker m = drawMarker(latLng,UNDEFINED_COLOR);
+                Marker m = drawMarker(latLng, UNDEFINED_COLOR);
 
                 // Adding place reference to HashMap with marker id as HashMap key
                 // to get its reference in infowindow click event listener
@@ -383,14 +469,14 @@ public class PlacesFragment extends Fragment {
     /**
      * Drawing marker at latLng with color
      */
-    private Marker drawMarker(LatLng latLng,float color){
+    private Marker drawMarker(LatLng latLng, float color) {
         // Creating a marker
         MarkerOptions markerOptions = new MarkerOptions();
 
         // Setting the position for the marker
         markerOptions.position(latLng);
 
-        if(color != UNDEFINED_COLOR)
+        if (color != UNDEFINED_COLOR)
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(color));
 
         // Placing a marker on the touched position

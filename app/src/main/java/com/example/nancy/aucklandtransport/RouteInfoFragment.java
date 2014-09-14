@@ -76,23 +76,18 @@ public class RouteInfoFragment extends Fragment implements
         });
 
         navigationBtn=(Button)dataView.findViewById(R.id.startNavigation);
-        navigationBtn.setOnClickListener(new View.OnClickListener() {
+        /*navigationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 StartTracking(v);
             }
-        });
+        });*/
 
         getRoute();
 
         listView = (ListView)dataView.findViewById(R.id.RouteInfoScreenListView);
         if(route!=null)
             listView.setAdapter(new RouteInfoAdapter(getActivity(), route));
-
-        //Intent servIntent = new Intent(BackgroundService.class.getName());
-        //startService(servIntent);
-        //Log.i(TAG, "starting service " + servIntent.toString());
-        //bindService(servIntent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         // Click event for single list row
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

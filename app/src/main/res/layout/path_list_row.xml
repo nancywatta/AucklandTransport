@@ -14,7 +14,7 @@
         android:text=""
         android:textColor="#040404"
         android:typeface="sans"
-        android:textSize="15dip"
+        android:textSize="20dip"
         android:textStyle="bold"/>
 
 </RelativeLayout>
