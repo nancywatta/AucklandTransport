@@ -3,12 +3,14 @@ package com.example.nancy.aucklandtransport;
 import android.util.Log;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.maps.android.PolyUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -114,6 +116,106 @@ public class DirectionsJSONParser {
         } catch (Exception e) {
         }
         return routes;
+    }
+
+    public RouteStep parseRouteStep(JSONObject jObject) {
+        RouteStep routeStep = new RouteStep();
+
+        JSONArray jRoutes = null;
+        JSONArray jLegs = null;
+        JSONObject jDistance = null;
+        JSONObject jDuration = null;
+        JSONArray jSteps = null;
+        JSONArray Steps = null;
+        String startAddr = "";
+        String endAddr ="";
+        String type = "";
+        String departTime = "";
+        String arrivalTime = "";
+        String shortName = ""; String name="";
+        String departureStop = "", arrivalStop = "", instruc = "";
+        Double startLat, startLng, endLat, endLng;
+        long arrSec, depSec;
+
+        try {
+
+            jRoutes = jObject.getJSONArray("routes");
+
+            /** Traversing all routes */
+            for (int i = 0; i < jRoutes.length(); i++) {
+                jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");
+
+
+                /** Traversing all legs */
+                for (int j = 0; j < jLegs.length(); j++) {
+                    jDistance = null; jDuration = null;
+                    jSteps = null;
+                    type = ""; name = ""; shortName = ""; arrSec = 0; depSec = 0;
+                    endAddr = ""; startAddr = ""; departTime = ""; arrivalTime = "";
+                    departureStop = ""; arrivalStop = "";
+
+                    JSONObject leg = jLegs.getJSONObject(j);
+
+                    /** Getting distance from the json data */
+                    jDistance = leg.getJSONObject("distance");
+
+                    /** Getting duration from the json data */
+                    jDuration = leg.getJSONObject("duration");
+
+                    startLat = leg.getJSONObject("start_location").getDouble("lat");
+                    startLng = leg.getJSONObject("start_location").getDouble("lng");
+
+                    endLat = leg.getJSONObject("end_location").getDouble("lat");
+                    endLng = leg.getJSONObject("end_location").getDouble("lng");
+
+                    String polyline = "";
+                    polyline = (String)((JSONObject)leg.get("overview_polyline")).get("points");
+                    List<LatLng> list = new ArrayList<LatLng>();
+                    list = PolyUtil.decode(polyline);
+
+                    jSteps = ((JSONObject) jLegs.get(j)).getJSONArray("steps");
+
+                    /** Traversing all steps */
+                    for (int k = 0; k < jSteps.length(); k++) {
+                        type = "";
+                        name = "";
+                        JSONObject step = jSteps.getJSONObject(k);
+
+                        routeStep = new RouteStep(jDistance.getString("text"), jDuration.getString("text"),
+                                jDuration.getLong("value"),
+                                step.getString("html_instructions"), startAddr, endAddr, type, departTime, depSec,
+                                arrivalTime, arrSec, name,
+                                shortName, list, new LatLng(startLat,startLng), new LatLng(endLat,endLng), "WALKING",
+                                departureStop, arrivalStop, step.toString());
+
+                        Steps = ((JSONObject) jSteps.get(k)).getJSONArray("steps");
+
+                        for (int l = 0; l < Steps.length(); l++) {
+                            JSONObject path = Steps.getJSONObject(l);
+                            instruc = "";
+                            startLat = path.getJSONObject("start_location").getDouble("lat");
+                            startLng = path.getJSONObject("start_location").getDouble("lng");
+                            endLat = path.getJSONObject("end_location").getDouble("lat");
+                            endLng = path.getJSONObject("end_location").getDouble("lng");
+                            departTime = path.getJSONObject("duration").getString("text");
+                            depSec = path.getJSONObject("duration").getLong("value");
+                            try {
+                                instruc = path.getString("html_instructions");
+                            } catch (Exception e) {}
+                            PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng),
+                                    departTime,depSec, instruc,
+                                    path.getJSONObject("distance").getLong("value"));
+                            routeStep.add(p);
+                        }
+                    }
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+        }
+
+        return routeStep;
     }
 
     public ArrayList<Route> parse1(JSONObject jObject) {

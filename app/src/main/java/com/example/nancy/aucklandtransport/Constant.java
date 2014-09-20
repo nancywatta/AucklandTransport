@@ -12,6 +12,7 @@ public class Constant {
     public final static int OFF_ROUTE=5;
     public final static int STOPPED=6;
     public final static int FINISHED=7;
-    public final static int MAXSTATE=8;
-    public final static int DEFAULT=9;
+    public final static int REROUTE=8;
+    public final static int BUS=9;
+    public final static int DEFAULT=10;
 }

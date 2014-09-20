@@ -22,7 +22,7 @@ public class RouteStep {
     public String desc;
 
     public String distance;
-    public String duration;
+    public TravelTime duration;
 
     public String firstLoc = "";
     public String lastLoc = "";
@@ -104,13 +104,13 @@ public class RouteStep {
         }
     }
 
-    public RouteStep(String distance, String duration, String desc,
+    public RouteStep(String distance, String duration, long durSec, String desc,
                      String firstLoc, String lastLoc, String type, String depTime, long depSec, String arrTime,
                      long arrSec, String vehicleName, String shortName, List<LatLng> latlng,
                      LatLng startLoc, LatLng endLoc, String travelMode,
                      String departureStop, String arrivalStop, String jsonString) {
         this.distance = distance;
-        this.duration = duration;
+        this.duration = new TravelTime(duration, durSec);
         this.desc = desc;
         this.firstLoc = firstLoc;
         this.lastLoc = lastLoc;
@@ -136,7 +136,7 @@ public class RouteStep {
 
     public String getDistance() { return distance; }
 
-    public String getDuration() { return  duration; }
+    public TravelTime getDuration() { return  duration; }
 
     public String getDesc() { return desc; }
 

@@ -150,6 +150,7 @@ public class Route {
             list = PolyUtil.decode(polyline);
 
             RouteStep routeStep = new RouteStep(jDistance.getString("text"), jDuration.getString("text"),
+                    jDuration.getLong("value"),
                     step.getString("html_instructions"), startAddr, endAddr, type, departTime, depSec,
                     arrivalTime, arrSec, name,
                     shortName, list, new LatLng(startLat,startLng), new LatLng(endLat,endLng), travelMode,

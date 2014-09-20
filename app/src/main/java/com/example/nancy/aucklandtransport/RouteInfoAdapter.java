@@ -58,7 +58,7 @@ public class RouteInfoAdapter extends BaseAdapter {
             holder.text4.setText(step.getDepartureStop() + " To " + step.getArrivalStop());
         }
         else {
-            holder.text1.setText(step.getDistance() + " (" + step.getDuration() + ")");
+            holder.text1.setText(step.getDistance() + " (" + step.getDuration().getTravelTime() + ")");
             holder.text4.setText(step.getDesc());
             holder.text5.setText("");
         }

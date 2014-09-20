@@ -23,8 +23,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 /**
  * Created by Nancy on 7/29/14.
@@ -41,6 +39,8 @@ public class GoogleAPI {
     private TravelTime travelTime;
 
     private long remainingSeconds;
+
+    private RouteStep routeStep;
 
     List<HashMap<String, String>> geoPlaces;
 
@@ -197,6 +197,22 @@ public class GoogleAPI {
         return remainingSeconds;
     }
 
+    public RouteStep getRoute(LatLng startLoc, LatLng endLoc) {
+
+        this.startLoc = startLoc;
+        this.endLoc = endLoc;
+
+        // Getting URL to the Google Directions API
+        String url = getDirectionsUrl();
+
+        DownloadTask downloadTask = new DownloadTask();
+
+        // Start downloading json data from Google Directions API
+        downloadTask.execute(url);
+
+        return routeStep;
+    }
+
     private String getDirectionsUrl(){
 
         // Origin of route
@@ -298,36 +314,34 @@ public class GoogleAPI {
     }
 
     /** A class to parse the Google Places in JSON format */
-    private class ParserTask extends AsyncTask<String, Integer, ArrayList<Route>>{
+    private class ParserTask extends AsyncTask<String, Integer, RouteStep>{
 
         // Parsing the data in non-ui thread
         @Override
-        protected ArrayList<Route> doInBackground(String... jsonData) {
+        protected RouteStep doInBackground(String... jsonData) {
 
             JSONObject jObject;
-            ArrayList<Route> routes = null;
+            RouteStep walkRoute = null;
 
             try{
                 jObject = new JSONObject(jsonData[0]);
                 DirectionsJSONParser parser = new DirectionsJSONParser();
 
                 // Starts parsing data
-                routes = parser.parse(jObject);
+                walkRoute = parser.parseRouteStep(jObject);
             }catch(Exception e){
                 e.printStackTrace();
             }
-            return routes;
+            return walkRoute;
         }
 
         // Executes in UI thread, after the parsing process
         @Override
-        protected void onPostExecute(ArrayList<Route> result) {
-            if(result.size()<1){
+        protected void onPostExecute(RouteStep result) {
+            if(result == null){
                 return;
             }
-
-            Route route = result.get(0);
-            remainingSeconds = route.getDuration().getSeconds();
+            routeStep = result;
         }
     }
 }

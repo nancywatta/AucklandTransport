@@ -76,12 +76,12 @@ public class RouteInfoFragment extends Fragment implements
         });
 
         navigationBtn=(Button)dataView.findViewById(R.id.startNavigation);
-        /*navigationBtn.setOnClickListener(new View.OnClickListener() {
+        navigationBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(final View v) {
                 StartTracking(v);
             }
-        });*/
+        });
 
         getRoute();
 
