@@ -94,7 +94,7 @@ public class PathElevation extends Activity {
     private String getElevationUrl() {
 
         // Building the url to the web service
-        String url = "http://172.23.4.11:8080/apt-server/showElevationProfile?pathStr="
+        String url = "http://" + getString(R.string.IP_ADDRESS) + ":8080/apt-server/showElevationProfile?pathStr="
                 + pathCoords.trim();
 
         Log.d("url", url);

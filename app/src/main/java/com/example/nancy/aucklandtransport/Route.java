@@ -127,10 +127,10 @@ public class Route {
                 type = transit.getJSONObject("line").getJSONObject("vehicle").getString("type");
                 name = transit.getJSONObject("line").getString("name");
                 shortName = transit.getJSONObject("line").getString("short_name");
-                startLat = transit.getJSONObject("arrival_stop").getJSONObject("location").getDouble("lat");
-                startLng = transit.getJSONObject("arrival_stop").getJSONObject("location").getDouble("lng");
-                endLat = transit.getJSONObject("departure_stop").getJSONObject("location").getDouble("lat");
-                endLng = transit.getJSONObject("departure_stop").getJSONObject("location").getDouble("lng");
+                startLat = transit.getJSONObject("departure_stop").getJSONObject("location").getDouble("lat");
+                startLng = transit.getJSONObject("departure_stop").getJSONObject("location").getDouble("lng");
+                endLat = transit.getJSONObject("arrival_stop").getJSONObject("location").getDouble("lat");
+                endLng = transit.getJSONObject("arrival_stop").getJSONObject("location").getDouble("lng");
                 arrSec = transit.getJSONObject("arrival_time").getLong("value");
                 depSec = transit.getJSONObject("departure_time").getLong("value");
                 departureStop = transit.getJSONObject("departure_stop").getString("name");
@@ -174,7 +174,9 @@ public class Route {
                     depSec = path.getJSONObject("duration").getLong("value");
                     try {
                         instruc = path.getString("html_instructions");
-                    } catch (Exception e) {}
+                    } catch (Exception e) {
+                        instruc = step.getString("html_instructions");
+                    }
                     PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng),
                             departTime,depSec, instruc,
                             path.getJSONObject("distance").getLong("value"));

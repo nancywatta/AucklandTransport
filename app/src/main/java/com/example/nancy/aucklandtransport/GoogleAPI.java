@@ -20,7 +20,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,7 +28,7 @@ import java.util.List;
  */
 public class GoogleAPI {
 
-    private static final String TAG = "GoogleAPI";
+    private static final String TAG = GoogleAPI.class.getSimpleName();
 
     private static final String main_url = "https://maps.googleapis.com/maps/api/geocode/json?";
 
@@ -339,6 +338,7 @@ public class GoogleAPI {
         @Override
         protected void onPostExecute(RouteStep result) {
             if(result == null){
+                Log.d(TAG, "null routestep");
                 return;
             }
             routeStep = result;

@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -26,6 +27,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
+
+import org.androidpn.client.ServiceManager;
 
 public class RouteInfoFragment extends Fragment implements
         GooglePlayServicesClient.ConnectionCallbacks,
@@ -56,6 +59,8 @@ public class RouteInfoFragment extends Fragment implements
     private IBackgroundServiceAPI api = null;
     private boolean isGPSon = false;
 
+    ServiceManager serviceManager;
+
     public boolean getRouteSet() { return isRouteSet;}
 
     @Override
@@ -65,6 +70,9 @@ public class RouteInfoFragment extends Fragment implements
                 container, false);
 
         context = container.getContext();
+
+        serviceManager = new ServiceManager(context);
+
         isRouteSet = false;
 
         mapBtn=(Button)dataView.findViewById(R.id.mapButton);
@@ -76,12 +84,7 @@ public class RouteInfoFragment extends Fragment implements
         });
 
         navigationBtn=(Button)dataView.findViewById(R.id.startNavigation);
-        navigationBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(final View v) {
-                StartTracking(v);
-            }
-        });
+        navigationBtn.setOnClickListener(selectButtonListener);
 
         getRoute();
 
@@ -101,6 +104,8 @@ public class RouteInfoFragment extends Fragment implements
                 startActivity(myIntent);
             }
         });
+
+        if (isRouteSet) setButtonToCancel();
 
         return dataView;
     }
@@ -166,6 +171,7 @@ public class RouteInfoFragment extends Fragment implements
     public void onDestroy() {
         super.onDestroy();
         try {
+            cancelRoute();
             getActivity().getApplicationContext().unbindService(this);
             disconnect();
 
@@ -185,6 +191,17 @@ public class RouteInfoFragment extends Fragment implements
         super.onResume();
 
         getRoute();
+        if (isRouteSet) setButtonToCancel();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+
+        getRoute();
+
+        if (isRouteSet) setButtonToCancel();
     }
 
     private boolean setRoute() {
@@ -249,6 +266,7 @@ public class RouteInfoFragment extends Fragment implements
     }
 
     public void startNavigation() {
+        setButtonToCancel();
         isRouteSet = true;
         mInProgress = false;
         arclient = new ActivityRecognitionClient(context, this, this);
@@ -308,13 +326,50 @@ public class RouteInfoFragment extends Fragment implements
         //android:onClick="StartTracking"
         if (!setRoute()) return;
         startNavigation();
+        // Start the service
+        serviceManager.setNotificationIcon(R.drawable.notification);
+        serviceManager.startService();
     }
+
+    public void setButtonToCancel() {
+        isRouteSet = true;
+        navigationBtn.setText(getString(R.string.mCancelRoute));
+        navigationBtn.setOnClickListener(cancelButtonListener);
+    }
+
+    private View.OnClickListener cancelButtonListener = new View.OnClickListener() {
+
+        public void onClick(View v) {
+            if(isRouteSet) {
+                /** Instantiating the DialogFragment */
+                MyAlertDialogWIndow alert = new MyAlertDialogWIndow();
+
+                Bundle args = new Bundle();
+                args.putString("message", "Do you want to cancel the route?");
+                alert.setArguments(args);
+
+                /** Opening the dialog window */
+                alert.show(getFragmentManager(), "Alert_Dialog");
+                //cancelRoute();
+            }
+        }
+    };
+
+    private View.OnClickListener selectButtonListener = new View.OnClickListener() {
+
+        public void onClick(View v) {
+            StartTracking(v);
+        }
+    };
 
     public void cancelRoute() {
         isRouteSet = false;
+        navigationBtn.setText(getString(R.string.Navigation));
+        navigationBtn.setOnClickListener(selectButtonListener);
         try {
             if (api != null) api.cancelRoute(1);
             ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(BackgroundService.NOTIFICATION_ID);
+            serviceManager.stopService();
         } catch(Exception e) {
             Log.e(TAG, "ERROR!!", e);
         }

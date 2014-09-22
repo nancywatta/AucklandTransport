@@ -30,6 +30,7 @@
             android:onClick="StartTracking"
             >
         </Button>
+
     </LinearLayout>
 
     <View

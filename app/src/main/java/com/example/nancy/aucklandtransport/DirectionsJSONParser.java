@@ -31,8 +31,8 @@ public class DirectionsJSONParser {
         String type = "";
         String name = "";
         JSONObject transit = null;
-        long depSec=0, arrSec=0;
-        String depTime="", arrTime="";
+        long depSec = 0, arrSec = 0;
+        String depTime = "", arrTime = "";
 
         try {
 
@@ -45,10 +45,15 @@ public class DirectionsJSONParser {
 
                 /** Traversing all legs */
                 for (int j = 0; j < jLegs.length(); j++) {
-                    jDistance = null; jDuration = null;
+                    jDistance = null;
+                    jDuration = null;
                     jDepartureTime = null;
-                    jArrivalTime = null; jSteps = null;
-                    depSec=0; arrSec=0; depTime=""; arrTime="";
+                    jArrivalTime = null;
+                    jSteps = null;
+                    depSec = 0;
+                    arrSec = 0;
+                    depTime = "";
+                    arrTime = "";
 
                     JSONObject leg = jLegs.getJSONObject(j);
 
@@ -65,7 +70,7 @@ public class DirectionsJSONParser {
                         depSec = jDepartureTime.getLong("value");
                         arrSec = jArrivalTime.getLong("value");
                         depTime = jDepartureTime.getString("text");
-                        arrTime =jArrivalTime.getString("text");
+                        arrTime = jArrivalTime.getString("text");
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -119,7 +124,7 @@ public class DirectionsJSONParser {
     }
 
     public RouteStep parseRouteStep(JSONObject jObject) {
-        RouteStep routeStep = new RouteStep();
+        RouteStep routeStep = null;
 
         JSONArray jRoutes = null;
         JSONArray jLegs = null;
@@ -128,11 +133,12 @@ public class DirectionsJSONParser {
         JSONArray jSteps = null;
         JSONArray Steps = null;
         String startAddr = "";
-        String endAddr ="";
+        String endAddr = "";
         String type = "";
         String departTime = "";
         String arrivalTime = "";
-        String shortName = ""; String name="";
+        String shortName = "";
+        String name = "";
         String departureStop = "", arrivalStop = "", instruc = "";
         Double startLat, startLng, endLat, endLng;
         long arrSec, depSec;
@@ -144,15 +150,28 @@ public class DirectionsJSONParser {
             /** Traversing all routes */
             for (int i = 0; i < jRoutes.length(); i++) {
                 jLegs = ((JSONObject) jRoutes.get(i)).getJSONArray("legs");
-
+                String polyline = "";
+                polyline = ((JSONObject) jRoutes.get(i)).getJSONObject("overview_polyline").getString("points");
+                List<LatLng> list = new ArrayList<LatLng>();
+                list = PolyUtil.decode(polyline);
 
                 /** Traversing all legs */
                 for (int j = 0; j < jLegs.length(); j++) {
-                    jDistance = null; jDuration = null;
+                    jDistance = null;
+                    jDuration = null;
                     jSteps = null;
-                    type = ""; name = ""; shortName = ""; arrSec = 0; depSec = 0;
-                    endAddr = ""; startAddr = ""; departTime = ""; arrivalTime = "";
-                    departureStop = ""; arrivalStop = "";
+                    type = "";
+                    name = "";
+                    shortName = "";
+                    arrSec = 0;
+                    depSec = 0;
+                    endAddr = "";
+                    startAddr = "";
+                    departTime = "";
+                    arrivalTime = "";
+                    departureStop = "";
+                    arrivalStop = "";
+                    instruc = "";
 
                     JSONObject leg = jLegs.getJSONObject(j);
 
@@ -168,10 +187,15 @@ public class DirectionsJSONParser {
                     endLat = leg.getJSONObject("end_location").getDouble("lat");
                     endLng = leg.getJSONObject("end_location").getDouble("lng");
 
-                    String polyline = "";
-                    polyline = (String)((JSONObject)leg.get("overview_polyline")).get("points");
-                    List<LatLng> list = new ArrayList<LatLng>();
-                    list = PolyUtil.decode(polyline);
+                    startAddr = leg.getString("start_address");
+                    endAddr = leg.getString("end_address");
+
+                    routeStep = new RouteStep(jDistance.getString("text"), jDuration.getString("text"),
+                            jDuration.getLong("value"),
+                            instruc, startAddr, endAddr, type, departTime, depSec,
+                            arrivalTime, arrSec, name,
+                            shortName, list, new LatLng(startLat, startLng), new LatLng(endLat, endLng), "WALKING",
+                            departureStop, arrivalStop, leg.toString());
 
                     jSteps = ((JSONObject) jLegs.get(j)).getJSONArray("steps");
 
@@ -179,44 +203,45 @@ public class DirectionsJSONParser {
                     for (int k = 0; k < jSteps.length(); k++) {
                         type = "";
                         name = "";
-                        JSONObject step = jSteps.getJSONObject(k);
+                        JSONObject path = jSteps.getJSONObject(k);
 
-                        routeStep = new RouteStep(jDistance.getString("text"), jDuration.getString("text"),
-                                jDuration.getLong("value"),
-                                step.getString("html_instructions"), startAddr, endAddr, type, departTime, depSec,
-                                arrivalTime, arrSec, name,
-                                shortName, list, new LatLng(startLat,startLng), new LatLng(endLat,endLng), "WALKING",
-                                departureStop, arrivalStop, step.toString());
-
-                        Steps = ((JSONObject) jSteps.get(k)).getJSONArray("steps");
-
-                        for (int l = 0; l < Steps.length(); l++) {
-                            JSONObject path = Steps.getJSONObject(l);
-                            instruc = "";
-                            startLat = path.getJSONObject("start_location").getDouble("lat");
-                            startLng = path.getJSONObject("start_location").getDouble("lng");
-                            endLat = path.getJSONObject("end_location").getDouble("lat");
-                            endLng = path.getJSONObject("end_location").getDouble("lng");
-                            departTime = path.getJSONObject("duration").getString("text");
-                            depSec = path.getJSONObject("duration").getLong("value");
-                            try {
-                                instruc = path.getString("html_instructions");
-                            } catch (Exception e) {}
-                            PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng),
-                                    departTime,depSec, instruc,
-                                    path.getJSONObject("distance").getLong("value"));
-                            routeStep.add(p);
+                        instruc = "";
+                        startLat = path.getJSONObject("start_location").getDouble("lat");
+                        startLng = path.getJSONObject("start_location").getDouble("lng");
+                        endLat = path.getJSONObject("end_location").getDouble("lat");
+                        endLng = path.getJSONObject("end_location").getDouble("lng");
+                        departTime = path.getJSONObject("duration").getString("text");
+                        depSec = path.getJSONObject("duration").getLong("value");
+                        try {
+                            instruc = path.getString("html_instructions");
+                        } catch (Exception e) {
                         }
-                    }
+                        PathSegment p = new PathSegment(new LatLng(startLat, startLng), new LatLng(endLat, endLng),
+                                departTime, depSec, instruc,
+                                path.getJSONObject("distance").getLong("value"));
+                        routeStep.add(p);
                 }
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
         }
-
-        return routeStep;
     }
+
+    catch(
+    JSONException e
+    )
+
+    {
+        e.printStackTrace();
+    }
+
+    catch(
+    Exception e
+    )
+
+    {
+    }
+
+    return routeStep;
+}
 
     public ArrayList<Route> parse1(JSONObject jObject) {
 

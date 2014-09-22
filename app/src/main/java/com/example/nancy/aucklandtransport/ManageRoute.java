@@ -159,25 +159,6 @@ public class ManageRoute extends ActionBarActivity implements
         }
     }
 
-    /*Class for Tab2 "Edit User"*/
-
-    public static class EditFragment extends Fragment {
-
-        public EditFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View dataView = inflater.inflate(R.layout.fragment_edit_tab,
-                    container, false);
-            // TextView sectionBarView = (TextView) dataView
-            //      .findViewById(R.id.section_label);
-            //sectionBarView.setText("Invite");
-            return dataView;
-        }
-    }
-
     /**
      * A placeholder fragment containing a simple view.
      */

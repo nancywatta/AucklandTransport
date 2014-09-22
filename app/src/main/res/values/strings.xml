@@ -71,6 +71,9 @@
     <string name="title_activity_route_details">RouteDetails</string>
     <string name="title_activity_route_info_fragment">RouteInfoFragment</string>
 
+    <string name="IP_ADDRESS">172.23.4.11</string>
+    <string name="mCancelRoute">Stop Navigation</string>
+
     <string name="Places">Places</string>
     <string-array name="place_type">
         <item>airport</item>

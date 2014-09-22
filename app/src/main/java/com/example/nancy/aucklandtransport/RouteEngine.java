@@ -20,22 +20,25 @@ public class RouteEngine {
     private int routeState = Constant.INIT;
     private int nextStop = 0;
     private long searchInterval = 0;
+    private long remainingTime = 0;
     private boolean firstTime = true;
     private float prevDistance = 0;
     private boolean getRealTime = false;
     private RouteStep s = null;
     private int currentStep = 0;
-    BackgroundService service;
+    private BackgroundService service;
     private boolean isNotRouteInSettings = false;
-    Route route;
+    private Route route;
     private int offRouteCount = 0;
-    GoogleAPI googleAPI = new GoogleAPI();
-    Context context;
+    private GoogleAPI googleAPI = new GoogleAPI();
+    private Context context;
+    private AucklandPublicTransportAPI aptApi = null;
 
     public RouteEngine(BackgroundService service, Context context)
     {
         this.service = service;
         this.context = context;
+        aptApi = new AucklandPublicTransportAPI(context);
     }
 
     public void routeEngine(Route mRoute, String mActivity, Location currentLocation) {
@@ -61,6 +64,7 @@ public class RouteEngine {
                 prevDistance = 0;
                 getRealTime = false;
                 s = mRoute.getSteps().get(currentStep);
+                remainingTime = 0;
                 routeState = Constant.CHANGE_OVER;
                 break;
 
@@ -78,11 +82,13 @@ public class RouteEngine {
                 } else if(s.getTransportName() == R.string.tr_bus) {
                     //&& mActivity.compareTo("In Vehicle") == 0) {
                     Log.d(TAG, "I am in Bus");
+                    remainingTime = s.getDuration().getSeconds();
                     routeState = Constant.BUS;
                 }
                 else if (s.isTransit()) {
                     //&& mActivity.compareTo("In Vehicle") == 0) {
-                    Log.d(TAG, "I am in Bus");
+                    Log.d(TAG, "I am in TRAIN/FERRY");
+                    remainingTime = s.getDuration().getSeconds();
                     routeState = Constant.TRANSIT;
                 } else
                     break;
@@ -90,7 +96,8 @@ public class RouteEngine {
                 currentStep++;
                 if(currentStep < mRoute.getSteps().size() &&
                     mRoute.getSteps().get(currentStep).getTransportName() == R.string.tr_bus) {
-                    
+                    RouteStep busStep = mRoute.getSteps().get(currentStep);
+                    aptApi.startServerTracking(busStep.getStartLoc(), busStep.getShortName());
                 }
 
                 break;
@@ -176,7 +183,8 @@ public class RouteEngine {
 
             case Constant.TRANSIT:
                 if (searchInterval <= 0) {
-                    searchInterval = (s.getDuration().getSeconds() / 2);
+                    searchInterval = (remainingTime / 2);
+                    remainingTime = remainingTime - searchInterval;
                     Log.d(TAG, "searchInterval zero " + searchInterval);
                     Calendar c = Calendar.getInstance();
                     //long diff = (s.getArrival().getSeconds() * 1000L) - c.getTimeInMillis();
@@ -195,6 +203,35 @@ public class RouteEngine {
                 } else if (searchInterval > 0) {
                     Log.d(TAG, "searchInterval not zero " + searchInterval);
                     searchInterval--;
+                }
+                break;
+
+            case Constant.BUS:
+                if (searchInterval <= 0) {
+                    searchInterval = (remainingTime / 2);
+                    remainingTime = remainingTime - searchInterval;
+                    Log.d(TAG, "BUS searchInterval zero " + searchInterval);
+
+                    dest.setLatitude(s.getEndLoc().latitude);
+                    dest.setLongitude(s.getEndLoc().longitude);
+                    dist = currentLocation.distanceTo(dest);
+
+                    Log.d(TAG, " currentStep: " + currentStep +
+                    " lat: " + s.getEndLoc().latitude + " dist: " + dist);
+
+                    if (dist < 20 || searchInterval <= 120)
+                        routeState = Constant.PRE_CHANGE_OVER;
+                }else if (searchInterval > 0) {
+                    Log.d(TAG, "BUS searchInterval not zero " + searchInterval);
+                    searchInterval--;
+
+                    // TODO remove below code
+                    dest.setLatitude(s.getEndLoc().latitude);
+                    dest.setLongitude(s.getEndLoc().longitude);
+                    dist = currentLocation.distanceTo(dest);
+                    Log.d(TAG, " distance BUS: " + dist);
+                    if (dist < 20)
+                        routeState = Constant.PRE_CHANGE_OVER;
                 }
                 break;
 
@@ -232,9 +269,12 @@ public class RouteEngine {
                                     s.getEndLoc());
                 Log.d(TAG, "rerouteStep: " + reRouteStep);
 
-                currentStep--;
-                mRoute.getSteps().set(currentStep, reRouteStep);
-                routeState = Constant.INIT;
+                if(reRouteStep !=null) {
+                    currentStep--;
+                    mRoute.getSteps().set(currentStep, reRouteStep);
+                    routeState = Constant.INIT;
+                }
+
                 break;
 
             case Constant.FINISHED:

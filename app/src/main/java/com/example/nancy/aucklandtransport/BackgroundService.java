@@ -443,6 +443,8 @@ public class BackgroundService extends Service implements
             arrTime.setTimeInMillis(route.getArrival().getSeconds() * 1000L);
 
             Log.i(TAG, "DATES: " + arrTime + " " + depTime);
+            if (!mLocationClient.isConnected())
+                mLocationClient.connect();
 
             isRouteSet = true;
             handle.post(new Runnable() {

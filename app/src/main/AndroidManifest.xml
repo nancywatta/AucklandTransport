@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
 
     <uses-feature
@@ -86,6 +87,14 @@
             android:label=".BackgroundService" >
             <intent-filter>
                 <action android:name="com.example.nancy.aucklandtransport.BackgroundService" />
+            </intent-filter>
+        </service>
+
+        <service android:enabled="true"
+            android:name="org.androidpn.client.NotificationService"
+            android:label="NotificationService">
+            <intent-filter>
+                <action android:name="org.androidpn.client.NotificationService" />
             </intent-filter>
         </service>
 
