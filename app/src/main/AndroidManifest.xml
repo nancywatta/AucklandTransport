@@ -89,10 +89,10 @@
                 <action android:name="com.example.nancy.aucklandtransport.BackgroundService" />
             </intent-filter>
         </service>
-
-        <service android:enabled="true"
+        <service
             android:name="org.androidpn.client.NotificationService"
-            android:label="NotificationService">
+            android:enabled="true"
+            android:label="NotificationService" >
             <intent-filter>
                 <action android:name="org.androidpn.client.NotificationService" />
             </intent-filter>
@@ -110,25 +110,21 @@
         <service android:name=".ActivityRecognitionService" />
 
         <activity
-            android:name=".pathTrackerActivity"
-            android:label="@string/title_activity_path_tracker"
-            android:parentActivityName=".RouteInfoScreen" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.nancy.aucklandtransport.RouteInfoScreen" />
-        </activity>
-        <activity
             android:name=".NotificationUpdates"
             android:label="@string/title_activity_notification_updates" >
         </activity>
         <activity
             android:name=".ManageRoute"
             android:label="@string/title_activity_manage_route"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:parentActivityName=".RoutesActivity" >
+            android:parentActivityName=".RoutesActivity"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.RoutesActivity" />
+        </activity>
+        <activity android:theme="@android:style/Theme.Dialog"
+            android:name=".PathTracker"
+            android:label="@string/title_activity_path_tracker" >
         </activity>
     </application>
 

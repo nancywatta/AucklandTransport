@@ -293,7 +293,7 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
         isRouteSet = false;
         try {
             if (api != null) api.cancelRoute(1);
-            ((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(BackgroundService.NOTIFICATION_ID);
+            ((NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE)).cancel(Constant.NOTIFICATION_ID);
         } catch(Exception e) {
             Log.e(TAG, "ERROR!!", e);
         }

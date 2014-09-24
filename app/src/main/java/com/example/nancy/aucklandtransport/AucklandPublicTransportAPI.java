@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.UUID;
 
 /**
  * Created by Nancy on 9/20/14.
@@ -22,10 +23,23 @@ public class AucklandPublicTransportAPI {
 
     private static String main_url="";
     private Context mContext;
+    //private SharedPreferences sharedPrefs;
 
     public AucklandPublicTransportAPI(Context context) {
         this.mContext = context;
+//        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
+//                Context.MODE_PRIVATE);
         main_url = "http://" + mContext.getResources().getString(R.string.IP_ADDRESS) + ":8080/apt-server/";
+    }
+
+//    private boolean isRegistered() {
+//        return sharedPrefs.contains(Constants.XMPP_USERNAME)
+//                && sharedPrefs.contains(Constants.XMPP_PASSWORD);
+//    }
+
+    private String newRandomUUID() {
+        String uuidRaw = UUID.randomUUID().toString();
+        return uuidRaw.replaceAll("-", "");
     }
 
     //http://localhost:8080/apt-server/ScheduleJob?lat=-36.861798&lng=174.74301&route=030&tripType=0&username=96ecf6226e93493e8c6c31e72e48114b
@@ -38,18 +52,52 @@ public class AucklandPublicTransportAPI {
 
         String serviceName = Context.TELEPHONY_SERVICE;
         TelephonyManager m_telephonyManager = (TelephonyManager) mContext.getSystemService(serviceName);
-        String IMEI;
-        IMEI = m_telephonyManager.getDeviceId();
+        String userName = "username=" + m_telephonyManager.getDeviceId();
+
+//        if (!isRegistered()) {
+//            final String newUsername = newRandomUUID();
+//            final String newPassword = newRandomUUID();
+//            SharedPreferences.Editor editor = sharedPrefs.edit();
+//            editor.putString(Constants.XMPP_USERNAME,
+//                    newUsername);
+//            editor.putString(Constants.XMPP_PASSWORD,
+//                    newPassword);
+//            editor.commit();
+//            userName = "username=" + newUsername;
+//        }
+//        else
+//            userName = "username=" + sharedPrefs.getString(Constants.XMPP_USERNAME, "");
 
         // TODO remove hardcoding
-        //String url = main_url + "ScheduleJob?" + location + "&" + routeName + "&username=" + IMEI;
-        String url = main_url + "ScheduleJob?" + "lat=-36.861798&lng=174.74301&route=030&tripType=0&username=9f72abdd7ddd4bca814529e3695d7c9c";
+        //String url = main_url + "ScheduleJob?" + location + "&" + routeName + "&" + userName;
+        String url = main_url + "ScheduleJob?" +
+                "lat=-36.861798&lng=174.74301&route=030&tripType=0&" + userName;
 
         Log.d(TAG, "url : " +  url);
 
         ScheduleTask scheduleTask = new ScheduleTask();
 
-        // Start downloading json data from Google Directions API
+        scheduleTask.execute(url);
+    }
+
+    public void stopServerTracking(LatLng busStop, String busNumber) {
+        String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
+
+        String routeName = "route=" + busNumber + "&tripType=0";
+
+        String serviceName = Context.TELEPHONY_SERVICE;
+        TelephonyManager m_telephonyManager = (TelephonyManager) mContext.getSystemService(serviceName);
+        String userName = "username=" + m_telephonyManager.getDeviceId();
+
+        // TODO remove hardcoding
+        //String url = main_url + "DeleteJob?" + location + "&" + routeName + "&" + userName;
+        String url = main_url + "DeleteJob?" +
+                "lat=-36.861798&lng=174.74301&route=030&tripType=0&" + userName;
+
+        Log.d(TAG, "url : " +  url);
+
+        ScheduleTask scheduleTask = new ScheduleTask();
+
         scheduleTask.execute(url);
     }
 

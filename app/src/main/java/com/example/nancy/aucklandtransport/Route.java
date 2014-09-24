@@ -208,4 +208,6 @@ public class Route {
 
     public LatLng getEndLocation() { return endLocation; }
 
+    public String getEndAddress() { return endAddress; }
+
 }

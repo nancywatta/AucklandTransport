@@ -15,4 +15,6 @@ public class Constant {
     public final static int REROUTE=8;
     public final static int BUS=9;
     public final static int DEFAULT=10;
+
+    public static final int NOTIFICATION_ID = 12345;
 }

@@ -36,8 +36,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 //import android.location.LocationListener;
 
@@ -85,14 +83,13 @@ public class BackgroundService extends Service implements
     private boolean allowCoords;
     private Handler handle;
     public int reminderTime;
-    private Timer timer;
+    private Handler mHandler;
     private Uri alarmSound;
 
     private Notification notification = null;
     private PendingIntent contentIntent;
     private Intent notificationIntent;
     private int toastLength = Toast.LENGTH_SHORT;
-    public static final int NOTIFICATION_ID = 12345;
     String lastText = "";
     private AsyncPlayer aPlayer = new AsyncPlayer("aPlayer");
     public long timerInverval = 1000L;
@@ -134,9 +131,6 @@ public class BackgroundService extends Service implements
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.example.nancy.aucklandtransport.ACTIVITY_RECOGNITION_DATA");
         registerReceiver(myReceiver, filter);
-
-        timer = new Timer(getString(R.string.Timer));
-        timer.schedule(updateTask, 0, timerInverval);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         reminderTime = Integer.parseInt(prefs.getString("prefDepNotifInterval", "5")) * 60 * 1000;
@@ -180,7 +174,8 @@ public class BackgroundService extends Service implements
         alarmSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.alarm_clock);
     }
 
-    private TimerTask updateTask = new TimerTask() {
+    private Runnable mRunnable = new Runnable() {
+
         @Override
         public void run() {
             if (route != null && currentLocation != null) {
@@ -218,6 +213,8 @@ public class BackgroundService extends Service implements
                     routeEngine.routeEngine(route, mActivity, currentLocation);
                 }
             }
+
+            mHandler.postDelayed(mRunnable, 1000);
         }
     };
 
@@ -243,8 +240,13 @@ public class BackgroundService extends Service implements
         //locationManager.removeUpdates(this);
 
         super.onDestroy();
-        timer.cancel();
-        timer = null;
+
+        if(mHandler != null)
+            mHandler.removeCallbacks(mRunnable);
+        mHandler = null;
+
+//        timer.cancel();
+//        timer = null;
 
         Log.i(TAG, "SERVICE DESTROYED");
         unregisterReceiver(myReceiver);
@@ -357,8 +359,9 @@ public class BackgroundService extends Service implements
             stopPeriodicUpdates();
         }
 
-        mLocationClient.disconnect();
-
+        if(mHandler != null)
+            mHandler.removeCallbacks(mRunnable);
+        mHandler = null;
         //locationManager.removeUpdates(this);
 
         currentState = STATE_DO_NOTHING;
@@ -373,22 +376,6 @@ public class BackgroundService extends Service implements
         SharedPreferences.Editor editor = settings.edit();
         editor.putBoolean("routeStarted", true);
         editor.commit();
-    }
-
-    public void getRouteFromSettings() {
-        Log.i(TAG, "SERVICE getRouteFromSettings");
-        SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
-        try {
-            String routeString = settings.getString("route", "");
-
-            if (!routeString.equals("")) route = new Route(routeString);
-
-            prevRouteString = routeString;
-            isNotRouteInSettings = false;
-            return;
-        } catch (Exception e) {
-        }
-        isNotRouteInSettings = true;
     }
 
     public void addressDiscovered(String s) {
@@ -446,6 +433,14 @@ public class BackgroundService extends Service implements
             if (!mLocationClient.isConnected())
                 mLocationClient.connect();
 
+            if(mLocationClient.isConnected())
+                mLocationClient.requestLocationUpdates(mLocationRequest, this);
+
+            mHandler = new Handler();
+            mHandler.postDelayed(mRunnable, timerInverval);
+            routeEngine.setRouteState(Constant.INIT);
+            routeEngine.resetStep();
+
             isRouteSet = true;
             handle.post(new Runnable() {
                 public void run() {
@@ -461,7 +456,7 @@ public class BackgroundService extends Service implements
     private void changeState(int state) {
         currentState = state;
         if (state == STATE_START_ROUTE) {
-            mLocationClient.requestLocationUpdates(mLocationRequest, this);
+            //mLocationClient.requestLocationUpdates(mLocationRequest, this);
             if (!isSameRoute) {
                 createNotification(getString(R.string.RouteStart), getString(R.string.app_name), getString(R.string.RouteStart), false, false, Toast.LENGTH_LONG);
                 isRouteStartedShown = true;
@@ -599,7 +594,7 @@ public class BackgroundService extends Service implements
 
         lastText = text;
         toastLength = tlength;
-        mNotificationManager.notify(NOTIFICATION_ID, notification);
+        mNotificationManager.notify(Constant.NOTIFICATION_ID, notification);
         handle.post(new Runnable() {
             public void run() {
                 try {
@@ -620,7 +615,7 @@ public class BackgroundService extends Service implements
         NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
 
 
-        mNotificationManager.cancel(NOTIFICATION_ID);
+        mNotificationManager.cancel(Constant.NOTIFICATION_ID);
 
         handle.post(new Runnable() {
             public void run() {

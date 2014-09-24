@@ -368,7 +368,7 @@ public class RouteInfoFragment extends Fragment implements
         navigationBtn.setOnClickListener(selectButtonListener);
         try {
             if (api != null) api.cancelRoute(1);
-            ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(BackgroundService.NOTIFICATION_ID);
+            ((NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(Constant.NOTIFICATION_ID);
             serviceManager.stopService();
         } catch(Exception e) {
             Log.e(TAG, "ERROR!!", e);

@@ -2,13 +2,17 @@ package com.example.nancy.aucklandtransport;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
@@ -104,6 +108,11 @@ public class MainApp extends FragmentActivity {
 
     GPSTracker gps;
     GoogleAPI googleAPI;
+
+    private Boolean launchedFromParamsAlready = false;
+    private String lastLocDisc = "";
+
+    private IBackgroundServiceAPI api = null;
 
     private void locationConsent(boolean showDialog) {
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -400,6 +409,12 @@ public class MainApp extends FragmentActivity {
             date.setText(twodigits(calendar.get(Calendar.DAY_OF_MONTH)) + "/" +
                     twodigits(month) + "/" + calendar.get(Calendar.YEAR));
         }
+
+        Log.i(TAG, "trying to bind service "+BackgroundService.class.getName());
+        Intent servIntent = new Intent(BackgroundService.class.getName());
+        startService(servIntent);
+        Log.i(TAG, "starting service "+servIntent.toString());
+        bindService(servIntent, serviceConection, 0);
 
         Bundle b = getIntent().getExtras();
         if (b != null) {
@@ -780,4 +795,104 @@ public class MainApp extends FragmentActivity {
     {
         super.onConfigurationChanged(newConfig);
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        try {
+            if (api != null) api.removeListener(serviceListener);
+        } catch(Exception e) {
+            Log.e(TAG, "ERROR!!", e);
+        }
+
+        unbindService(serviceConection);
+        Log.i(TAG, "unbind ");
+    }
+
+    /**
+     * Service interaction stuff
+     */
+    private IBackgroundServiceListener serviceListener = new IBackgroundServiceListener.Stub() {
+
+        public void locationDiscovered(double lat, double lon)
+                throws RemoteException {
+            Log.i(TAG, "locationDiscovered: "+lat+" "+lon);
+            lastLocDisc = lon+","+lat;
+            if (fromCoords.equals(""))
+                fromCoords = lon+","+lat;
+        }
+
+        public void handleGPSUpdate(double lat, double lon, float angle) throws RemoteException {
+            Log.i(TAG, "handleGPSUpdate: "+lat+" "+lon);
+            if (fromCoords.equals(""))
+                fromCoords = lon+","+lat;
+        }
+
+        public void addressDiscovered(String address) throws RemoteException {
+            Log.i(TAG, "addressDiscovered: "+address);
+            if (TextUtils.isEmpty(origin.getText())) {
+                if (address.equals("")) {
+                    origin.setHint(getString(R.string.EditHintLocating));
+                } else {
+                    origin.setHint(address);
+                }
+            }
+
+            if (launchedFromParamsAlready) return;
+            Bundle b = getIntent().getExtras();
+            if (b != null) {
+                Log.i(TAG, "Bundle: "+b);
+                String toAddress = b.getString("TO_ADDRESS");
+                String toCoordsInt = b.getString("TO_COORDS");
+
+                if (toAddress != null && !lastLocDisc.equals("")) {
+                    toCoords = toCoordsInt;
+                    fromCoords = lastLocDisc;
+                    locationConsent(false);
+                    launchNextActivity(address, toAddress);
+                    launchedFromParamsAlready = true;
+                }
+            }
+        }
+    };
+
+    private void launchNextActivity(String fromAddress, String toAddress) {
+        // only if we successfully retrieved both from and to
+        // coordinates, start the new activity
+        Log.i(TAG, "launchNextActivity fromCoords:"+fromCoords+" toCoords:"+toCoords);
+        if (fromCoords.compareTo("")!=0 && toCoords.compareTo("")!=0
+                && fromAddress.compareTo("")!=0 && toAddress.compareTo("")!=0) {
+
+            Intent myIntent = new Intent(MainApp.this, RoutesActivity.class);
+            myIntent.putExtra(FROM_LOCATION, fromAddress);
+            myIntent.putExtra(TO_LOCATION, toAddress);
+            Calendar c = Calendar.getInstance(Locale.getDefault());
+            myIntent.putExtra(TIME, (c.getTimeInMillis()/ 1000L));
+            myIntent.putExtra(FROM_COORDS, fromCoords);
+            myIntent.putExtra(TO_COORDS, toCoords);
+            myIntent.putExtra(ISDEPARTURE, true);
+            startActivity(myIntent);
+        }
+    }
+
+    private ServiceConnection serviceConection = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "Service disconnected!");
+            api = null;
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            api = IBackgroundServiceAPI.Stub.asInterface(service);
+
+            Log.i(TAG, "Service connected! "+api.toString());
+            try {
+                api.addListener(serviceListener);
+                api.cancelRoute(0);
+            } catch(Exception e) {
+                Log.e(TAG, "ERROR!!", e);
+            }
+        }
+    };
 }

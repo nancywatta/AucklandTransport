@@ -19,6 +19,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.os.Handler;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
@@ -339,7 +340,10 @@ public class XmppManager {
             Log.i(LOGTAG, "RegisterTask.run()...");
 
             if (!xmppManager.isRegistered()) {
-                final String newUsername = newRandomUUID();
+                String serviceName = Context.TELEPHONY_SERVICE;
+                TelephonyManager m_telephonyManager = (TelephonyManager) context.getSystemService(serviceName);
+                final String newUsername = m_telephonyManager.getDeviceId();
+                //final String newUsername = newRandomUUID();
                 final String newPassword = newRandomUUID();
 
                 Registration registration = new Registration();

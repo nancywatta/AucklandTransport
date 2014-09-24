@@ -24,6 +24,8 @@
     <string name="tr_boat">Boat</string>
     <string name="PREFS_NAME">RoutePreferences</string>
     <string name="title_activity_route_info_screen">APT</string>
+    <string name="EditHintLocating">Locating...</string>
+
     <string name="Map">Map</string>
     <string name="Navigation">Start Navigation</string>
     <string name="title_activity_route_map">RouteMap</string>
@@ -71,7 +73,7 @@
     <string name="title_activity_route_details">RouteDetails</string>
     <string name="title_activity_route_info_fragment">RouteInfoFragment</string>
 
-    <string name="IP_ADDRESS">172.23.4.11</string>
+    <string name="IP_ADDRESS">192.168.1.6</string>
     <string name="mCancelRoute">Stop Navigation</string>
 
     <string name="Places">Places</string>
@@ -101,5 +103,9 @@
         <item>Hindu Temple</item>
         <item>Restaurant</item>
     </string-array>
+
+    <!-- Path Tracker Activity-->
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 
 </resources>
