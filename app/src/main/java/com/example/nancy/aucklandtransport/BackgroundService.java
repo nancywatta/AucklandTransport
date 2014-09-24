@@ -55,15 +55,11 @@ public class BackgroundService extends Service implements
     public static int STATE_START_ROUTE = 1;
 
     private Location currentLocation = null;
-    private Location previousLocation = null;
-    private Boolean discoverAddress = false;
 
     private Boolean isRouteStartedShown = false;
     private GoogleAPI api;
     float angle = 0;
     double lat, lng;
-
-    private String lastKnownAddress = "";
 
     public Route route;
 
@@ -112,6 +108,8 @@ public class BackgroundService extends Service implements
 
     private RouteEngine routeEngine;
 
+    List<HashMap<String, String>> geoPlaces;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -135,7 +133,7 @@ public class BackgroundService extends Service implements
         prefs = PreferenceManager.getDefaultSharedPreferences(this);
         reminderTime = Integer.parseInt(prefs.getString("prefDepNotifInterval", "5")) * 60 * 1000;
 
-        api = new GoogleAPI();
+        api = new GoogleAPI(BackgroundService.this);
 
         // get a handle on the location manager
         //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -321,8 +319,6 @@ public class BackgroundService extends Service implements
     }
 
     public void onLocationChanged(Location loc) {
-        // TODO Auto-generated method stub
-        previousLocation = currentLocation;
         currentLocation = loc;
         if (currentLocation.getProvider() == LocationManager.GPS_PROVIDER) {
             angle = currentLocation.getBearing();
@@ -339,9 +335,6 @@ public class BackgroundService extends Service implements
                     Log.e(TAG, "listener is " + listener);
                 }
             }
-        }
-        if (discoverAddress) {
-            getAddressFromGoogle(loc);
         }
     }
 
@@ -474,11 +467,12 @@ public class BackgroundService extends Service implements
         new Thread(new Runnable() {
             public void run() {
                 api.getReverseGeocode(new LatLng(l.getLatitude(), l.getLongitude()));
-                List<HashMap<String, String>> recs = api.geoPlaces;
-                if (recs.size() > 0) {
-                    HashMap<String, String> hmPlace = recs.get(0);
-                    lastKnownAddress = hmPlace.get("formatted_address");
-                    addressDiscovered(hmPlace.get("formatted_address"));
+
+                if(geoPlaces != null) {
+                    if (geoPlaces.size() > 0) {
+                        HashMap<String, String> hmPlace = geoPlaces.get(0);
+                        addressDiscovered(hmPlace.get("formatted_address"));
+                    }
                 }
             }
         }).run();
@@ -533,7 +527,6 @@ public class BackgroundService extends Service implements
             Location l1 = mLocationClient.getLastLocation();
             //getServiceLastKnownLocation();
             Log.i(TAG, "requestLastKnownAddress:\n" + String.valueOf(l1));
-            previousLocation = currentLocation;
             currentLocation = l1;
             if (l1 == null) {
                 addressDiscovered("");

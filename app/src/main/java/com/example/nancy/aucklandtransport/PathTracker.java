@@ -48,6 +48,7 @@ public class PathTracker extends Activity {
             public void onClick(View v) {
                 Log.d(TAG, "Change Route!!!");
                 Intent myIntent = new Intent(PathTracker.this, MainApp.class);
+                myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 myIntent.putExtra("TO_ADDRESS",toAddress);
                 myIntent.putExtra("TO_COORDS", toCoords);
                 startActivity(myIntent);

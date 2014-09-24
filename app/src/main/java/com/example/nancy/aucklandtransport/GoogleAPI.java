@@ -43,6 +43,16 @@ public class GoogleAPI {
 
     List<HashMap<String, String>> geoPlaces;
 
+    private BackgroundService service;
+
+    public GoogleAPI() {
+
+    }
+
+    public GoogleAPI(BackgroundService service) {
+        this.service = service;
+    }
+
     public List<HashMap<String, String>> getReverseGeocode(LatLng data) {
         String latilong = "latlng=" + data.latitude +","+data.longitude;
 
@@ -58,6 +68,12 @@ public class GoogleAPI {
 
         // Start downloading json data from Google Directions API
         geoCodeTask.execute(url);
+
+//        try {
+//            Thread.sleep(5000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
         return geoPlaces;
     }
@@ -172,11 +188,15 @@ public class GoogleAPI {
         // Executes in UI thread, after the parsing process
         @Override
         protected void onPostExecute(List<HashMap<String,String>> list) {
-            if(list.size()<1){
+            if(list == null || list.size() < 1){
+                Log.d(TAG, "null list");
                 return;
             }
 
+            Log.d(TAG, "not null list");
             geoPlaces = list;
+            if(service != null)
+                service.geoPlaces = list;
         }
     }
 

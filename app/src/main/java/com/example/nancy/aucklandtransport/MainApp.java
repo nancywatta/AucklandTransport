@@ -824,24 +824,22 @@ public class MainApp extends FragmentActivity {
         }
 
         public void handleGPSUpdate(double lat, double lon, float angle) throws RemoteException {
-            Log.i(TAG, "handleGPSUpdate: "+lat+" "+lon);
             if (fromCoords.equals(""))
                 fromCoords = lon+","+lat;
         }
 
         public void addressDiscovered(String address) throws RemoteException {
-            Log.i(TAG, "addressDiscovered: "+address);
-            if (TextUtils.isEmpty(origin.getText())) {
-                if (address.equals("")) {
-                    origin.setHint(getString(R.string.EditHintLocating));
-                } else {
-                    origin.setHint(address);
-                }
-            }
-
             if (launchedFromParamsAlready) return;
             Bundle b = getIntent().getExtras();
             if (b != null) {
+                Log.i(TAG, "addressDiscovered: "+address);
+                if (TextUtils.isEmpty(origin.getText())) {
+                    if (address.equals("")) {
+                        origin.setHint(getString(R.string.EditHintLocating));
+                    } else {
+                        origin.setHint(address);
+                    }
+                }
                 Log.i(TAG, "Bundle: "+b);
                 String toAddress = b.getString("TO_ADDRESS");
                 String toCoordsInt = b.getString("TO_COORDS");
@@ -889,10 +887,17 @@ public class MainApp extends FragmentActivity {
             Log.i(TAG, "Service connected! "+api.toString());
             try {
                 api.addListener(serviceListener);
+                int res = api.requestLastKnownAddress(1);
+                Log.i(TAG, "requestLastKnownAddress: "+res);
                 api.cancelRoute(0);
             } catch(Exception e) {
                 Log.e(TAG, "ERROR!!", e);
             }
         }
     };
+
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 }

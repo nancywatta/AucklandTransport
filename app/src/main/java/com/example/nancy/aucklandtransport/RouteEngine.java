@@ -41,8 +41,8 @@ public class RouteEngine {
         aptApi = new AucklandPublicTransportAPI(context);
     }
 
-    public void setRouteState (int state) {
-    this.routeState = state;
+    public void setRouteState(int state) {
+        this.routeState = state;
     }
 
     public void resetStep() {
@@ -182,7 +182,7 @@ public class RouteEngine {
                         else
                             routeState = Constant.WALKING;
 
-                        checkChangeRoute(mRoute,currentStep);
+                        checkChangeRoute(mRoute, currentStep);
                         //searchInterval = 0;
                         //firstTime = true;
                     }
@@ -192,8 +192,10 @@ public class RouteEngine {
 
             case Constant.TRANSIT:
                 if (searchInterval <= 0) {
-                    searchInterval = (remainingTime / 2);
-                    remainingTime = remainingTime - searchInterval;
+                    if (remainingTime > 0) {
+                        searchInterval = (remainingTime / 2);
+                        remainingTime = remainingTime - searchInterval;
+                    }
                     Log.d(TAG, "searchInterval zero " + searchInterval);
                     Calendar c = Calendar.getInstance();
                     //long diff = (s.getArrival().getSeconds() * 1000L) - c.getTimeInMillis();
@@ -210,7 +212,6 @@ public class RouteEngine {
                     if (dist < 20 || searchInterval <= 120)
                         routeState = Constant.PRE_CHANGE_OVER;
                 } else if (searchInterval > 0) {
-                    Log.d(TAG, "searchInterval not zero " + searchInterval);
                     searchInterval--;
                 }
                 break;
@@ -218,7 +219,7 @@ public class RouteEngine {
             case Constant.BUS:
                 if (searchInterval <= 0) {
 
-                    if(remainingTime > 0) {
+                    if (remainingTime > 0) {
                         searchInterval = (remainingTime / 2);
                         remainingTime = remainingTime - searchInterval;
                     }
@@ -342,17 +343,25 @@ public class RouteEngine {
 
             Calendar c = Calendar.getInstance();
             long diff =
-                    (mRoute.getSteps().get(nextStep).getDeparture().getSeconds() * 1000L)
-                            - c.getTimeInMillis();
+                    mRoute.getSteps().get(nextStep).getDeparture().getSeconds()
+                            - (c.getTimeInMillis() / 1000L);
 
+
+            diff = 111;
             if (diff < 120) {
                 Intent myIntent = new Intent(context, PathTracker.class);
-                String message = "Will you be able to catch " + nextRoute.getTransportName()
-                        + " in next " + Math.round(diff / (1000 * 60)) + " minutes?";
-                myIntent.putExtra("MESSAGE",message);
-                myIntent.putExtra("TO_ADDRESS",mRoute.getEndAddress());
+                String message = "";
+                if (diff < 0)
+                    message = "Your " + context.getResources().getString(nextRoute.getTransportName())
+                            + " is about to leave. Will you be able to catch?";
+                else
+                    message = "Will you be able to catch " +
+                            context.getResources().getString(nextRoute.getTransportName())
+                            + " in next " + Math.round(diff / 60) + " minutes?";
+                myIntent.putExtra("MESSAGE", message);
+                myIntent.putExtra("TO_ADDRESS", mRoute.getEndAddress());
                 myIntent.putExtra("TO_COORDS", mRoute.getEndLocation().latitude +
-                "," + mRoute.getEndLocation().longitude);
+                        "," + mRoute.getEndLocation().longitude);
                 myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(myIntent);
 //                service.createNotification(context.getResources().getString(R.string.RunningLateText),
