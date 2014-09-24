@@ -15,6 +15,8 @@ public class Constant {
     public final static int REROUTE=8;
     public final static int BUS=9;
     public final static int DEFAULT=10;
+    public final static int STATE_DO_NOTHING = 11;
+    public final static int STATE_START_ROUTE = 12;
 
     public static final int NOTIFICATION_ID = 12345;
 }

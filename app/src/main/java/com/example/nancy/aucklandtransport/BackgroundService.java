@@ -51,8 +51,6 @@ public class BackgroundService extends Service implements
     private static final String TAG = BackgroundService.class.getSimpleName();
     //private LocationManager locationManager;
     private int currentState = 0;
-    public static int STATE_DO_NOTHING = 0;
-    public static int STATE_START_ROUTE = 1;
 
     private Location currentLocation = null;
 
@@ -70,7 +68,6 @@ public class BackgroundService extends Service implements
     private boolean isGPSOn = false;
 
     public boolean isRouteSet = false;
-    public boolean isNotRouteInSettings = false;
     private Boolean isSameRoute = false;
 
     public String prevRouteString = "";
@@ -137,7 +134,7 @@ public class BackgroundService extends Service implements
 
         // get a handle on the location manager
         //locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        currentState = STATE_DO_NOTHING;
+        currentState = Constant.STATE_DO_NOTHING;
 
         // Create a new global location parameters object
         mLocationRequest = LocationRequest.create();
@@ -178,7 +175,7 @@ public class BackgroundService extends Service implements
         public void run() {
             if (route != null && currentLocation != null) {
 
-                if (currentState != STATE_DO_NOTHING && route != null) {
+                if (currentState != Constant.STATE_DO_NOTHING && route != null) {
                     currentTime = Calendar.getInstance();
                     if (currentTime.compareTo(depTime) > 0) {
                         long diff = route.getDeparture().getSeconds() * 1000L
@@ -205,7 +202,7 @@ public class BackgroundService extends Service implements
                     }
 
                     if (currentTime.getTimeInMillis() - arrTime.getTimeInMillis() > reminderTime) {
-                        changeState(STATE_DO_NOTHING);
+                        changeState(Constant.STATE_DO_NOTHING);
                     }
 
                     routeEngine.routeEngine(route, mActivity, currentLocation);
@@ -357,7 +354,7 @@ public class BackgroundService extends Service implements
         mHandler = null;
         //locationManager.removeUpdates(this);
 
-        currentState = STATE_DO_NOTHING;
+        currentState = Constant.STATE_DO_NOTHING;
         route = null;
         prevRouteString = "";
     }
@@ -437,7 +434,7 @@ public class BackgroundService extends Service implements
             isRouteSet = true;
             handle.post(new Runnable() {
                 public void run() {
-                    changeState(STATE_START_ROUTE);
+                    changeState(Constant.STATE_START_ROUTE);
                 }
             });
 
@@ -448,13 +445,13 @@ public class BackgroundService extends Service implements
 
     private void changeState(int state) {
         currentState = state;
-        if (state == STATE_START_ROUTE) {
+        if (state == Constant.STATE_START_ROUTE) {
             //mLocationClient.requestLocationUpdates(mLocationRequest, this);
             if (!isSameRoute) {
                 createNotification(getString(R.string.RouteStart), getString(R.string.app_name), getString(R.string.RouteStart), false, false, Toast.LENGTH_LONG);
                 isRouteStartedShown = true;
             }
-        } else if (state == STATE_DO_NOTHING) {
+        } else if (state == Constant.STATE_DO_NOTHING) {
             deleteRoute();
             createNotification(getString(R.string.RouteFinish), getString(R.string.app_name), getString(R.string.RouteFinishText), false, false, Toast.LENGTH_LONG);
             cancelNotification();

@@ -118,39 +118,9 @@ public class RouteEngine {
 
             case Constant.WALKING:
                 pathSegment = s.getPath().get(nextStop);
-                long maxSeconds = pathSegment.getTravelTime().getSeconds();
                 offRouteCount = 0;
 
                 if (!pathSegment.isNotified) {
-                    //searchInterval = 5;
-//                    if (firstTime) {
-//                        searchInterval = fixIntervalForWalk(maxSeconds);
-//                        if (searchInterval > 5)
-//                            getRealTime = true;
-//                        firstTime = false;
-//                    } else {
-//                        if (getRealTime) {
-//                            GoogleAPI googleAPI = new GoogleAPI();
-//                            long seconds = googleAPI.getDuration(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()),
-//                                    pathSegment.getEndLoc());
-//                            searchInterval = fixIntervalForWalk(seconds);
-//
-//                            if (searchInterval == 5)
-//                                getRealTime = false;
-//
-//                            if (route.getSteps().get(currentStep).isTransit()) {
-//                                Calendar c = Calendar.getInstance();
-//                                c.add(Calendar.SECOND, (int) seconds);
-//                                long diff = (route.getSteps().get(currentStep).getDeparture().getSeconds() * 1000L) - c.getTimeInMillis();
-//                                if (diff < 120) {
-//                                    createNotification(getString(R.string.RunningLateText),
-//                                            getString(R.string.app_name),
-//                                            getString(R.string.RunningLateText), true, true, Toast.LENGTH_LONG);
-//                                }
-//                            }
-//                        } else
-//                            searchInterval = 5;
-//                    }
                     dest.setLatitude(pathSegment.getEndLoc().latitude);
                     dest.setLongitude(pathSegment.getEndLoc().longitude);
                     dist = currentLocation.distanceTo(dest); // Approximate distance in meters
@@ -183,8 +153,6 @@ public class RouteEngine {
                             routeState = Constant.WALKING;
 
                         checkChangeRoute(mRoute, currentStep);
-                        //searchInterval = 0;
-                        //firstTime = true;
                     }
                 }
 
@@ -192,25 +160,30 @@ public class RouteEngine {
 
             case Constant.TRANSIT:
                 if (searchInterval <= 0) {
-                    if (remainingTime > 0) {
+                    if (remainingTime > 60) {
                         searchInterval = (remainingTime / 2);
                         remainingTime = remainingTime - searchInterval;
+
+                        Calendar c = Calendar.getInstance();
+                        //long diff = (s.getArrival().getSeconds() * 1000L) - c.getTimeInMillis();
+                        long diff = (s.getArrival().getSeconds() * 1000L) - (s.getDeparture().getSeconds() * 1000L);
+                        String str = String.format(context.getResources().getString(R.string.ArrivalText), Math.round(diff / (1000 * 60)));
+                        service.createNotification(str,
+                                context.getResources().getString(R.string.app_name), str, true,
+                                true, Toast.LENGTH_LONG);
                     }
                     Log.d(TAG, "searchInterval zero " + searchInterval);
-                    Calendar c = Calendar.getInstance();
-                    //long diff = (s.getArrival().getSeconds() * 1000L) - c.getTimeInMillis();
-                    long diff = (s.getArrival().getSeconds() * 1000L) - (s.getDeparture().getSeconds() * 1000L);
-                    String str = String.format(context.getResources().getString(R.string.ArrivalText), Math.round(diff / (1000 * 60)));
-                    service.createNotification(str,
-                            context.getResources().getString(R.string.app_name), str, true,
-                            true, Toast.LENGTH_LONG);
+
 
                     dest.setLatitude(s.getEndLoc().latitude);
                     dest.setLongitude(s.getEndLoc().longitude);
                     dist = currentLocation.distanceTo(dest);
 
-                    if (dist < 20 || searchInterval <= 120)
+                    // TODO remove search interval
+                    if (dist < 40 || searchInterval <= 60) {
+                        checkChangeRoute(mRoute, currentStep);
                         routeState = Constant.PRE_CHANGE_OVER;
+                    }
                 } else if (searchInterval > 0) {
                     searchInterval--;
                 }
@@ -232,8 +205,15 @@ public class RouteEngine {
                     Log.d(TAG, " currentStep: " + currentStep +
                             " lat: " + s.getEndLoc().latitude + " dist: " + dist);
 
-                    if (dist < 20)
+                    if (dist < 40) {
+                        String str =
+                                String.format(context.getResources().getString(R.string.busExitText), dist);
+                        service.createNotification(str,
+                                context.getResources().getString(R.string.app_name), str, true,
+                                true, Toast.LENGTH_LONG);
+                        checkChangeRoute(mRoute, currentStep);
                         routeState = Constant.PRE_CHANGE_OVER;
+                    }
                 } else if (searchInterval > 0) {
                     Log.d(TAG, "BUS searchInterval not zero " + searchInterval);
                     searchInterval--;
@@ -243,8 +223,15 @@ public class RouteEngine {
                     dest.setLongitude(s.getEndLoc().longitude);
                     dist = currentLocation.distanceTo(dest);
                     Log.d(TAG, " distance BUS: " + dist);
-                    if (dist < 20)
+                    if (dist < 40) {
+                        String str =
+                                String.format(context.getResources().getString(R.string.busExitText), dist);
+                        service.createNotification(str,
+                                context.getResources().getString(R.string.app_name), str, true,
+                                true, Toast.LENGTH_LONG);
+                        checkChangeRoute(mRoute, currentStep);
                         routeState = Constant.PRE_CHANGE_OVER;
+                    }
                 }
                 break;
 
@@ -346,18 +333,18 @@ public class RouteEngine {
                     mRoute.getSteps().get(nextStep).getDeparture().getSeconds()
                             - (c.getTimeInMillis() / 1000L);
 
-
-            diff = 111;
             if (diff < 120) {
                 Intent myIntent = new Intent(context, PathTracker.class);
                 String message = "";
                 if (diff < 0)
                     message = "Your " + context.getResources().getString(nextRoute.getTransportName())
+                            + " " + nextRoute.getShortName()
                             + " is about to leave. Will you be able to catch?";
                 else
                     message = "Will you be able to catch " +
                             context.getResources().getString(nextRoute.getTransportName())
-                            + " in next " + Math.round(diff / 60) + " minutes?";
+                            + " " + nextRoute.getShortName()
+                            + " in next " + Math.round(diff / 60) + " minute?";
                 myIntent.putExtra("MESSAGE", message);
                 myIntent.putExtra("TO_ADDRESS", mRoute.getEndAddress());
                 myIntent.putExtra("TO_COORDS", mRoute.getEndLocation().latitude +

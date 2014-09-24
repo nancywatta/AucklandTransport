@@ -12,7 +12,7 @@
     <string name="to">To</string>
     <string name="leave_after">Leave after</string>
     <string name="arrive_before">Arrive before</string>
-    <string name="title_activity_display_map">Map</string>
+
     <string name="str_btn_find">Find</string>
     <string name="hnt_et_location">Enter location</string>
     <string name="title_activity_routes">Routes</string>
@@ -28,7 +28,6 @@
 
     <string name="Map">Map</string>
     <string name="Navigation">Start Navigation</string>
-    <string name="title_activity_route_map">RouteMap</string>
     <string name="allowLocTitle">Location consent</string>
     <string name="allowLocText">Allow sharing your current location while using public transport.</string>
     <string name="allowLocAgree">Agree</string>
@@ -43,11 +42,9 @@
     <string name="TabRoutesMenuSet">Set</string>
     <string name="TabRoutesMenuSetBackwards">Set backwards</string>
     <string name="TabRoutesMenuDelete">Delete</string>
-    <string name="RouteCancel">Route canceled</string>
-    <string name="RouteFinish">Route finished</string>
-    <string name="RouteFinishText">Your trip finished!</string>
-    <string name="RouteStart">Route started</string>
     <string name="Timer">APTTimer</string>
+
+    <!-- Notifications Strings -->
     <string name="DepartureText1">You need to start departure in less than %d minutes</string>
     <string name="RunningLateText">You need to walk faster</string>
     <string name="OffRouteText">You are walking off the route</string>
@@ -58,20 +55,29 @@
     <string name="NotifyNextStop">Following the timetable you should exit on the next stop, please adjust if you are not going on time</string>
     <string name="RouteDone">Route done!</string>
     <string name="busNotifyExitText">You need to exit on the next stop</string>
+    <string name="busExitText">You need to get down the BUS in next %d meter(s)</string>
+    <string name="RouteCancel">Route canceled</string>
+    <string name="RouteFinish">Route finished</string>
+    <string name="RouteFinishText">Your trip finished!</string>
+    <string name="RouteStart">Route started</string>
+    <string name="ArrivalText">You need to get down the vehicle in %d minutes</string>
+
+    <!-- Activity Titles -->
     <string name="title_activity_path_elevation">RouteInfo</string>
     <string name="title_activity_path_tracker">pathTrackerActivity</string>
     <string name="title_activity_notification_updates">NotificationUpdates</string>
-
-    <string name="ArrivalText">You need to get down the vehicle in %d minutes</string>
-
-    <!-- Latitude, longitude format -->
-    <string name="latitude_longitude">%1$.8f, %2$.8f</string>
-    <string name="play_services_available">Google Play services is available</string>
+    <string name="title_activity_route_map">RouteMap</string>
     <string name="title_activity_manage_route">ManageRoute</string>
     <string name="title_section1">Route Information</string>
     <string name="title_section2">Places Of Interest</string>
     <string name="title_activity_route_details">RouteDetails</string>
     <string name="title_activity_route_info_fragment">RouteInfoFragment</string>
+    <string name="title_activity_display_map">Map</string>
+
+    <!-- Latitude, longitude format -->
+    <string name="latitude_longitude">%1$.8f, %2$.8f</string>
+    <string name="play_services_available">Google Play services is available</string>
+
 
     <string name="IP_ADDRESS">192.168.1.6</string>
     <string name="mCancelRoute">Stop Navigation</string>
