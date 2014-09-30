@@ -2,6 +2,7 @@ package com.example.nancy.aucklandtransport;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
@@ -21,7 +22,7 @@ public class ActivityRecognitionService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if(ActivityRecognitionResult.hasResult(intent)){
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
-            //Log.d(TAG, getType(result.getMostProbableActivity().getType()));
+            Log.d(TAG, getType(result.getMostProbableActivity().getType()));
             Intent i = new Intent("com.example.nancy.aucklandtransport.ACTIVITY_RECOGNITION_DATA");
             i.putExtra("Activity", getType(result.getMostProbableActivity().getType()) );
             i.putExtra("Confidence", result.getMostProbableActivity().getConfidence());

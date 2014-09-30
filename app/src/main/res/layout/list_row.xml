@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/list_selector"
     android:orientation="horizontal"
+    android:descendantFocusability="blocksDescendants"
     android:padding="5dip">
 
     <TextView
@@ -19,11 +20,43 @@
         android:layout_alignParentLeft="true"
         android:layout_marginRight="5dip"/>
 
+    <ImageButton
+        android:layout_width="50dip"
+        android:layout_height="50dip"
+        android:id="@+id/realTimeButton"
+        android:background="@android:drawable/stat_notify_sync"
+        android:layout_marginTop="1dip"
+        android:focusable="false"
+        android:layout_below="@id/title"
+        android:layout_alignParentLeft="true"/>
+
+    <ProgressBar
+        android:id="@+id/loginProgress"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="40dip"
+        android:layout_height="40dip"
+        android:visibility="gone"
+        android:layout_below="@+id/title"
+        android:layout_toRightOf="@+id/realTimeButton"
+        android:layout_toEndOf="@+id/realTimeButton" />
+
+    <TextView
+        android:id="@+id/realTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Click refresh for Real Time"
+        android:gravity="center_vertical"
+        android:textSize="10dip"
+        android:textColor="#10bcc9"
+        android:textStyle="bold"
+        android:layout_toRightOf="@id/realTimeButton"
+        android:layout_alignTop="@id/realTimeButton"/>
+
     <LinearLayout android:id="@+id/images"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:padding="3dip"
-        android:layout_below="@id/title"
+        android:layout_below="@id/realTimeButton"
         android:layout_marginTop="1dip"
         android:orientation="vertical"
         android:layout_alignParentLeft="true"/>
@@ -45,6 +78,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_action_next_item"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"/>
+        android:layout_centerVertical="true"
+        android:id="@+id/imageView" />
 
 </RelativeLayout>

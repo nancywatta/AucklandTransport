@@ -521,19 +521,25 @@ public class BackgroundService extends Service implements
 
         public int requestLastKnownAddress(int getAddress) {
             Log.i(TAG, "SERVICE requestLastKnownAddress");
-            Location l1 = mLocationClient.getLastLocation();
-            //getServiceLastKnownLocation();
-            Log.i(TAG, "requestLastKnownAddress:\n" + String.valueOf(l1));
-            currentLocation = l1;
-            if (l1 == null) {
-                addressDiscovered("");
-                return 0;
-            }
+            if (!mLocationClient.isConnected())
+                mLocationClient.connect();
 
-            locationDiscovered(l1);
-            if (getAddress > 0)
-                getAddressFromGoogle(l1);
-            return 1;
+            if(mLocationClient.isConnected()) {
+                Location l1 = mLocationClient.getLastLocation();
+                //getServiceLastKnownLocation();
+                Log.i(TAG, "requestLastKnownAddress:\n" + String.valueOf(l1));
+                currentLocation = l1;
+                if (l1 == null) {
+                    addressDiscovered("");
+                    return 0;
+                }
+
+                locationDiscovered(l1);
+                if (getAddress > 0)
+                    getAddressFromGoogle(l1);
+                return 1;
+            }
+            return 0;
         }
 
         public boolean isGPSOn() {

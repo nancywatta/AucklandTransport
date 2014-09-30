@@ -60,6 +60,10 @@ public class RouteEngine {
             return;
         }
 
+        if(Constant.IS_CHANGE_ROUTE) {
+            checkChangeRoute(mRoute, currentStep);
+        }
+
         Location dest = new Location("");
         PathSegment pathSegment;
         float dist;
@@ -173,7 +177,6 @@ public class RouteEngine {
                                 true, Toast.LENGTH_LONG);
                     }
                     Log.d(TAG, "searchInterval zero " + searchInterval);
-
 
                     dest.setLatitude(s.getEndLoc().latitude);
                     dest.setLongitude(s.getEndLoc().longitude);

@@ -108,6 +108,8 @@ public class Notifier {
             intent.putExtra(Constants.NOTIFICATION_ID, notificationId);
             intent.putExtra(Constants.NOTIFICATION_API_KEY, apiKey);
             intent.putExtra(Constants.NOTIFICATION_TITLE, title);
+            if(title.compareTo("ChangeRoute")==0)
+                Constant.IS_CHANGE_ROUTE = true;
             intent.putExtra(Constants.NOTIFICATION_MESSAGE, message);
             intent.putExtra(Constants.NOTIFICATION_URI, uri);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

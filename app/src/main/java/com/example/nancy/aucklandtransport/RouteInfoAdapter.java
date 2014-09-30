@@ -1,10 +1,15 @@
 package com.example.nancy.aucklandtransport;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -35,7 +40,7 @@ public class RouteInfoAdapter extends BaseAdapter {
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
-        ViewHolder holder;
+        final ViewHolder holder;
         if (convertView == null) {
             convertView = mInflater.inflate(R.layout.route_list_row, null);
             holder = new ViewHolder();
@@ -43,24 +48,48 @@ public class RouteInfoAdapter extends BaseAdapter {
             holder.image = (ImageView) convertView.findViewById(R.id.RouteInfoIcon);
             holder.text4 = (TextView) convertView.findViewById(R.id.TextRouteBus);
             holder.text5 = (TextView) convertView.findViewById(R.id.TextRouteAddress);
+            holder.btnRealTime = (ImageButton) convertView.findViewById(R.id.realTimeBtn);
+            holder.realTimeData = (TextView) convertView.findViewById(R.id.realTimeTxt); // duration
+            holder.mProgressView = convertView.findViewById(R.id.apiProgress);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        RouteStep step = route.getSteps().get(position);
+        final RouteStep step = route.getSteps().get(position);
 
-        if(step.isTransit()) {
+        if (step.isTransit()) {
+            holder.text5.setVisibility(View.VISIBLE);
             holder.text1.setText(step.getDeparture().getTravelTime()
                     + " - " + step.getArrival().getTravelTime());
+            if (step.getTransportName() == R.string.tr_bus) {
+                holder.realTimeData.setVisibility(View.VISIBLE);
+                holder.btnRealTime.setVisibility(View.VISIBLE);
+
+                holder.btnRealTime.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        showProgress(true, holder.mProgressView, holder.realTimeData);
+
+                        AucklandPublicTransportAPI api =
+                                new AucklandPublicTransportAPI(context.getApplicationContext(),
+                                        holder.realTimeData, holder.mProgressView, RouteInfoAdapter.this);
+
+                        api.getRealTimeDate(step.getStartLoc(), step.getShortName());
+                    }
+                });
+
+            }
             holder.text5.setText(step.getType() + " --- "
                     + step.getShortName() + "(" + step.getVehicleName() + ")");
             holder.text4.setText(step.getDepartureStop() + " To " + step.getArrivalStop());
-        }
-        else {
+        } else {
+            holder.realTimeData.setVisibility(View.GONE);
+            holder.btnRealTime.setVisibility(View.GONE);
+            holder.text5.setVisibility(View.GONE);
             holder.text1.setText(step.getDistance() + " (" + step.getDuration().getTravelTime() + ")");
             holder.text4.setText(step.getDesc());
-            holder.text5.setText("");
+            //holder.text5.setText("");
         }
         holder.image.setImageResource(step.getIconId());
 
@@ -72,5 +101,45 @@ public class RouteInfoAdapter extends BaseAdapter {
         ImageView image;
         TextView text4;
         TextView text5;
+        ImageButton btnRealTime;
+        TextView realTimeData;
+        View mProgressView;
     }
+
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    public void showProgress(final boolean show, final View mProgressView, final TextView realTimeData) {
+        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+        // for very easy animations. If available, use these APIs to fade-in
+        // the progress spinner.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            int shortAnimTime = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
+
+            realTimeData.setVisibility(show ? View.GONE : View.VISIBLE);
+            realTimeData.animate().setDuration(shortAnimTime).alpha(
+                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    realTimeData.setVisibility(show ? View.GONE : View.VISIBLE);
+                }
+            });
+
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            mProgressView.animate().setDuration(shortAnimTime).alpha(
+                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                }
+            });
+        } else {
+            // The ViewPropertyAnimator APIs are not available, so simply show
+            // and hide the relevant UI components.
+            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            realTimeData.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
+    }
+
 }

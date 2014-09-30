@@ -19,4 +19,5 @@ public class Constant {
     public final static int STATE_START_ROUTE = 12;
 
     public static final int NOTIFICATION_ID = 12345;
+    public static boolean IS_CHANGE_ROUTE = false;
 }

@@ -129,9 +129,10 @@ public class RouteStep {
         this.arrivalStop = arrivalStop;
     }
 
-    public RouteStep(String type, String name) {
+    public RouteStep(String type, String name, LatLng startLoc) {
         this.type = type;
         this.shortName = name;
+        this.startLoc = startLoc;
     }
 
     public String getDistance() { return distance; }

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -23,7 +25,33 @@ public class AucklandPublicTransportAPI {
 
     private static String main_url="";
     private Context mContext;
+    private TextView realTimeText;
+    private View mProgressView;
+    private RoutesAdaptar routesAdaptar;
+    private RouteInfoAdapter routeInfoAdapter;
     //private SharedPreferences sharedPrefs;
+
+    public AucklandPublicTransportAPI(Context context, TextView realTimeText,
+                                      View mProgressView, RoutesAdaptar routesAdaptar) {
+        this.mContext = context;
+        this.realTimeText = realTimeText;
+        this.mProgressView = mProgressView;
+        this.routesAdaptar = routesAdaptar;
+//        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
+//                Context.MODE_PRIVATE);
+        main_url = "http://" + mContext.getResources().getString(R.string.IP_ADDRESS) + ":8080/apt-server/";
+    }
+
+    public AucklandPublicTransportAPI(Context context, TextView realTimeText,
+                                      View mProgressView, RouteInfoAdapter routeInfoAdapter) {
+        this.mContext = context;
+        this.realTimeText = realTimeText;
+        this.mProgressView = mProgressView;
+        this.routeInfoAdapter = routeInfoAdapter;
+//        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
+//                Context.MODE_PRIVATE);
+        main_url = "http://" + mContext.getResources().getString(R.string.IP_ADDRESS) + ":8080/apt-server/";
+    }
 
     public AucklandPublicTransportAPI(Context context) {
         this.mContext = context;
@@ -164,6 +192,59 @@ public class AucklandPublicTransportAPI {
             urlConnection.disconnect();
         }
         return data;
+    }
+
+    //http://172.23.208.76:8080/apt-server/showDueTime.do?lat=-36.861798&lng=174.74301&route=030
+    public void getRealTimeDate(LatLng busStop, String busNumber) {
+        String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
+
+        String routeName = "route=" + busNumber;
+
+        // TODO remove hardcoding
+        //String url = main_url + "showDueTime.do?" + location + "&" + routeName;
+        String url = main_url + "showDueTime.do?" +
+                "lat=-36.861798&lng=174.74301&route=030";
+
+        Log.d(TAG, "url : " +  url);
+
+        RealTimeTask realTimeTask = new RealTimeTask();
+
+        realTimeTask.execute(url);
+    }
+
+    private class RealTimeTask extends AsyncTask<String, Void, String> {
+
+        // Downloading data in non-ui thread
+        @Override
+        protected String doInBackground(String... url) {
+
+            // For storing data from web service
+            String data = "";
+
+            try{
+                // Fetching the data from web service
+                data = downloadUrl(url[0]);
+            }catch(Exception e){
+                Log.d("Background Task", e.toString());
+            }
+            return data;
+        }
+
+        // Executes in UI thread, after the execution of
+        // doInBackground()
+        @Override
+        protected void onPostExecute(String result) {
+
+            if(routesAdaptar != null)
+                routesAdaptar.showProgress(false, mProgressView, realTimeText );
+            if(routeInfoAdapter!=null)
+                routeInfoAdapter.showProgress(false, mProgressView, realTimeText );
+            if(result!=null) {
+                realTimeText.setText(result);
+            }
+            else
+                realTimeText.setText("Not Available");
+        }
     }
 
 }

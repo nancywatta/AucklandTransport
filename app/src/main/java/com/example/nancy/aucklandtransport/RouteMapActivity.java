@@ -1,10 +1,14 @@
 package com.example.nancy.aucklandtransport;
 
 import android.app.ActionBar;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -14,6 +18,7 @@ import android.widget.Toast;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -23,15 +28,25 @@ import java.util.ArrayList;
 
 public class RouteMapActivity extends FragmentActivity {
 
+    private static final String TAG = RouteMapActivity.class.getSimpleName();
     private GoogleMap googleMap;
     private String routeString;
     Route route = null;
+    private boolean isRouteSet = false;
+    private IBackgroundServiceAPI api = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_map);
+
         getRoute();
+
+        Log.i(TAG, "trying to bind service "+BackgroundService.class.getName());
+        Intent servIntent = new Intent(BackgroundService.class.getName());
+        startService(servIntent);
+        Log.i(TAG, "starting service "+servIntent.toString());
+        bindService(servIntent, serviceConection, 0);
 
         SupportMapFragment supportMapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.mapPath);
@@ -49,8 +64,9 @@ public class RouteMapActivity extends FragmentActivity {
             googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
             if(route != null) {
+                if(!isRouteSet)
+                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(route.getStartLocation(), 15));
 
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(route.getStartLocation(), 15));
                 Marker marker = googleMap.addMarker(new MarkerOptions()
                         .position(route.getStartLocation()));
                 marker.showInfoWindow();
@@ -92,6 +108,7 @@ public class RouteMapActivity extends FragmentActivity {
         SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         try {
             routeString = settings.getString("route", "");
+            isRouteSet = settings.getBoolean("isRouteSet", false);
 
             if (!routeString.equals("")) route = new Route(routeString);
             else {
@@ -102,6 +119,67 @@ public class RouteMapActivity extends FragmentActivity {
 
         } catch ( Exception e ) {
             Log.e("ERROR", "Couldn't get the route from JSONobj");
+        }
+    }
+
+    private ServiceConnection serviceConection = new ServiceConnection() {
+
+        public void onServiceDisconnected(ComponentName name) {
+            Log.i(TAG, "Service disconnected!");
+            api = null;
+        }
+
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            api = IBackgroundServiceAPI.Stub.asInterface(service);
+
+            Log.i(TAG, "Service connected! "+api.toString());
+            try {
+                api.addListener(serviceListener);
+                api.requestLastKnownAddress(0);
+            } catch(Exception e) {
+                Log.e(TAG, "ERROR!!", e);
+            }
+        }
+    };
+
+    /**
+     * Service interaction stuff
+     */
+    private IBackgroundServiceListener serviceListener = new IBackgroundServiceListener.Stub() {
+
+        public void locationDiscovered(double lat, double lon)
+                throws RemoteException {
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(lat, lon)).zoom(15).build();
+            if (isRouteSet)
+                googleMap.animateCamera(CameraUpdateFactory
+                    .newCameraPosition(cameraPosition));
+        }
+
+        public void handleGPSUpdate(double lat, double lon, float angle) throws RemoteException {
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(lat, lon)).zoom(15).build();
+
+            if (isRouteSet)
+                googleMap.animateCamera(CameraUpdateFactory
+                        .newCameraPosition(cameraPosition));
+        }
+
+        public void addressDiscovered(String address) throws RemoteException {
+
+        }
+    };
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            if (api != null) api.removeListener(serviceListener);
+            unbindService(serviceConection);
+            Log.i(TAG, "unbind ");
+        } catch(Exception e) {
+            Log.e(TAG, "ERROR!!", e);
         }
     }
 

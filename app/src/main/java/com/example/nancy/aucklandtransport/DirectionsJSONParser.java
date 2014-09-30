@@ -92,6 +92,7 @@ public class DirectionsJSONParser {
 
                     /** Traversing all steps */
                     for (int k = 0; k < jSteps.length(); k++) {
+                        Double startLat, startLng;
                         transit = null;
                         type = "";
                         name = "";
@@ -105,8 +106,13 @@ public class DirectionsJSONParser {
                         if (transit != null) {
                             type = transit.getJSONObject("line").getJSONObject("vehicle").getString("type");
                             name = transit.getJSONObject("line").getString("short_name");
+                            startLat = transit.getJSONObject("departure_stop").getJSONObject("location").getDouble("lat");
+                            startLng = transit.getJSONObject("departure_stop").getJSONObject("location").getDouble("lng");
+                        } else {
+                            startLat = step.getJSONObject("start_location").getDouble("lat");
+                            startLng = step.getJSONObject("start_location").getDouble("lng");
                         }
-                        RouteStep routeStep = new RouteStep(type, name);
+                        RouteStep routeStep = new RouteStep(type, name, new LatLng(startLat, startLng));
 
                         route.getSteps().add(routeStep);
                     }

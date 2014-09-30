@@ -55,7 +55,7 @@
     <string name="NotifyNextStop">Following the timetable you should exit on the next stop, please adjust if you are not going on time</string>
     <string name="RouteDone">Route done!</string>
     <string name="busNotifyExitText">You need to exit on the next stop</string>
-    <string name="busExitText">You need to get down the BUS in next %d meter(s)</string>
+    <string name="busExitText">You need to get down the BUS in next %f meter(s)</string>
     <string name="RouteCancel">Route canceled</string>
     <string name="RouteFinish">Route finished</string>
     <string name="RouteFinishText">Your trip finished!</string>
@@ -79,7 +79,7 @@
     <string name="play_services_available">Google Play services is available</string>
 
 
-    <string name="IP_ADDRESS">192.168.1.6</string>
+    <string name="IP_ADDRESS">192.168.1.5</string>
     <string name="mCancelRoute">Stop Navigation</string>
 
     <string name="Places">Places</string>
