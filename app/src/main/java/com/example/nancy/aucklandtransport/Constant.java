@@ -20,4 +20,5 @@ public class Constant {
 
     public static final int NOTIFICATION_ID = 12345;
     public static boolean IS_CHANGE_ROUTE = false;
+    public static boolean SPEED_CHECK_IND = true;
 }

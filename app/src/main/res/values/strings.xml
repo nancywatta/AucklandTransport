@@ -64,7 +64,7 @@
 
     <!-- Activity Titles -->
     <string name="title_activity_path_elevation">RouteInfo</string>
-    <string name="title_activity_path_tracker">pathTrackerActivity</string>
+    <string name="title_activity_path_tracker">Information</string>
     <string name="title_activity_notification_updates">NotificationUpdates</string>
     <string name="title_activity_route_map">RouteMap</string>
     <string name="title_activity_manage_route">ManageRoute</string>
@@ -81,6 +81,9 @@
 
     <string name="IP_ADDRESS">192.168.1.5</string>
     <string name="mCancelRoute">Stop Navigation</string>
+
+    <string name="mClickOnBoard">Click the OnBoard Button once you are in the vehicle</string>
+    <string name="mNotifyOnBoard">Notify APT when you board the vehicle</string>
 
     <string name="Places">Places</string>
     <string-array name="place_type">

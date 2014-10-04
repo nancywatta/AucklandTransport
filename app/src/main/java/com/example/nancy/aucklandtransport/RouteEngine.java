@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -22,7 +23,7 @@ public class RouteEngine {
     private int nextStop = 0;
     private long searchInterval = 0;
     private long remainingTime = 0;
-    //private boolean firstTime = true;
+    private boolean firstTime = true;
     private float prevDistance = 0;
     //private boolean getRealTime = false;
     private RouteStep s = null;
@@ -34,16 +35,23 @@ public class RouteEngine {
     private GoogleAPI googleAPI = new GoogleAPI();
     private static Context context;
     private AucklandPublicTransportAPI aptApi = null;
+    private SpeedCalculator speedCalculator;
+    private boolean startedJourney=false;
 
     public RouteEngine(BackgroundService service, Context context) {
         this.service = service;
         this.context = context;
         aptApi = new AucklandPublicTransportAPI(context);
+        speedCalculator = new SpeedCalculator(context);
     }
 
     public void setRouteState(int state) {
         this.routeState = state;
     }
+
+    public boolean isStartedJourney() { return startedJourney; }
+
+    public void setStartedJourney(boolean value) { this.startedJourney = value; }
 
     public void resetStep() {
         this.currentStep = 0;
@@ -60,9 +68,9 @@ public class RouteEngine {
             return;
         }
 
-        if(Constant.IS_CHANGE_ROUTE) {
-            checkChangeRoute(mRoute, currentStep);
-        }
+//        if(Constant.IS_CHANGE_ROUTE) {
+//            checkChangeRoute(mRoute, currentStep);
+//        }
 
         Location dest = new Location("");
         PathSegment pathSegment;
@@ -73,7 +81,7 @@ public class RouteEngine {
                 nextStop = 0;
                 offRouteCount = 0;
                 searchInterval = 0;
-                //firstTime = true;
+                firstTime = true;
                 prevDistance = 0;
                 //getRealTime = false;
                 s = mRoute.getSteps().get(currentStep);
@@ -86,6 +94,8 @@ public class RouteEngine {
                     routeState = Constant.FINISHED;
                 if (s.getTransportName() == R.string.tr_walk) {
                     //&& mActivity.compareTo("On Foot") == 0) {
+                    if(Constant.SPEED_CHECK_IND)
+                        speedCalculator.learnUserSpeed(currentLocation.getSpeed());
                     Log.d(TAG, "I am Walking");
                     pathSegment = s.getPath().get(nextStop);
                     service.createNotification(pathSegment.getInstruction(),
@@ -93,17 +103,16 @@ public class RouteEngine {
                             pathSegment.getInstruction(), true, true, Toast.LENGTH_LONG);
                     routeState = Constant.WALKING;
                 } else if (s.getTransportName() == R.string.tr_bus) {
-                    //&& mActivity.compareTo("In Vehicle") == 0) {
-                    Log.d(TAG, "I am in Bus");
-                    remainingTime = s.getDuration().getSeconds();
-                    routeState = Constant.BUS;
+                    if(!notifyWhenBoard(mRoute, mActivity, Constant.BUS))
+                        break;
+
                 } else if (s.isTransit()) {
-                    //&& mActivity.compareTo("In Vehicle") == 0) {
-                    Log.d(TAG, "I am in TRAIN/FERRY");
-                    remainingTime = s.getDuration().getSeconds();
-                    routeState = Constant.TRANSIT;
+                    if(!notifyWhenBoard(mRoute, mActivity, Constant.TRANSIT))
+                        break;
                 } else
                     break;
+
+                startedJourney = true;
 
                 stopServer(mRoute, currentStep - 1);
 
@@ -113,16 +122,22 @@ public class RouteEngine {
 
                 break;
             case Constant.PRE_CHANGE_OVER:
-//                dest.setLatitude(s.getEndLoc().latitude);
-//                dest.setLongitude(s.getEndLoc().longitude);
-//                dist = currentLocation.distanceTo(dest); // Approximate distance in meters
-                //if (dist < 2)
-                routeState = Constant.INIT;
+                if (s.isTransit()) {
+                    dest.setLatitude(s.getEndLoc().latitude);
+                    dest.setLongitude(s.getEndLoc().longitude);
+                    dist = currentLocation.distanceTo(dest); // Approximate distance in meters
+                    if (dist < 20)
+                        routeState = Constant.INIT;
+                }else {
+                    routeState = Constant.INIT;
+                }
                 break;
 
             case Constant.WALKING:
                 pathSegment = s.getPath().get(nextStop);
                 offRouteCount = 0;
+                if(Constant.SPEED_CHECK_IND)
+                    speedCalculator.learnUserSpeed(currentLocation.getSpeed());
 
                 if (!pathSegment.isNotified) {
                     dest.setLatitude(pathSegment.getEndLoc().latitude);
@@ -151,12 +166,15 @@ public class RouteEngine {
                                     s.getPath().get(nextStop).getInstruction(), true, true, Toast.LENGTH_LONG);
                         pathSegment.isNotified = true;
                         prevDistance = 0;
-                        if (nextStop >= s.getPath().size())
+                        if (nextStop >= s.getPath().size()) {
+                            if(Constant.SPEED_CHECK_IND)
+                                speedCalculator.saveSpeed();
                             routeState = Constant.PRE_CHANGE_OVER;
+                        }
                         else
                             routeState = Constant.WALKING;
 
-                        checkChangeRoute(mRoute, currentStep);
+                        //checkChangeRoute(mRoute, currentStep);
                     }
                 }
 
@@ -184,7 +202,7 @@ public class RouteEngine {
 
                     // TODO remove search interval
                     if (dist < 40 || searchInterval <= 60) {
-                        checkChangeRoute(mRoute, currentStep);
+                        //checkChangeRoute(mRoute, currentStep);
                         routeState = Constant.PRE_CHANGE_OVER;
                     }
                 } else if (searchInterval > 0) {
@@ -214,7 +232,7 @@ public class RouteEngine {
                         service.createNotification(str,
                                 context.getResources().getString(R.string.app_name), str, true,
                                 true, Toast.LENGTH_LONG);
-                        checkChangeRoute(mRoute, currentStep);
+                        //checkChangeRoute(mRoute, currentStep);
                         routeState = Constant.PRE_CHANGE_OVER;
                     }
                 } else if (searchInterval > 0) {
@@ -232,7 +250,7 @@ public class RouteEngine {
                         service.createNotification(str,
                                 context.getResources().getString(R.string.app_name), str, true,
                                 true, Toast.LENGTH_LONG);
-                        checkChangeRoute(mRoute, currentStep);
+                        //checkChangeRoute(mRoute, currentStep);
                         routeState = Constant.PRE_CHANGE_OVER;
                     }
                 }
@@ -352,12 +370,56 @@ public class RouteEngine {
                 myIntent.putExtra("TO_ADDRESS", mRoute.getEndAddress());
                 myIntent.putExtra("TO_COORDS", mRoute.getEndLocation().latitude +
                         "," + mRoute.getEndLocation().longitude);
+                myIntent.putExtra("IS_BUS", false);
                 myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(myIntent);
 //                service.createNotification(context.getResources().getString(R.string.RunningLateText),
 //                        context.getResources().getString(R.string.app_name),
 //                        context.getResources().getString(R.string.RunningLateText),
 //                        true, true, Toast.LENGTH_LONG);
+            }
+        }
+    }
+
+    private void notifyIntent(Route mRoute) {
+        service.createNotification(context.getResources().getString(R.string.mNotifyOnBoard),
+                context.getResources().getString(R.string.app_name),
+                context.getResources().getString(R.string.mClickOnBoard), true, true, Toast.LENGTH_LONG);
+        Intent myIntent = new Intent(context, PathTracker.class);
+        String message = "Click on the onBoard CheckBox when you are in vehicle";
+        myIntent.putExtra("MESSAGE", message);
+        myIntent.putExtra("TO_ADDRESS", mRoute.getEndAddress());
+        myIntent.putExtra("TO_COORDS", mRoute.getEndLocation().latitude +
+                "," + mRoute.getEndLocation().longitude);
+        myIntent.putExtra("IS_VEHICLE", true);
+        myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(myIntent);
+        firstTime = false;
+    }
+
+    private boolean notifyWhenBoard(Route mRoute, String mActivity, int state) {
+        if( mActivity.compareTo("In Vehicle") == 0) {
+            Log.d(TAG, "I am in Vehicle");
+            remainingTime = s.getDuration().getSeconds();
+            routeState = state;
+            RouteInfoFragment.boardedBus = false;
+            RouteInfoFragment.onBoardBtn.setVisibility(View.GONE);
+            return true;
+        } else {
+            if(firstTime) {
+                notifyIntent(mRoute);
+                return false;
+            }
+            else {
+                if(RouteInfoFragment.boardedBus) {
+                    Log.d(TAG, "I am in Vehicle");
+                    remainingTime = s.getDuration().getSeconds();
+                    routeState = state;
+                    RouteInfoFragment.boardedBus = false;
+                    RouteInfoFragment.onBoardBtn.setVisibility(View.GONE);
+                    return true;
+                } else
+                    return false;
             }
         }
     }

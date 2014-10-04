@@ -177,7 +177,8 @@ public class BackgroundService extends Service implements
 
                 if (currentState != Constant.STATE_DO_NOTHING && route != null) {
                     currentTime = Calendar.getInstance();
-                    if (currentTime.compareTo(depTime) > 0) {
+                    if (currentTime.compareTo(depTime) > 0 &&
+                            !routeEngine.isStartedJourney()) {
                         long diff = route.getDeparture().getSeconds() * 1000L
                                 - currentTime.getTimeInMillis(); // depTime.getTimeInMillis();
 
@@ -429,6 +430,7 @@ public class BackgroundService extends Service implements
             mHandler = new Handler();
             mHandler.postDelayed(mRunnable, timerInverval);
             routeEngine.setRouteState(Constant.INIT);
+            routeEngine.setStartedJourney(false);
             routeEngine.resetStep();
 
             isRouteSet = true;

@@ -1,5 +1,6 @@
 package com.example.nancy.aucklandtransport;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -100,6 +101,27 @@ public class ManageRoute extends ActionBarActivity implements
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /*
+    When an android device changes orientation usually the activity is destroyed and recreated with a new
+    orientation layout. This method, along with a setting in the the manifest for this activity
+    tells the OS to let us handle it instead.
+
+    This increases performance and gives us greater control over activity creation and destruction for simple
+    activities.
+
+    Must place this into the AndroidManifest.xml file for this activity in order for this to work properly
+    android:configChanges="keyboardHidden|orientation"
+    optionally
+    android:screenOrientation="landscape"
+     */
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+
     }
 
     @Override

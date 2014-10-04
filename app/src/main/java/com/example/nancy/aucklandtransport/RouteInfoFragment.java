@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -52,7 +53,7 @@ public class RouteInfoFragment extends Fragment implements
     private Boolean mInProgress;
     // Constants that define the activity detection interval
     public static final int MILLISECONDS_PER_SECOND = 1000;
-    public static final int DETECTION_INTERVAL_SECONDS = 20;
+    public static final int DETECTION_INTERVAL_SECONDS = 1;
     public static final int DETECTION_INTERVAL_MILLISECONDS =
             MILLISECONDS_PER_SECOND * DETECTION_INTERVAL_SECONDS;
 
@@ -60,6 +61,9 @@ public class RouteInfoFragment extends Fragment implements
     private boolean isGPSon = false;
 
     ServiceManager serviceManager;
+
+    public static CheckBox onBoardBtn;
+    public static boolean boardedBus = false;
 
     public boolean getRouteSet() { return isRouteSet;}
 
@@ -74,6 +78,20 @@ public class RouteInfoFragment extends Fragment implements
         serviceManager = new ServiceManager(context);
 
         isRouteSet = false;
+
+        onBoardBtn =(CheckBox)dataView.findViewById(R.id.onBoardBtn);
+        onBoardBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                //is chkIos checked?
+                if (((CheckBox) v).isChecked()) {
+                    boardedBus = true;
+                }
+                else
+                    boardedBus = false;
+            }
+        });
 
         mapBtn=(Button)dataView.findViewById(R.id.mapButton);
         mapBtn.setOnClickListener(new View.OnClickListener() {
@@ -193,6 +211,20 @@ public class RouteInfoFragment extends Fragment implements
         getRoute();
         if (isRouteSet) setButtonToCancel();
     }
+
+    /*
+    When an android device changes orientation usually the activity is destroyed and recreated with a new
+    orientation layout. This method, along with a setting in the the manifest for this activity
+    tells the OS to let us handle it instead.
+
+    This increases performance and gives us greater control over activity creation and destruction for simple
+    activities.
+
+    Must place this into the AndroidManifest.xml file for this activity in order for this to work properly
+    android:configChanges="keyboardHidden|orientation"
+    optionally
+    android:screenOrientation="landscape"
+     */
 
     @Override
     public void onConfigurationChanged(Configuration newConfig)

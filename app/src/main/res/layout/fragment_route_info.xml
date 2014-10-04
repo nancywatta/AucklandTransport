@@ -45,4 +45,12 @@
         android:layout_width="fill_parent">
     </ListView>
 
+    <CheckBox
+        android:id="@+id/onBoardBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="onBoard"
+        android:checked="false"
+        android:visibility="gone"/>
+
 </LinearLayout>

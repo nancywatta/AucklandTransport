@@ -20,6 +20,7 @@ public class PathTracker extends Activity {
     TextView mMessageText;
     Button yesButton;
     Button noButton;
+    Boolean isBusNotify;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +35,14 @@ public class PathTracker extends Activity {
         message = intent.getStringExtra("MESSAGE");
         toAddress = intent.getStringExtra("TO_ADDRESS");
         toCoords = intent.getStringExtra("TO_COORDS");
+        isBusNotify = intent.getBooleanExtra("IS_VEHICLE", false);
+
+        if(isBusNotify) {
+            noButton.setVisibility(View.GONE);
+            yesButton.setText("OK");
+            RouteInfoFragment.onBoardBtn.setVisibility(View.VISIBLE);
+        }
+
         mMessageText.setText(message);
 
         yesButton.setOnClickListener(new View.OnClickListener() {

@@ -117,7 +117,8 @@
             android:name=".ManageRoute"
             android:label="@string/title_activity_manage_route"
             android:parentActivityName=".RoutesActivity"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.RoutesActivity" />
