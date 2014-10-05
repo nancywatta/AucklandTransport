@@ -12,7 +12,6 @@
     <string name="to">To</string>
     <string name="leave_after">Leave after</string>
     <string name="arrive_before">Arrive before</string>
-
     <string name="str_btn_find">Find</string>
     <string name="hnt_et_location">Enter location</string>
     <string name="title_activity_routes">Routes</string>
@@ -25,7 +24,6 @@
     <string name="PREFS_NAME">RoutePreferences</string>
     <string name="title_activity_route_info_screen">APT</string>
     <string name="EditHintLocating">Locating...</string>
-
     <string name="Map">Map</string>
     <string name="Navigation">Start Navigation</string>
     <string name="allowLocTitle">Location consent</string>
@@ -77,15 +75,17 @@
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
     <string name="play_services_available">Google Play services is available</string>
-
-
-    <string name="IP_ADDRESS">192.168.1.5</string>
+    <string name="IP_ADDRESS">192.168.1.3</string>
     <string name="mCancelRoute">Stop Navigation</string>
-
     <string name="mClickOnBoard">Click the OnBoard Button once you are in the vehicle</string>
     <string name="mNotifyOnBoard">Notify APT when you board the vehicle</string>
 
+    <string name="explore_city">Explore City</string>
     <string name="Places">Places</string>
+    <string name="Explore">Explore</string>
+    <string name="leave_at">Leave</string>
+    <string name="SetTime">Set Time</string>
+
     <string-array name="place_type">
         <item>airport</item>
         <item>atm</item>
@@ -113,8 +113,9 @@
         <item>Restaurant</item>
     </string-array>
 
-    <!-- Path Tracker Activity-->
+    <!-- Path Tracker Activity -->
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="title_activity_tourist_planner">TouristPlanner</string>
 
 </resources>

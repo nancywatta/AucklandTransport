@@ -27,6 +27,7 @@ public class SpeedCalculator {
                         mContext.getResources().getString(R.string.PREFS_NAME),
                         Context.MODE_PRIVATE);
         Constant.SPEED_CHECK_IND = prefs.getBoolean("SPEED_CHECK_IND", true);
+        Constant.USER_SPEED = prefs.getFloat("USER_SPEED",0);
     }
 
     public void learnUserSpeed(float speed){
@@ -58,6 +59,15 @@ public class SpeedCalculator {
         calcSpeed.clear();
     }
 
+    public float getUserSpeed() {
+        float sum = 0;
+        for (Float tempSpeed : speedArray) {
+            Log.d(TAG, "tempSpeed " + tempSpeed.toString());
+            sum += tempSpeed.floatValue();
+        }
+        return sum / speedArray.size();
+    }
+
     public void addSpeed(float speed) {
         if (null == speedArray) {
             speedArray = new ArrayList<Float>();
@@ -76,6 +86,7 @@ public class SpeedCalculator {
             if(speedArray.size() > 9) {
                 Constant.SPEED_CHECK_IND = false;
                 editor.putBoolean("SPEED_CHECK_IND", Constant.SPEED_CHECK_IND);
+                editor.putFloat("USER_SPEED", getUserSpeed());
             }
             editor.putString("SPEEDS", ObjectSerializer.serialize(speedArray));
         } catch (IOException e) {
@@ -99,6 +110,7 @@ public class SpeedCalculator {
                     ObjectSerializer.deserialize(
                             prefs.getString("SPEEDS",
                                     ObjectSerializer.serialize(new ArrayList<Float>())));
+
         } catch (IOException e) {
             e.printStackTrace();
         }

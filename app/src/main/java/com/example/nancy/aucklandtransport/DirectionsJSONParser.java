@@ -196,8 +196,8 @@ public class DirectionsJSONParser {
                     startAddr = leg.getString("start_address");
                     endAddr = leg.getString("end_address");
 
-                    routeStep = new RouteStep(jDistance.getString("text"), jDuration.getString("text"),
-                            jDuration.getLong("value"),
+                    routeStep = new RouteStep(jDistance.getString("text"),jDistance.getLong("value"),
+                            jDuration.getString("text"),jDuration.getLong("value"),
                             instruc, startAddr, endAddr, type, departTime, depSec,
                             arrivalTime, arrSec, name,
                             shortName, list, new LatLng(startLat, startLng), new LatLng(endLat, endLng), "WALKING",

@@ -20,11 +20,13 @@ public class RouteInfoAdapter extends BaseAdapter {
     private LayoutInflater mInflater;
     private Context context;
     private Route route;
+    private SpeedCalculator speedCalculator;
 
     public RouteInfoAdapter(Context context, Route route) {
         mInflater = LayoutInflater.from(context);
         this.context = context;
         this.route = route;
+        speedCalculator = new SpeedCalculator(context);
     }
 
     public int getCount() {
@@ -86,9 +88,20 @@ public class RouteInfoAdapter extends BaseAdapter {
         } else {
             holder.realTimeData.setVisibility(View.GONE);
             holder.btnRealTime.setVisibility(View.GONE);
-            holder.text5.setVisibility(View.GONE);
-            holder.text1.setText(step.getDistance() + " (" + step.getDuration().getTravelTime() + ")");
+            //holder.text5.setVisibility(View.GONE);
+            holder.text1.setText(step.getDistance().getTravelDistance() + " (" + step.getDuration().getTravelTime() + ")");
             holder.text4.setText(step.getDesc());
+
+            float userSpeed = Constant.USER_SPEED;
+            if(userSpeed == 0) {
+                holder.text5.setVisibility(View.GONE);
+            }
+            else {
+                holder.text5.setVisibility(View.VISIBLE);
+                float time = step.getDistance().getMeters() / userSpeed;
+                holder.text5.setText(Math.round(time/60) + "");
+            }
+
             //holder.text5.setText("");
         }
         holder.image.setImageResource(step.getIconId());

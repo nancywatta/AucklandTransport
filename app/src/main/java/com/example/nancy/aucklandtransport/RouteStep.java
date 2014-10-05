@@ -1,5 +1,6 @@
 package com.example.nancy.aucklandtransport;
 
+import com.example.nancy.aucklandtransport.datatype.TravelDistance;
 import com.example.nancy.aucklandtransport.datatype.TravelTime;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -21,7 +22,7 @@ public class RouteStep {
     public int iconId = -1;
     public String desc;
 
-    public String distance;
+    public TravelDistance distance;
     public TravelTime duration;
 
     public String firstLoc = "";
@@ -104,12 +105,12 @@ public class RouteStep {
         }
     }
 
-    public RouteStep(String distance, String duration, long durSec, String desc,
+    public RouteStep(String distance, long meters, String duration, long durSec, String desc,
                      String firstLoc, String lastLoc, String type, String depTime, long depSec, String arrTime,
                      long arrSec, String vehicleName, String shortName, List<LatLng> latlng,
                      LatLng startLoc, LatLng endLoc, String travelMode,
                      String departureStop, String arrivalStop, String jsonString) {
-        this.distance = distance;
+        this.distance = new TravelDistance(distance,meters);
         this.duration = new TravelTime(duration, durSec);
         this.desc = desc;
         this.firstLoc = firstLoc;
@@ -135,7 +136,7 @@ public class RouteStep {
         this.startLoc = startLoc;
     }
 
-    public String getDistance() { return distance; }
+    public TravelDistance getDistance() { return distance; }
 
     public TravelTime getDuration() { return  duration; }
 

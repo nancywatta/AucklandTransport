@@ -9,6 +9,8 @@ import android.widget.TextView;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -200,10 +202,7 @@ public class AucklandPublicTransportAPI {
 
         String routeName = "route=" + busNumber;
 
-        // TODO remove hardcoding
-        //String url = main_url + "showDueTime.do?" + location + "&" + routeName;
-        String url = main_url + "showDueTime.do?" +
-                "lat=-36.861798&lng=174.74301&route=030";
+        String url = main_url + "showDueTime.do?" + location + "&" + routeName;
 
         Log.d(TAG, "url : " +  url);
 
@@ -234,16 +233,54 @@ public class AucklandPublicTransportAPI {
         // doInBackground()
         @Override
         protected void onPostExecute(String result) {
+            super.onPostExecute(result);
 
+            RealTimeParserTask parserTask = new RealTimeParserTask();
+
+            // Invokes the thread for parsing the JSON data
+            parserTask.execute(result);
+
+        }
+    }
+
+    /** A class to parse the Geocoding Places in non-ui thread */
+    class RealTimeParserTask extends AsyncTask<String, Integer, String>{
+
+        JSONObject jObject;
+
+        // Invoked by execute() method of this object
+        @Override
+        protected String doInBackground(String... jsonData) {
+
+            String actualArrivalTime = null;
+            RealTimeJSONParser parser = new RealTimeJSONParser();
+
+            try{
+                jObject = new JSONObject(jsonData[0]);
+
+                /** Getting the parsed data as a an ArrayList */
+                actualArrivalTime = parser.parse(jObject);
+
+            }catch(Exception e){
+                Log.d("Exception", e.toString());
+            }
+            return actualArrivalTime;
+        }
+
+        // Executes in UI thread, after the parsing process
+        @Override
+        protected void onPostExecute(String actualArrivalTime) {
             if(routesAdaptar != null)
                 routesAdaptar.showProgress(false, mProgressView, realTimeText );
             if(routeInfoAdapter!=null)
                 routeInfoAdapter.showProgress(false, mProgressView, realTimeText );
-            if(result!=null) {
-                realTimeText.setText(result);
-            }
-            else
+
+            if(actualArrivalTime == null || actualArrivalTime.equals("")){
                 realTimeText.setText("Not Available");
+                return;
+            }
+
+            realTimeText.setText(actualArrivalTime);
         }
     }
 

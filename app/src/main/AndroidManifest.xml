@@ -117,15 +117,24 @@
             android:name=".ManageRoute"
             android:label="@string/title_activity_manage_route"
             android:parentActivityName=".RoutesActivity"
-            android:theme="@style/Theme.AppCompat.Light.DarkActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.DarkActionBar" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.RoutesActivity" />
         </activity>
-        <activity android:theme="@android:style/Theme.Dialog"
+        <activity
             android:name=".PathTracker"
-            android:label="@string/title_activity_path_tracker" >
+            android:label="@string/title_activity_path_tracker"
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:name=".TouristPlanner"
+            android:label="@string/title_activity_tourist_planner"
+            android:parentActivityName=".MainApp" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.nancy.aucklandtransport.MainApp" />
         </activity>
     </application>
 
