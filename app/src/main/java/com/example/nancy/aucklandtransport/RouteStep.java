@@ -130,10 +130,13 @@ public class RouteStep {
         this.arrivalStop = arrivalStop;
     }
 
-    public RouteStep(String type, String name, LatLng startLoc) {
+    public RouteStep(String type, String name, LatLng startLoc,
+                     String depTime, long depSec, String arrTime, long arrSec) {
         this.type = type;
         this.shortName = name;
         this.startLoc = startLoc;
+        this.departure = new TravelTime(depTime,depSec);
+        this.arrival = new TravelTime(arrTime,arrSec);
     }
 
     public TravelDistance getDistance() { return distance; }

@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -91,7 +92,7 @@ public class RoutesAdaptar extends BaseAdapter {
 
         if(path.getSteps()!=null) {
             holder.ly.removeAllViews();
-            populateLinks(holder.ly, path.getSteps());
+            populateLinks(holder.ly, path.getSteps(), path);
         }
 
         return convertView;
@@ -142,7 +143,8 @@ public class RoutesAdaptar extends BaseAdapter {
         }
     }
 
-    private void populateLinks(LinearLayout ll, ArrayList<RouteStep> collection) {
+    private void populateLinks(LinearLayout ll, ArrayList<RouteStep> collection,
+                               Route route) {
 
         Display display = activity.getWindowManager().getDefaultDisplay();
         int maxWidth = display.getWidth() - 100;
@@ -156,8 +158,33 @@ public class RoutesAdaptar extends BaseAdapter {
             int widthSoFar = 0;
             for(int pos=0; pos< collection.size(); pos++ ) {
                 RouteStep samItem = collection.get(pos);
-                ImageView image = new ImageView(activity.getApplicationContext());
-                image.setImageResource(samItem.getIconId());
+
+                View image = null;
+                if(samItem.isTransit()) {
+                    image = new TextView(activity.getApplicationContext());
+                    ((TextView)image).setText(samItem.getDeparture().getTravelTime());
+                }
+                else {
+                    image = new TextView(activity.getApplicationContext());
+                    if(pos == 0) {
+                        ((TextView)image).setText(route.getDeparture().getTravelTime());
+                    }
+                    else {
+                        RouteStep item = collection.get(pos-1);
+                        ((TextView)image).setText(item.getArrival().getTravelTime());
+                    }
+
+                    //image = new ImageView(activity.getApplicationContext());
+                    //((ImageView)image).setImageResource(samItem.getIconId());
+                    //image.measure(0, 0);
+                }
+                int id = samItem.getIconId();
+                ((TextView)image).setCompoundDrawablesWithIntrinsicBounds(
+                        0, //left
+                        0, //top
+                        0, //right
+                        id);//bottom);
+                ((TextView)image).setTextColor(Color.parseColor("#0000FF"));
                 image.measure(0, 0);
                 widthSoFar += image.getMeasuredWidth();
 
@@ -179,6 +206,12 @@ public class RoutesAdaptar extends BaseAdapter {
                 if(samItem.getShortName() != "" && !samItem.getShortName().equals("")) {
                     TextView name = new TextView(activity.getApplicationContext());
                     name.setText(samItem.getShortName());
+                    LinearLayout.LayoutParams params =
+                            new LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+                    params.setMargins(0, 50, 0, 0);
+                    name.setLayoutParams(params);
+                    name.setTextColor(Color.parseColor("#FFA500"));
+
                     name.measure(0,0);
                     widthSoFar += name.getMeasuredWidth();
 
