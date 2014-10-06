@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.Utils;
 
 /**
  * Created by Nancy on 8/12/14.
@@ -22,4 +22,7 @@ public class Constant {
     public static boolean IS_CHANGE_ROUTE = false;
     public static boolean SPEED_CHECK_IND = true;
     public static float USER_SPEED = 0;
+
+    // Specifies the drawMarker() to draw the marker with default color
+    public static final float UNDEFINED_COLOR = -1;
 }

@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.datatype;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -8,20 +8,20 @@ import android.os.Parcelable;
  */
 public class Place implements Parcelable {
     // Latitude of the place
-    String mLat="";
+    public String mLat="";
 
     // Longitude of the place
-    String mLng="";
+    public String mLng="";
 
     // Place Name
-    String mPlaceName="";
+    public String mPlaceName="";
 
     // Vicinity of the place
-    String mVicinity="";
+    public String mVicinity="";
 
     // Photos of the place
     // Photo is a Parcelable class
-    Photo[] mPhotos={};
+    public Photo[] mPhotos={};
 
     @Override
     public int describeContents() {
@@ -64,4 +64,5 @@ public class Place implements Parcelable {
             return null;
         }
     };
+
 }

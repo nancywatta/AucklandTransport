@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.nancy.aucklandtransport.Parser.RealTimeJSONParser;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONObject;

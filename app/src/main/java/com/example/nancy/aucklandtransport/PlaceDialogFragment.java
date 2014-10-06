@@ -16,6 +16,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.nancy.aucklandtransport.datatype.Photo;
+import com.example.nancy.aucklandtransport.datatype.Place;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;

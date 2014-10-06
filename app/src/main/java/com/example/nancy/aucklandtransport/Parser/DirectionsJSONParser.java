@@ -1,7 +1,10 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.Parser;
 
 import android.util.Log;
 
+import com.example.nancy.aucklandtransport.PathSegment;
+import com.example.nancy.aucklandtransport.Route;
+import com.example.nancy.aucklandtransport.RouteStep;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.PolyUtil;
 

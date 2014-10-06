@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.example.nancy.aucklandtransport.Utils.Constant;
+
 import org.apache.pig.impl.util.ObjectSerializer;
 
 import java.io.IOException;

@@ -1,6 +1,10 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.Parser;
 
 import android.util.Log;
+
+import com.example.nancy.aucklandtransport.datatype.Attribution;
+import com.example.nancy.aucklandtransport.datatype.Photo;
+import com.example.nancy.aucklandtransport.datatype.Place;
 
 import org.json.JSONArray;
 import org.json.JSONException;

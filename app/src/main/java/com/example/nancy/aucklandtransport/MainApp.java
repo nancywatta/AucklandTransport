@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -35,28 +34,23 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RadioButton;
-import android.widget.SimpleAdapter;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
 import com.example.nancy.aucklandtransport.History.PlaceItem;
 import com.example.nancy.aucklandtransport.History.RouteHistoryItem;
+import com.example.nancy.aucklandtransport.Utils.ConnectionDetector;
 import com.google.android.gms.maps.model.LatLng;
-
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 
 
@@ -67,8 +61,6 @@ public class MainApp extends FragmentActivity {
     AutoCompleteTextView destination;
     Button date;
     Button time;
-    PlacesTask placesTask;
-    ParserTask parserTask;
     String fromCoords ="";
     String toCoords="";
     String prefix="";
@@ -177,7 +169,8 @@ public class MainApp extends FragmentActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 prefix = s.toString();
-                placesTask = new PlacesTask();
+                GooglePlacesTask placesTask = new GooglePlacesTask(getBaseContext(),
+                        origin, prefix);
                 placesTask.execute(s.toString());
             }
 
@@ -227,7 +220,8 @@ public class MainApp extends FragmentActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 prefix = s.toString();
-                placesTask = new PlacesTask();
+                GooglePlacesTask placesTask = new GooglePlacesTask(getBaseContext(),
+                        destination, prefix);
                 placesTask.execute(s.toString());
             }
 
@@ -474,113 +468,6 @@ public class MainApp extends FragmentActivity {
         return data;
     }
 
-    // Fetches all places from GooglePlaces AutoComplete Web Service
-    private class PlacesTask extends AsyncTask<String, Void, String> {
-
-        @Override
-        protected String doInBackground(String... place) {
-            // For storing data from web service
-            String data = "";
-
-            String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
-
-            String input="";
-
-            try {
-                input = "input=" + URLEncoder.encode(place[0], "utf-8");
-            } catch (UnsupportedEncodingException e1) {
-                e1.printStackTrace();
-            }
-
-            // place type to be searched
-            String types = "types=geocode";
-
-            // Sensor enabled
-            String sensor = "sensor=false";
-
-            // Building the parameters to the web service
-            String parameters = input+"&"+types+"&"+sensor+"&"+key+"&"+"components=country:nz";
-
-            // Output format
-            String output = "json";
-
-            // Building the url to the web service
-            String url = "https://maps.googleapis.com/maps/api/place/autocomplete/"+output+"?"+parameters;
-
-            try{
-                // Fetching the data from web service
-                data = downloadUrl(url);
-            }catch(Exception e){
-                Log.d("Background Task",e.toString());
-            }
-            return data;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-
-            // Creating ParserTask
-            parserTask = new ParserTask();
-
-            // Starting Parsing the JSON string returned by Web Service
-            parserTask.execute(result);
-        }
-    }
-    /** A class to parse the Google Places in JSON format */
-    private class ParserTask extends AsyncTask<String, Integer, List<HashMap<String,String>>>{
-
-        JSONObject jObject;
-
-        @Override
-        protected List<HashMap<String, String>> doInBackground(String... jsonData) {
-
-            List<HashMap<String, String>> places = null;
-
-            PlaceJSONParser placeJsonParser = new PlaceJSONParser();
-
-            try{
-                jObject = new JSONObject(jsonData[0]);
-
-                // Getting the parsed data as a List construct
-                places = placeJsonParser.parse(jObject);
-
-            }catch(Exception e){
-                Log.d("Exception", e.toString());
-            }
-            return places;
-        }
-
-        @Override
-        protected void onPostExecute(List<HashMap<String, String>> result) {
-
-            String[] from = new String[] { "description"};
-            int[] to = new int[] { android.R.id.text1 };
-
-            List<HashMap<String, String>> finalResult = new ArrayList<HashMap<String, String>>();
-            ArrayList<String> historyPlaces = History.getHistoryArray();
-            for(String place:historyPlaces) {
-                if(place.startsWith(prefix)) {
-                    HashMap<String, String> hm = new HashMap<String, String>();
-                    hm.put("description", place);
-                    finalResult.add(hm);
-                }
-            }
-            finalResult.addAll(result);
-
-            // Creating a SimpleAdapter for the AutoCompleteTextView
-            SimpleAdapter adapter = new SimpleAdapter(getBaseContext(), finalResult, android.R.layout.simple_list_item_1, from, to);
-
-            // Setting the adapter
-            origin.setEllipsize(TextUtils.TruncateAt.END);
-            origin.setSingleLine();
-            origin.setHorizontallyScrolling(true);
-            origin.setAdapter(adapter);
-            destination.setAdapter(adapter);
-        }
-    }
-
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -783,12 +670,18 @@ public class MainApp extends FragmentActivity {
     public void showTimePickerDialog(View v) {
         if(timeFragment==null)
             timeFragment = new TimePickerFragment();
+        Bundle bdl = new Bundle(2);
+        bdl.putInt("ButtonId", R.id.button2);
+        timeFragment.setArguments(bdl);
         timeFragment.show(getSupportFragmentManager(), "timePicker");
     }
 
     public void showDatePickerDialog(View v) {
         if(dateFragment==null)
             dateFragment = new DatePickerDialogFragment();
+        Bundle bdl = new Bundle(2);
+        bdl.putInt("ButtonId", R.id.button3);
+        dateFragment.setArguments(bdl);
         dateFragment.show(getSupportFragmentManager(), "datePicker");
     }
 

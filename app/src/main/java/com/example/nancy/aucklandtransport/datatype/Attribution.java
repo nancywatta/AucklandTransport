@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.datatype;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -9,7 +9,7 @@ import android.os.Parcelable;
 public class Attribution implements Parcelable {
 
     // Attribution of the photo
-    String mHtmlAttribution="";
+    public String mHtmlAttribution="";
 
     @Override
     public int describeContents() {

@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.Utils;
 
 import android.content.Context;
 import android.net.ConnectivityManager;

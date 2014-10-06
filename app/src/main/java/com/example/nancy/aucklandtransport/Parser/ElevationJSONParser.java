@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.Parser;
 
 import org.json.JSONArray;
 import org.json.JSONException;

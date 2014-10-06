@@ -1,7 +1,9 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.Utils;
 
 import android.content.Context;
 import android.location.Location;
+
+import com.example.nancy.aucklandtransport.R;
 
 /**
  * Created by Nancy on 9/20/14.

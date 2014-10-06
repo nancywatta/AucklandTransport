@@ -24,7 +24,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.nancy.aucklandtransport.Constant;
+import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.example.nancy.aucklandtransport.NotificationUpdates;
 
 import java.util.Random;

@@ -131,10 +131,20 @@
         <activity
             android:name=".TouristPlanner"
             android:label="@string/title_activity_tourist_planner"
+            android:windowSoftInputMode="stateHidden|adjustResize"
             android:parentActivityName=".MainApp" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.MainApp" />
+        </activity>
+        <activity
+            android:name=".TouristRoute"
+            android:label="@string/title_activity_tourist_route"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:parentActivityName=".TouristPlanner" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.nancy.aucklandtransport.TouristPlanner" />
         </activity>
     </application>
 

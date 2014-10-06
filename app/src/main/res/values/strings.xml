@@ -75,15 +75,15 @@
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
     <string name="play_services_available">Google Play services is available</string>
-    <string name="IP_ADDRESS">192.168.1.3</string>
+    <string name="IP_ADDRESS">172.23.232.58</string>
     <string name="mCancelRoute">Stop Navigation</string>
     <string name="mClickOnBoard">Click the OnBoard Button once you are in the vehicle</string>
     <string name="mNotifyOnBoard">Notify APT when you board the vehicle</string>
-
     <string name="explore_city">Explore City</string>
     <string name="Places">Places</string>
     <string name="Explore">Explore</string>
     <string name="leave_at">Leave</string>
+    <string name="Arrive_at">Arrive</string>
     <string name="SetTime">Set Time</string>
 
     <string-array name="place_type">
@@ -117,5 +117,6 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="title_activity_tourist_planner">TouristPlanner</string>
+    <string name="title_activity_tourist_route">TouristRoute</string>
 
 </resources>

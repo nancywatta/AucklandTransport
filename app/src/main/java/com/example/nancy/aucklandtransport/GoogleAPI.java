@@ -3,6 +3,8 @@ package com.example.nancy.aucklandtransport;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
+import com.example.nancy.aucklandtransport.Parser.GeocodeJSONParser;
 import com.example.nancy.aucklandtransport.datatype.TravelTime;
 import com.google.android.gms.maps.model.LatLng;
 

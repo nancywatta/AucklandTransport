@@ -17,6 +17,7 @@ public class DatePickerDialogFragment extends DialogFragment
     int mDay;
     int mMonth;
     int mYear;
+    int buttonId;
 
     public DatePickerDialogFragment() {
         // Assign current Date and Time Values to Variables
@@ -29,6 +30,7 @@ public class DatePickerDialogFragment extends DialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState){
 
+        buttonId = getArguments().getInt("ButtonId");
         /** Opening the DatePickerDialog window */
         return new DatePickerDialog(getActivity(), this, mYear, mMonth, mDay);
     }
@@ -39,7 +41,7 @@ public class DatePickerDialogFragment extends DialogFragment
         mYear = yearSelected;
         mMonth = monthOfYear;
         mDay = dayOfMonth;
-        ((Button)getActivity().findViewById(R.id.button3))
+        ((Button)getActivity().findViewById(buttonId))
                 .setText(twodigits(dayOfMonth) + "/" + twodigits((monthOfYear+1)) + "/" + yearSelected);
     }
 

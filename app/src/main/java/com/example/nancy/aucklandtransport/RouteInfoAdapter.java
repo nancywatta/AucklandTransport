@@ -88,21 +88,19 @@ public class RouteInfoAdapter extends BaseAdapter {
         } else {
             holder.realTimeData.setVisibility(View.GONE);
             holder.btnRealTime.setVisibility(View.GONE);
-            //holder.text5.setVisibility(View.GONE);
+            holder.text5.setVisibility(View.GONE);
             holder.text1.setText(step.getDistance().getTravelDistance() + " (" + step.getDuration().getTravelTime() + ")");
             holder.text4.setText(step.getDesc());
 
-            float userSpeed = Constant.USER_SPEED;
-            if(userSpeed == 0) {
-                holder.text5.setVisibility(View.GONE);
-            }
-            else {
-                holder.text5.setVisibility(View.VISIBLE);
-                float time = step.getDistance().getMeters() / userSpeed;
-                holder.text5.setText(Math.round(time/60) + "");
-            }
-
-            //holder.text5.setText("");
+//            float userSpeed = Constant.USER_SPEED;
+//            if(userSpeed == 0) {
+//                holder.text5.setVisibility(View.GONE);
+//            }
+//            else {
+//                holder.text5.setVisibility(View.VISIBLE);
+//                float time = step.getDistance().getMeters() / userSpeed;
+//                holder.text5.setText(Math.round(time/60) + "");
+//            }
         }
         holder.image.setImageResource(step.getIconId());
 

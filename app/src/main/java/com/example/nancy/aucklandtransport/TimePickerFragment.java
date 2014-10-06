@@ -18,6 +18,7 @@ public class TimePickerFragment extends DialogFragment
     int mHour;
     int mMinute;
     boolean isTimeSet;
+    int buttonId;
 
     public TimePickerFragment() {
         // Use the current time as the default values for the picker
@@ -30,6 +31,7 @@ public class TimePickerFragment extends DialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
+        buttonId = getArguments().getInt("ButtonId");
         // Create a new instance of TimePickerDialog and return it
         return new TimePickerDialog(getActivity(), this, mHour, mMinute,
                 false);
@@ -40,7 +42,7 @@ public class TimePickerFragment extends DialogFragment
         mHour = hourOfDay;
         mMinute = minute;
         isTimeSet = true;
-        ((Button)getActivity().findViewById(R.id.button2))
+        ((Button)getActivity().findViewById(buttonId))
                 .setText(twodigits(hourOfDay) + ":" + twodigits(minute));
     }
 

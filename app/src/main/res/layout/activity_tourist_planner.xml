@@ -127,7 +127,7 @@
                         android:layout_height="wrap_content"
                         android:background="@color/green"
                         android:drawableLeft="@android:drawable/ic_menu_search"
-                        android:onClick="showAllRoutes"
+                        android:onClick="showRoute"
                         android:text="@string/Explore"></Button>
                 </TableRow>
             </TableLayout>
@@ -146,30 +146,10 @@
                     <TextView
                         android:id="@+id/leave_at"
                         android:layout_width="0dp"
-                        android:layout_weight="0.15"
+                        android:layout_weight="0.125"
                         android:layout_height="wrap_content"
                         android:width="1dp"
                         android:text="@string/leave_at" />
-                    <EditText
-                        android:id="@+id/editTime"
-                        android:layout_width="0dp"
-                        android:layout_weight="0.40"
-                        android:text=""
-                        android:layout_height="wrap_content"
-                        android:cursorVisible="false"
-                        android:clickable="false"
-                        android:focusableInTouchMode="false"
-                        android:editable="false"
-                        android:textSize="20dip">
-                    </EditText>
-                    <Button
-                        android:id="@+id/button5"
-                        android:layout_width="0dp"
-                        android:layout_weight="0.325"
-                        android:layout_height="wrap_content"
-                        android:drawableLeft="@android:drawable/arrow_down_float"
-                        android:onClick="showDatePickerDialog"
-                        android:text="@string/Date"></Button>
 
                     <Button
                         android:id="@+id/button6"
@@ -179,49 +159,26 @@
                         android:drawableLeft="@android:drawable/arrow_down_float"
                         android:onClick="showTimePickerDialog"
                         android:text="@string/Time"></Button>
-                </TableRow>
-                <TableRow
-                    android:id="@+id/tableRow4"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
 
                     <TextView
-                        android:id="@+id/leave_at"
+                        android:id="@+id/arrive_at"
                         android:layout_width="0dp"
-                        android:layout_weight="0.15"
+                        android:layout_weight="0.125"
                         android:layout_height="wrap_content"
                         android:width="1dp"
-                        android:text="@string/leave_at" />
-                    <EditText
-                        android:id="@+id/editTime"
-                        android:layout_width="0dp"
-                        android:layout_weight="0.40"
-                        android:text=""
-                        android:layout_height="wrap_content"
-                        android:cursorVisible="false"
-                        android:clickable="false"
-                        android:focusableInTouchMode="false"
-                        android:editable="false"
-                        android:textSize="20dip">
-                    </EditText>
+                        android:text="@string/Arrive_at" />
+
                     <Button
                         android:id="@+id/button5"
                         android:layout_width="0dp"
                         android:layout_weight="0.325"
                         android:layout_height="wrap_content"
                         android:drawableLeft="@android:drawable/arrow_down_float"
-                        android:onClick="showDatePickerDialog"
-                        android:text="@string/Date"></Button>
-
-                    <Button
-                        android:id="@+id/button6"
-                        android:layout_width="0dp"
-                        android:layout_weight="0.325"
-                        android:layout_height="wrap_content"
-                        android:drawableLeft="@android:drawable/arrow_down_float"
-                        android:onClick="showTimePickerDialog"
+                        android:onClick="showArriveTimeDialog"
                         android:text="@string/Time"></Button>
+
                 </TableRow>
+
             </TableLayout>
 
             <LinearLayout
@@ -237,15 +194,6 @@
                     android:drawableLeft="@android:drawable/arrow_down_float"
                     android:onClick="showDatePickerDialog"
                     android:text="@string/Date"></Button>
-
-                <Button
-                    android:id="@+id/button2"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.33"
-                    android:drawableLeft="@android:drawable/arrow_down_float"
-                    android:onClick="showTimePickerDialog"
-                    android:text="@string/Time"></Button>
 
             </LinearLayout>
 

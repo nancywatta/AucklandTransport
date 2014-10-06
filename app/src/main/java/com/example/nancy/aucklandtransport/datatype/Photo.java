@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.datatype;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -8,17 +8,17 @@ import android.os.Parcelable;
  */
 public class Photo implements Parcelable {
     // Width of the Photo
-    int mWidth=0;
+    public int mWidth=0;
 
     // Height of the Photo
-    int mHeight=0;
+    public int mHeight=0;
 
     // Reference of the photo to be used in Google Web Services
-    String mPhotoReference="";
+    public String mPhotoReference="";
 
     // Attributions of the photo
     // Attribution is a Parcelable class
-    Attribution[] mAttributions={};
+    public Attribution[] mAttributions={};
 
     @Override
     public int describeContents() {
