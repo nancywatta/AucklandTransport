@@ -12,6 +12,7 @@ import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Created by Nancy on 9/20/14.
@@ -38,6 +39,7 @@ public class RouteEngine {
     private AucklandPublicTransportAPI aptApi = null;
     private SpeedCalculator speedCalculator;
     private boolean startedJourney=false;
+    private Date actualArrivalTime;
 
     public RouteEngine(BackgroundService service, Context context) {
         this.service = service;
@@ -56,6 +58,10 @@ public class RouteEngine {
 
     public void resetStep() {
         this.currentStep = 0;
+    }
+
+    public void setActualArrivalTime(Date date) {
+        this.actualArrivalTime = date;
     }
 
     public void routeEngine(Route mRoute, String mActivity, Location currentLocation) {
@@ -175,6 +181,7 @@ public class RouteEngine {
                         else
                             routeState = Constant.WALKING;
 
+                        checkRoute(mRoute, currentStep);
                         //checkChangeRoute(mRoute, currentStep);
                     }
                 }
@@ -346,13 +353,12 @@ public class RouteEngine {
     }
 
     public void checkChangeRoute(Route mRoute, int nextStep) {
-        RouteStep nextRoute = mRoute.getSteps().get(nextStep);
+        final RouteStep nextRoute = mRoute.getSteps().get(nextStep);
 
         if (nextRoute.isTransit()) {
 
             Calendar c = Calendar.getInstance();
-            long diff =
-                    mRoute.getSteps().get(nextStep).getDeparture().getSeconds()
+            long diff = mRoute.getSteps().get(nextStep).getDeparture().getSeconds()
                             - (c.getTimeInMillis() / 1000L);
 
             if (diff < 120) {
@@ -374,10 +380,48 @@ public class RouteEngine {
                 myIntent.putExtra("IS_BUS", false);
                 myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(myIntent);
+            }
 //                service.createNotification(context.getResources().getString(R.string.RunningLateText),
 //                        context.getResources().getString(R.string.app_name),
 //                        context.getResources().getString(R.string.RunningLateText),
 //                        true, true, Toast.LENGTH_LONG);
+        }
+    }
+
+    public void checkRoute(Route mRoute, int nextStep) {
+        final RouteStep nextRoute = mRoute.getSteps().get(nextStep);
+
+        if (nextRoute.isTransit()) {
+
+            new Thread(new Runnable() {
+                public void run() {
+                    AucklandPublicTransportAPI aptAPI = new AucklandPublicTransportAPI(context);
+                    aptAPI.setRouteEngine(RouteEngine.this);
+                    aptAPI.getRealTimeDate(nextRoute.getStartLoc(), nextRoute.getShortName(),
+                            nextRoute.getDeparture().getSeconds());
+                }
+            }).run();
+
+            Log.d(TAG, "actualArrivalTime: "+ actualArrivalTime);
+            if(actualArrivalTime != null) {
+                Intent myIntent = new Intent(context, PathTracker.class);
+                Calendar c = Calendar.getInstance();
+                long diff = (actualArrivalTime.getTime() - c.getTimeInMillis()) / 1000L;
+
+                if(diff > 0 && diff <= 600) {
+                    String message = "Your " +
+                            context.getResources().getString(nextRoute.getTransportName())
+                            + " " + nextRoute.getShortName()
+                            + " is arriving in next " + Math.round(diff / 60) + " minute."
+                    + " Do you want to continue with the route or look for other options?";
+                    myIntent.putExtra("MESSAGE", message);
+                    myIntent.putExtra("TO_ADDRESS", mRoute.getEndAddress());
+                    myIntent.putExtra("TO_COORDS", mRoute.getEndLocation().latitude +
+                            "," + mRoute.getEndLocation().longitude);
+                    myIntent.putExtra("IS_BUS", false);
+                    myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(myIntent);
+                }
             }
         }
     }

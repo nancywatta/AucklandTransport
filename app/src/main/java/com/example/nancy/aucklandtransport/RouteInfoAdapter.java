@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +68,8 @@ public class RouteInfoAdapter extends BaseAdapter {
             if (step.getTransportName() == R.string.tr_bus) {
                 holder.realTimeData.setVisibility(View.VISIBLE);
                 holder.btnRealTime.setVisibility(View.VISIBLE);
+                holder.realTimeData.setHint(Html.fromHtml("<small><small><small>" +
+                        "Click refresh for Real Time" + "</small></small></small>"));
 
                 holder.btnRealTime.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -77,7 +80,7 @@ public class RouteInfoAdapter extends BaseAdapter {
                                 new AucklandPublicTransportAPI(context.getApplicationContext(),
                                         holder.realTimeData, holder.mProgressView, RouteInfoAdapter.this);
 
-                        api.getRealTimeDate(step.getStartLoc(), step.getShortName());
+                        api.getRealTimeDate(step.getStartLoc(), step.getShortName(), step.getDeparture().getSeconds());
                     }
                 });
 

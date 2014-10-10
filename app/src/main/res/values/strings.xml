@@ -75,7 +75,7 @@
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
     <string name="play_services_available">Google Play services is available</string>
-    <string name="IP_ADDRESS">172.23.232.58</string>
+    <string name="IP_ADDRESS">192.168.1.4</string>
     <string name="mCancelRoute">Stop Navigation</string>
     <string name="mClickOnBoard">Click the OnBoard Button once you are in the vehicle</string>
     <string name="mNotifyOnBoard">Notify APT when you board the vehicle</string>

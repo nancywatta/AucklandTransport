@@ -6,7 +6,10 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
+import android.text.Html;
+import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
  * Created by Nancy on 7/13/14.
  */
 public class RoutesAdaptar extends BaseAdapter {
+    private static final String TAG = RoutesAdaptar.class.getSimpleName();
     private Activity activity;
     private ArrayList<Route> result;
     private static LayoutInflater inflater=null;
@@ -46,7 +50,7 @@ public class RoutesAdaptar extends BaseAdapter {
         return position;
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
         final ViewHolder holder;
         if(convertView==null) {
             holder = new ViewHolder();
@@ -62,6 +66,7 @@ public class RoutesAdaptar extends BaseAdapter {
         else {
             holder = (ViewHolder) convertView.getTag();
         }
+        holder.btnRealTime.setTag(position);
 
         // Fetching i-th route
         final Route path = result.get(position);
@@ -69,28 +74,43 @@ public class RoutesAdaptar extends BaseAdapter {
         holder.text.setText(path.getDeparture().getTravelTime() + " - " + path.getArrival().getTravelTime() + " (" + path.getDuration().getTravelTime() + ")");
         holder.text1.setText(path.getDistance());
 
+        holder.realTimeData.setHint(Html.fromHtml("<small><small><small>" +
+                "Click refresh for Real Time" + "</small></small></small>"));
+
         holder.btnRealTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProgress(true, holder.mProgressView, holder.realTimeData );
+                int pos = (Integer) v.getTag();
+                Log.d(TAG, "pos: " + pos + " position: " + position);
+                if(pos == position) {
+                    showProgress(true, holder.mProgressView, holder.realTimeData);
 
-                AucklandPublicTransportAPI api =
-                        new AucklandPublicTransportAPI(activity.getApplicationContext(),
-                                holder.realTimeData, holder.mProgressView, RoutesAdaptar.this);
+                    AucklandPublicTransportAPI api =
+                            new AucklandPublicTransportAPI(activity.getApplicationContext(),
+                                    holder.realTimeData, holder.mProgressView, RoutesAdaptar.this);
 
-                for (int i=0; i< path.getSteps().size(); i++) {
-                    RouteStep routeStep = path.getSteps().get(i);
-                    if(routeStep.getTransportName() == R.string.tr_bus) {
-                        api.getRealTimeDate(routeStep.getStartLoc(), routeStep.getShortName());
-                        break;
-                    } else if(routeStep.isTransit()) {
-                        break;
+                    for (int i = 0; i < path.getSteps().size(); i++) {
+                        RouteStep routeStep = path.getSteps().get(i);
+                        if (routeStep.getTransportName() == R.string.tr_bus) {
+                            api.getRealTimeDate(routeStep.getStartLoc(), routeStep.getShortName(),
+                                    routeStep.getDeparture().getSeconds());
+                            break;
+                        } else if (routeStep.isTransit()) {
+                            break;
+                        }
                     }
                 }
             }
         });
 
-        if(path.getSteps()!=null) {
+        if(path.getSteps() != null) {
+            if(path.showrealTime()) {
+                holder.btnRealTime.setVisibility(View.VISIBLE);
+                holder.realTimeData.setVisibility(View.VISIBLE);
+            } else {
+                holder.btnRealTime.setVisibility(View.GONE);
+                holder.realTimeData.setVisibility(View.GONE);
+            }
             holder.ly.removeAllViews();
             populateLinks(holder.ly, path.getSteps(), path);
         }
@@ -159,19 +179,17 @@ public class RoutesAdaptar extends BaseAdapter {
             for(int pos=0; pos< collection.size(); pos++ ) {
                 RouteStep samItem = collection.get(pos);
 
-                View image = null;
+                TextView image = new TextView(activity.getApplicationContext());
                 if(samItem.isTransit()) {
-                    image = new TextView(activity.getApplicationContext());
-                    ((TextView)image).setText(samItem.getDeparture().getTravelTime());
+                    image.setText(samItem.getDeparture().getTravelTime());
                 }
                 else {
-                    image = new TextView(activity.getApplicationContext());
                     if(pos == 0) {
-                        ((TextView)image).setText(route.getDeparture().getTravelTime());
+                        image.setText(route.getDeparture().getTravelTime());
                     }
                     else {
                         RouteStep item = collection.get(pos-1);
-                        ((TextView)image).setText(item.getArrival().getTravelTime());
+                        image.setText(item.getArrival().getTravelTime());
                     }
 
                     //image = new ImageView(activity.getApplicationContext());
@@ -179,12 +197,13 @@ public class RoutesAdaptar extends BaseAdapter {
                     //image.measure(0, 0);
                 }
                 int id = samItem.getIconId();
-                ((TextView)image).setCompoundDrawablesWithIntrinsicBounds(
+                image.setCompoundDrawablesWithIntrinsicBounds(
                         0, //left
                         0, //top
                         0, //right
                         id);//bottom);
-                ((TextView)image).setTextColor(Color.parseColor("#0000FF"));
+                image.setTextColor(Color.parseColor("#996633"));
+                image.setTypeface(null, Typeface.BOLD);
                 image.measure(0, 0);
                 widthSoFar += image.getMeasuredWidth();
 
@@ -211,6 +230,7 @@ public class RoutesAdaptar extends BaseAdapter {
                     params.setMargins(0, 50, 0, 0);
                     name.setLayoutParams(params);
                     name.setTextColor(Color.parseColor("#FFA500"));
+                    name.setTypeface(null, Typeface.BOLD);
 
                     name.measure(0,0);
                     widthSoFar += name.getMeasuredWidth();

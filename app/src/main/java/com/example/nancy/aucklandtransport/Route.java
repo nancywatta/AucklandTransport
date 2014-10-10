@@ -54,6 +54,19 @@ public class Route {
         this.jsonString = jsonString;
     }
 
+    public boolean showrealTime() {
+        RouteStep firstStep = steps.get(0);
+        if (firstStep.getTransportName() == R.string.tr_bus) {
+            return true;
+        } else if (!firstStep.isTransit()) {
+            RouteStep secondStep = steps.get(1);
+            if (secondStep.getTransportName() == R.string.tr_bus)
+                return true;
+        }
+
+        return false;
+    }
+
     public Route(String json) throws JSONException {
         this(new JSONObject(json));
     }

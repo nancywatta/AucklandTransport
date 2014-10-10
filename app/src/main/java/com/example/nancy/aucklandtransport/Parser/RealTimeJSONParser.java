@@ -7,26 +7,44 @@ import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Created by Nancy on 10/5/14.
  */
 public class RealTimeJSONParser {
 
-    public String parse(JSONObject jObject) {
-        String actualArrivalTime ="";
+    public HashMap<String, Date> parse(JSONObject jObject) {
+        String actualArrivalTime ="", expectedArrivalTime = "";
+        HashMap<String, Date> dates = new HashMap<String, Date>();
+
+        Date arrivalTime = null;
+        Date expectedTime = null;
         try {
             actualArrivalTime = jObject.getString("ActualArrivalTime");
 
-            if(actualArrivalTime.equals("") || actualArrivalTime  == null)
-                return actualArrivalTime;
+            if(actualArrivalTime.equals("") || actualArrivalTime  == null) {
+                dates.put("ActualArrivalTime", arrivalTime);
+            }
             else {
                 try {
                     SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     Date fullDate = toFullDate.parse(actualArrivalTime);
-                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-                    String shortTimeStr = sdf.format(fullDate);
-                    return shortTimeStr;
+                    dates.put("ActualArrivalTime", fullDate);
+                } catch (android.net.ParseException e) {
+                    Log.d("ParseException: " , e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            expectedArrivalTime = jObject.getString("ExpectedArrivalTime");
+            if(expectedArrivalTime.equals("") || expectedArrivalTime  == null) {
+                dates.put("ExpectedArrivalTime", expectedTime);
+            }
+            else {
+                try {
+                    SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    Date fullDate = toFullDate.parse(expectedArrivalTime);
+                    dates.put("ExpectedArrivalTime", fullDate);
                 } catch (android.net.ParseException e) {
                     Log.d("ParseException: " , e.getMessage());
                     e.printStackTrace();
@@ -39,6 +57,6 @@ public class RealTimeJSONParser {
             Log.d("Exception: " , e.getMessage());
             e.printStackTrace();
         }
-        return actualArrivalTime;
+        return dates;
     }
 }

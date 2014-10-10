@@ -3,6 +3,7 @@ package com.example.nancy.aucklandtransport;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -18,6 +19,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -32,7 +37,13 @@ public class AucklandPublicTransportAPI {
     private View mProgressView;
     private RoutesAdaptar routesAdaptar;
     private RouteInfoAdapter routeInfoAdapter;
+    private long depTime;
+    private RouteEngine routeEngine = null;
     //private SharedPreferences sharedPrefs;
+
+    public void setRouteEngine(RouteEngine routeEngine) {
+        this.routeEngine = routeEngine;
+    }
 
     public AucklandPublicTransportAPI(Context context, TextView realTimeText,
                                       View mProgressView, RoutesAdaptar routesAdaptar) {
@@ -198,7 +209,8 @@ public class AucklandPublicTransportAPI {
     }
 
     //http://172.23.208.76:8080/apt-server/showDueTime.do?lat=-36.861798&lng=174.74301&route=030
-    public void getRealTimeDate(LatLng busStop, String busNumber) {
+    public void getRealTimeDate(LatLng busStop, String busNumber, long depTime) {
+        this.depTime = depTime;
         String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
 
         String routeName = "route=" + busNumber;
@@ -234,8 +246,6 @@ public class AucklandPublicTransportAPI {
         // doInBackground()
         @Override
         protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-
             RealTimeParserTask parserTask = new RealTimeParserTask();
 
             // Invokes the thread for parsing the JSON data
@@ -245,43 +255,70 @@ public class AucklandPublicTransportAPI {
     }
 
     /** A class to parse the Geocoding Places in non-ui thread */
-    class RealTimeParserTask extends AsyncTask<String, Integer, String>{
+    class RealTimeParserTask extends AsyncTask<String, Integer, HashMap<String, Date>>{
 
         JSONObject jObject;
 
         // Invoked by execute() method of this object
         @Override
-        protected String doInBackground(String... jsonData) {
+        protected HashMap<String, Date> doInBackground(String... jsonData) {
 
-            String actualArrivalTime = null;
+            HashMap<String, Date> dates = null;
             RealTimeJSONParser parser = new RealTimeJSONParser();
 
             try{
                 jObject = new JSONObject(jsonData[0]);
 
                 /** Getting the parsed data as a an ArrayList */
-                actualArrivalTime = parser.parse(jObject);
+                dates = parser.parse(jObject);
 
             }catch(Exception e){
                 Log.d("Exception", e.toString());
             }
-            return actualArrivalTime;
+            return dates;
         }
 
         // Executes in UI thread, after the parsing process
         @Override
-        protected void onPostExecute(String actualArrivalTime) {
+        protected void onPostExecute(HashMap<String, Date> dates) {
             if(routesAdaptar != null)
                 routesAdaptar.showProgress(false, mProgressView, realTimeText );
             if(routeInfoAdapter!=null)
                 routeInfoAdapter.showProgress(false, mProgressView, realTimeText );
 
-            if(actualArrivalTime == null || actualArrivalTime.equals("")){
-                realTimeText.setText("Not Available");
-                return;
+            Date actualArrivalTime = dates.get("ActualArrivalTime");
+            Date expectedArrivalTime = dates.get("ExpectedArrivalTime");
+
+            if(expectedArrivalTime != null && actualArrivalTime != null) {
+
+                Date depDate = new Date();
+                depDate.setTime(depTime*1000L);
+
+                if(depDate.compareTo(actualArrivalTime) ==0) {
+                    SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+                    String shortTimeStr = sdf.format(expectedArrivalTime);
+                    if(realTimeText!=null)
+                        realTimeText.setText(shortTimeStr);
+                    if(routeEngine != null)
+                        routeEngine.setActualArrivalTime(expectedArrivalTime);
+                    return;
+                }
             }
 
-            realTimeText.setText(actualArrivalTime);
+            if(routeEngine != null) {
+                SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                try {
+                    Date fullDate = toFullDate.parse("2014-10-10 22:40:00");
+                    Log.d(TAG, "fullDate: " + fullDate.getTime());
+                    routeEngine.setActualArrivalTime(fullDate);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            if(realTimeText!=null)
+                realTimeText.setText(Html.fromHtml("<small><small><small>" +
+                        "Not Available" + "</small></small></small>"));
         }
     }
 
