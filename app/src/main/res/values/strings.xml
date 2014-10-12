@@ -114,9 +114,10 @@
     </string-array>
 
     <!-- Path Tracker Activity -->
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
+    <string name="yes">Continue</string>
+    <string name="no">Other Options</string>
     <string name="title_activity_tourist_planner">TouristPlanner</string>
     <string name="title_activity_tourist_route">TouristRoute</string>
+    <string name="title_activity_alternate_route">AlternateRoute</string>
 
 </resources>

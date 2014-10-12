@@ -10,17 +10,23 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.Calendar;
+import java.util.Locale;
+
 public class PathTracker extends Activity {
 
     private static final String TAG = PathTracker.class.getSimpleName();
     Intent intent;
     String message;
+    String fromAddress;
     String toAddress;
+    String fromCoords;
     String toCoords;
     TextView mMessageText;
     Button yesButton;
     Button noButton;
     Boolean isBusNotify;
+    int busIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,9 +39,12 @@ public class PathTracker extends Activity {
 
         intent = getIntent();
         message = intent.getStringExtra("MESSAGE");
-        toAddress = intent.getStringExtra("TO_ADDRESS");
-        toCoords = intent.getStringExtra("TO_COORDS");
+        fromAddress = intent.getStringExtra(MainApp.FROM_LOCATION);
+        toAddress = intent.getStringExtra(MainApp.TO_LOCATION);
+        fromCoords = intent.getStringExtra(MainApp.FROM_COORDS);
+        toCoords = intent.getStringExtra(MainApp.TO_COORDS);
         isBusNotify = intent.getBooleanExtra("IS_VEHICLE", false);
+        busIndex = intent.getIntExtra("BUS_INDEX",-1);
 
         if(isBusNotify) {
             noButton.setVisibility(View.GONE);
@@ -56,10 +65,18 @@ public class PathTracker extends Activity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Change Route!!!");
-                Intent myIntent = new Intent(PathTracker.this, MainApp.class);
-                myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                myIntent.putExtra("TO_ADDRESS",toAddress);
-                myIntent.putExtra("TO_COORDS", toCoords);
+//                Intent myIntent = new Intent(PathTracker.this, MainApp.class);
+//                myIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+//                myIntent.putExtra("TO_ADDRESS",toAddress);
+//                myIntent.putExtra("TO_COORDS", toCoords);
+                Intent myIntent = new Intent(PathTracker.this, AlternateRoute.class);
+                myIntent.putExtra(MainApp.FROM_LOCATION, fromAddress);
+                myIntent.putExtra(MainApp.TO_LOCATION, toAddress);
+                Calendar c = Calendar.getInstance(Locale.getDefault());
+                myIntent.putExtra(MainApp.TIME, (c.getTimeInMillis()/ 1000L));
+                myIntent.putExtra(MainApp.FROM_COORDS, fromCoords);
+                myIntent.putExtra(MainApp.TO_COORDS, toCoords);
+                myIntent.putExtra("BUS_INDEX", busIndex);
                 startActivity(myIntent);
                 finish();
                 return;

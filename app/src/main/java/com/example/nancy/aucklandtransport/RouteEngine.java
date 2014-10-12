@@ -100,7 +100,7 @@ public class RouteEngine {
                 if (currentStep >= mRoute.getSteps().size())
                     routeState = Constant.FINISHED;
                 if (s.getTransportName() == R.string.tr_walk) {
-                    //&& mActivity.compareTo("On Foot") == 0) {
+                    //&& mActivity.compareTo("On Foot") == 0) { TODO
                     if(Constant.SPEED_CHECK_IND)
                         speedCalculator.learnUserSpeed(currentLocation.getSpeed());
                     Log.d(TAG, "I am Walking");
@@ -133,10 +133,13 @@ public class RouteEngine {
                     dest.setLatitude(s.getEndLoc().latitude);
                     dest.setLongitude(s.getEndLoc().longitude);
                     dist = currentLocation.distanceTo(dest); // Approximate distance in meters
-                    if (dist < 20)
+                    if (dist < 20) {
                         routeState = Constant.INIT;
+                        checkRoute(mRoute, currentStep);
+                    }
                 }else {
                     routeState = Constant.INIT;
+                    checkRoute(mRoute, currentStep);
                 }
                 break;
 
@@ -180,8 +183,6 @@ public class RouteEngine {
                         }
                         else
                             routeState = Constant.WALKING;
-
-                        checkRoute(mRoute, currentStep);
                         //checkChangeRoute(mRoute, currentStep);
                     }
                 }
@@ -195,8 +196,8 @@ public class RouteEngine {
                         remainingTime = remainingTime - searchInterval;
 
                         Calendar c = Calendar.getInstance();
-                        //long diff = (s.getArrival().getSeconds() * 1000L) - c.getTimeInMillis();
-                        long diff = (s.getArrival().getSeconds() * 1000L) - (s.getDeparture().getSeconds() * 1000L);
+                        long diff = (s.getArrival().getSeconds() * 1000L) - c.getTimeInMillis();
+                        //long diff = (s.getArrival().getSeconds() * 1000L) - (s.getDeparture().getSeconds() * 1000L);
                         String str = String.format(context.getResources().getString(R.string.ArrivalText), Math.round(diff / (1000 * 60)));
                         service.createNotification(str,
                                 context.getResources().getString(R.string.app_name), str, true,
@@ -209,7 +210,7 @@ public class RouteEngine {
                     dist = currentLocation.distanceTo(dest);
 
                     // TODO remove search interval
-                    if (dist < 40 || searchInterval <= 60) {
+                    if (dist < 50 || searchInterval <= 60) {
                         //checkChangeRoute(mRoute, currentStep);
                         routeState = Constant.PRE_CHANGE_OVER;
                     }
@@ -388,40 +389,54 @@ public class RouteEngine {
         }
     }
 
-    public void checkRoute(Route mRoute, int nextStep) {
+    public void checkRoute(final Route mRoute, final int nextStep) {
         final RouteStep nextRoute = mRoute.getSteps().get(nextStep);
 
-        if (nextRoute.isTransit()) {
+        if (nextRoute.getTransportName() == R.string.tr_bus) {
 
+            final AucklandPublicTransportAPI aptAPI = new AucklandPublicTransportAPI(context);
             new Thread(new Runnable() {
                 public void run() {
-                    AucklandPublicTransportAPI aptAPI = new AucklandPublicTransportAPI(context);
                     aptAPI.setRouteEngine(RouteEngine.this);
+                    aptAPI.setRoute(mRoute, nextStep);
                     aptAPI.getRealTimeDate(nextRoute.getStartLoc(), nextRoute.getShortName(),
                             nextRoute.getDeparture().getSeconds());
                 }
             }).run();
 
-            Log.d(TAG, "actualArrivalTime: "+ actualArrivalTime);
-            if(actualArrivalTime != null) {
-                Intent myIntent = new Intent(context, PathTracker.class);
-                Calendar c = Calendar.getInstance();
-                long diff = (actualArrivalTime.getTime() - c.getTimeInMillis()) / 1000L;
 
-                if(diff > 0 && diff <= 600) {
-                    String message = "Your " +
-                            context.getResources().getString(nextRoute.getTransportName())
-                            + " " + nextRoute.getShortName()
-                            + " is arriving in next " + Math.round(diff / 60) + " minute."
-                    + " Do you want to continue with the route or look for other options?";
-                    myIntent.putExtra("MESSAGE", message);
-                    myIntent.putExtra("TO_ADDRESS", mRoute.getEndAddress());
-                    myIntent.putExtra("TO_COORDS", mRoute.getEndLocation().latitude +
-                            "," + mRoute.getEndLocation().longitude);
-                    myIntent.putExtra("IS_BUS", false);
-                    myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(myIntent);
-                }
+        }
+    }
+
+    public void notifyUser(Route mRoute, int nextStep) {
+        RouteStep nextRoute = mRoute.getSteps().get(nextStep);
+        Log.d(TAG, "actualArrivalTime: "+ actualArrivalTime);
+
+        if(actualArrivalTime != null) {
+            Intent myIntent = new Intent(context, PathTracker.class);
+            Calendar c = Calendar.getInstance();
+            long diff = (actualArrivalTime.getTime() - c.getTimeInMillis()) / 1000L;
+
+            //TODO remove hard coding
+            diff = 111;
+
+            if((diff > 0 && diff <= 600) || diff < 0) {
+                String message = "Your " +
+                        context.getResources().getString(nextRoute.getTransportName())
+                        + " " + nextRoute.getShortName()
+                        + " is arriving in next " + Math.round(diff / 60) + " minute."
+                        + " Do you want to continue with the route or look for other options?";
+                myIntent.putExtra("MESSAGE", message);
+                myIntent.putExtra(MainApp.FROM_LOCATION, nextRoute.getDepartureStop());
+                myIntent.putExtra(MainApp.TO_LOCATION, mRoute.getEndAddress());
+                myIntent.putExtra(MainApp.FROM_COORDS, nextRoute.getStartLoc().latitude +
+                "," + nextRoute.getStartLoc().longitude);
+                myIntent.putExtra(MainApp.TO_COORDS, mRoute.getEndLocation().latitude +
+                        "," + mRoute.getEndLocation().longitude);
+                myIntent.putExtra("BUS_INDEX", nextStep);
+                myIntent.putExtra("IS_BUS", false);
+                myIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(myIntent);
             }
         }
     }
@@ -430,6 +445,7 @@ public class RouteEngine {
         service.createNotification(context.getResources().getString(R.string.mNotifyOnBoard),
                 context.getResources().getString(R.string.app_name),
                 context.getResources().getString(R.string.mClickOnBoard), true, true, Toast.LENGTH_LONG);
+        RouteInfoFragment.onBoardBtn.setVisibility(View.VISIBLE);
         Intent myIntent = new Intent(context, PathTracker.class);
         String message = "Click on the onBoard CheckBox when you are in vehicle";
         myIntent.putExtra("MESSAGE", message);
@@ -462,6 +478,7 @@ public class RouteEngine {
                     routeState = state;
                     RouteInfoFragment.boardedBus = false;
                     RouteInfoFragment.onBoardBtn.setVisibility(View.GONE);
+                    firstTime = true;
                     return true;
                 } else
                     return false;

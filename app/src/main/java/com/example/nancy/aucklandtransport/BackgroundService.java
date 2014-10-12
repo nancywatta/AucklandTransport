@@ -204,15 +204,16 @@ public class BackgroundService extends Service implements
                         }
                     }
 
-//                    if (currentTime.getTimeInMillis() - arrTime.getTimeInMillis() > reminderTime) {
-//                        changeState(Constant.STATE_DO_NOTHING);
-//                    }
+                    if (currentTime.getTimeInMillis() - arrTime.getTimeInMillis() > reminderTime) {
+                        changeState(Constant.STATE_DO_NOTHING);
+                    }
 
                     routeEngine.routeEngine(route, mActivity, currentLocation);
                 }
             }
 
-            mHandler.postDelayed(mRunnable, 1000);
+            if(mHandler!=null)
+                mHandler.postDelayed(mRunnable, 1000);
         }
     };
 

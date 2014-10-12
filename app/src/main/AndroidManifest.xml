@@ -131,8 +131,8 @@
         <activity
             android:name=".TouristPlanner"
             android:label="@string/title_activity_tourist_planner"
-            android:windowSoftInputMode="stateHidden|adjustResize"
-            android:parentActivityName=".MainApp" >
+            android:parentActivityName=".MainApp"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.MainApp" />
@@ -140,11 +140,19 @@
         <activity
             android:name=".TouristRoute"
             android:label="@string/title_activity_tourist_route"
-            android:windowSoftInputMode="stateHidden|adjustResize"
-            android:parentActivityName=".TouristPlanner" >
+            android:parentActivityName=".TouristPlanner"
+            android:windowSoftInputMode="stateHidden|adjustResize" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.TouristPlanner" />
+        </activity>
+        <activity
+            android:name=".AlternateRoute"
+            android:label="@string/title_activity_alternate_route"
+            android:parentActivityName=".ManageRoute" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.nancy.aucklandtransport.ManageRoute" />
         </activity>
     </application>
 

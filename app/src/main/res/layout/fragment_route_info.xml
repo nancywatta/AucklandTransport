@@ -1,56 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:id="@+id/scroller"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:fillViewport="true"
+    android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:orientation="vertical"
+    android:windowSoftInputMode="stateHidden"
     tools:context="com.example.nancy.aucklandtransport.RouteInfoFragment">
-    <LinearLayout
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal">
-        <Button
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/buttonLayout"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/mapButton"
-            android:layout_width="wrap_content"
-            android:text="@string/Map"
-            android:onClick="ShowMap"
-            >
-        </Button>
+            android:orientation="horizontal">
 
-        <Button
+            <Button
+                android:id="@+id/mapButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="ShowMap"
+                android:text="@string/Map"></Button>
+
+            <Button
+                android:id="@+id/startNavigation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="StartTracking"
+                android:text="@string/Navigation"></Button>
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/view"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/buttonLayout"
+            android:layout_marginTop="2dp"
+            android:background="@android:color/darker_gray" />
+
+        <ListView
+            android:id="@+id/RouteInfoScreenListView"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/startNavigation"
+            android:layout_below="@id/view"></ListView>
+
+        <CheckBox
+            android:id="@+id/onBoardBtn"
             android:layout_width="wrap_content"
-            android:text="@string/Navigation"
-            android:onClick="StartTracking"
-            >
-        </Button>
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="onBoard"
+            android:layout_alignParentBottom="true"
+            android:visibility="gone" />
 
-    </LinearLayout>
-
-    <View
-        android:layout_width="fill_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="2dp"
-        android:background="@android:color/darker_gray"/>
-
-    <ListView
-        android:layout_height="wrap_content"
-        android:id="@+id/RouteInfoScreenListView"
-        android:layout_width="fill_parent">
-    </ListView>
-
-    <CheckBox
-        android:id="@+id/onBoardBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="onBoard"
-        android:checked="false"
-        android:visibility="gone"/>
-
-</LinearLayout>
+    </RelativeLayout>
+</ScrollView>

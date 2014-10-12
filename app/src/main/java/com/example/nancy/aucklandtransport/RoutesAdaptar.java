@@ -6,9 +6,11 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.text.Html;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -38,8 +40,20 @@ public class RoutesAdaptar extends BaseAdapter {
         inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
+    @Override
     public int getCount() {
         return result.size();
+    }
+
+    @Override
+    public int getViewTypeCount() {
+
+        return getCount();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     public Object getItem(int position) {
@@ -67,6 +81,7 @@ public class RoutesAdaptar extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.btnRealTime.setTag(position);
+        holder.realTimeData.setTag(position);
 
         // Fetching i-th route
         final Route path = result.get(position);
@@ -77,6 +92,7 @@ public class RoutesAdaptar extends BaseAdapter {
         holder.realTimeData.setHint(Html.fromHtml("<small><small><small>" +
                 "Click refresh for Real Time" + "</small></small></small>"));
 
+        final View finalConvertView = convertView;
         holder.btnRealTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,6 +108,9 @@ public class RoutesAdaptar extends BaseAdapter {
                     for (int i = 0; i < path.getSteps().size(); i++) {
                         RouteStep routeStep = path.getSteps().get(i);
                         if (routeStep.getTransportName() == R.string.tr_bus) {
+                            TextView textView = (TextView) finalConvertView.findViewById(i);
+
+                            api.setTextView(textView);
                             api.getRealTimeDate(routeStep.getStartLoc(), routeStep.getShortName(),
                                     routeStep.getDeparture().getSeconds());
                             break;
@@ -112,7 +131,7 @@ public class RoutesAdaptar extends BaseAdapter {
                 holder.realTimeData.setVisibility(View.GONE);
             }
             holder.ly.removeAllViews();
-            populateLinks(holder.ly, path.getSteps(), path);
+            populateLinks(holder.ly, path.getSteps(), path, holder.realTimeData);
         }
 
         return convertView;
@@ -164,7 +183,7 @@ public class RoutesAdaptar extends BaseAdapter {
     }
 
     private void populateLinks(LinearLayout ll, ArrayList<RouteStep> collection,
-                               Route route) {
+                               Route route, TextView realTimeText) {
 
         Display display = activity.getWindowManager().getDefaultDisplay();
         int maxWidth = display.getWidth() - 100;
@@ -182,6 +201,14 @@ public class RoutesAdaptar extends BaseAdapter {
                 TextView image = new TextView(activity.getApplicationContext());
                 if(samItem.isTransit()) {
                     image.setText(samItem.getDeparture().getTravelTime());
+                    image.setId(pos);
+                    if(samItem.getTransportName() == R.string.tr_bus
+                            && (pos == 0
+                                  || (pos>0 && !collection.get(pos-1).isTransit()))
+                            && !TextUtils.isEmpty(realTimeText.getText())
+                            && realTimeText.getText().toString().compareTo("Not Available") !=0) {
+                        image.setPaintFlags(image.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    }
                 }
                 else {
                     if(pos == 0) {

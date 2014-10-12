@@ -1,6 +1,7 @@
 package com.example.nancy.aucklandtransport;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
 import android.text.Html;
@@ -19,7 +20,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,10 +40,20 @@ public class AucklandPublicTransportAPI {
     private long depTime;
     private RouteEngine routeEngine = null;
     //private SharedPreferences sharedPrefs;
+    private Route route;
+    private int routeStep;
+    private TextView textView;
 
     public void setRouteEngine(RouteEngine routeEngine) {
         this.routeEngine = routeEngine;
     }
+
+    public void setRoute(Route route, int routeStep) {
+        this.route = route;
+        this.routeStep = routeStep;
+    }
+
+    public void setTextView(TextView textView) { this.textView = textView;}
 
     public AucklandPublicTransportAPI(Context context, TextView realTimeText,
                                       View mProgressView, RoutesAdaptar routesAdaptar) {
@@ -286,40 +296,49 @@ public class AucklandPublicTransportAPI {
             if(routeInfoAdapter!=null)
                 routeInfoAdapter.showProgress(false, mProgressView, realTimeText );
 
-            Date actualArrivalTime = dates.get("ActualArrivalTime");
-            Date expectedArrivalTime = dates.get("ExpectedArrivalTime");
+            if(dates !=null) {
+                Date actualArrivalTime = dates.get("ActualArrivalTime");
+                Date expectedArrivalTime = dates.get("ExpectedArrivalTime");
 
-            if(expectedArrivalTime != null && actualArrivalTime != null) {
+                if (expectedArrivalTime != null && actualArrivalTime != null) {
 
-                Date depDate = new Date();
-                depDate.setTime(depTime*1000L);
+                    Date depDate = new Date();
+                    depDate.setTime(depTime * 1000L);
 
-                if(depDate.compareTo(actualArrivalTime) ==0) {
-                    SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
-                    String shortTimeStr = sdf.format(expectedArrivalTime);
-                    if(realTimeText!=null)
-                        realTimeText.setText(shortTimeStr);
-                    if(routeEngine != null)
-                        routeEngine.setActualArrivalTime(expectedArrivalTime);
-                    return;
+                    if (depDate.compareTo(actualArrivalTime) == 0) {
+                        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
+                        String shortTimeStr = sdf.format(expectedArrivalTime);
+                        if (realTimeText != null) {
+                            realTimeText.setText(shortTimeStr);
+                            if(textView != null)
+                                textView.setPaintFlags(textView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                        }
+                        if (routeEngine != null) {
+                            routeEngine.setActualArrivalTime(expectedArrivalTime);
+                            routeEngine.notifyUser(route, routeStep);
+                        }
+                        return;
+                    }
                 }
             }
 
-            if(routeEngine != null) {
-                SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                try {
-                    Date fullDate = toFullDate.parse("2014-10-10 22:40:00");
-                    Log.d(TAG, "fullDate: " + fullDate.getTime());
-                    routeEngine.setActualArrivalTime(fullDate);
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                }
-            }
+//            if(routeEngine != null) {
+//                SimpleDateFormat toFullDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//                try {
+//                    Date fullDate = toFullDate.parse("2014-10-10 22:40:00");
+//                    Log.d(TAG, "fullDate: " + fullDate.getTime());
+//                    routeEngine.setActualArrivalTime(fullDate);
+//                } catch (ParseException e) {
+//                    e.printStackTrace();
+//                }
+//            }
 
             if(realTimeText!=null)
                 realTimeText.setText(Html.fromHtml("<small><small><small>" +
                         "Not Available" + "</small></small></small>"));
         }
     }
+
+
 
 }
