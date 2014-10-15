@@ -44,7 +44,7 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
     private Boolean mInProgress;
     // Constants that define the activity detection interval
     public static final int MILLISECONDS_PER_SECOND = 1000;
-    public static final int DETECTION_INTERVAL_SECONDS = 20;
+    public static final int DETECTION_INTERVAL_SECONDS = 1;
     public static final int DETECTION_INTERVAL_MILLISECONDS =
             MILLISECONDS_PER_SECOND * DETECTION_INTERVAL_SECONDS;
 
@@ -94,19 +94,19 @@ public class RouteInfoScreen extends FragmentActivity implements AlertPositiveLi
     private void getRoute() {
         SharedPreferences settings = getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         try {
-            routeString = settings.getString("route", "");
             routeStarted = settings.getBoolean("routeStarted", false);
             isRouteSet = settings.getBoolean("isRouteSet", false);
 
             if (routeStarted) isRouteSet = routeStarted;
+
+            Intent intent = getIntent();
+            routeString = intent.getStringExtra("route");
             if (!routeString.equals("")) route = new Route(routeString);
             else {
-                Intent intent = getIntent();
-                routeString = intent.getStringExtra("route");
+                Log.d(TAG, "Shared Working :)");
+                routeString = settings.getString("route", "");
                 route = new Route(routeString);
-                Log.d("Shared Not Working", ":(");
             }
-
         } catch ( Exception e ) {
             Log.e("ERROR", "Couldn't get the route from JSONobj");
             e.printStackTrace();

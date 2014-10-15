@@ -1,6 +1,7 @@
 package com.example.nancy.aucklandtransport;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.os.AsyncTask;
 import android.telephony.TelephonyManager;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import com.example.nancy.aucklandtransport.Parser.RealTimeJSONParser;
 import com.google.android.gms.maps.model.LatLng;
 
+import org.androidpn.client.Constants;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -21,6 +23,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
@@ -39,7 +42,7 @@ public class AucklandPublicTransportAPI {
     private RouteInfoAdapter routeInfoAdapter;
     private long depTime;
     private RouteEngine routeEngine = null;
-    //private SharedPreferences sharedPrefs;
+    private SharedPreferences sharedPrefs;
     private Route route;
     private int routeStep;
     private TextView textView;
@@ -61,8 +64,8 @@ public class AucklandPublicTransportAPI {
         this.realTimeText = realTimeText;
         this.mProgressView = mProgressView;
         this.routesAdaptar = routesAdaptar;
-//        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
-//                Context.MODE_PRIVATE);
+        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
+                Context.MODE_PRIVATE);
         main_url = "http://" + mContext.getResources().getString(R.string.IP_ADDRESS) + ":8080/apt-server/";
     }
 
@@ -72,15 +75,15 @@ public class AucklandPublicTransportAPI {
         this.realTimeText = realTimeText;
         this.mProgressView = mProgressView;
         this.routeInfoAdapter = routeInfoAdapter;
-//        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
-//                Context.MODE_PRIVATE);
+        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
+                Context.MODE_PRIVATE);
         main_url = "http://" + mContext.getResources().getString(R.string.IP_ADDRESS) + ":8080/apt-server/";
     }
 
     public AucklandPublicTransportAPI(Context context) {
         this.mContext = context;
-//        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
-//                Context.MODE_PRIVATE);
+        sharedPrefs = mContext.getSharedPreferences(Constants.SHARED_PREFERENCE_NAME,
+                Context.MODE_PRIVATE);
         main_url = "http://" + mContext.getResources().getString(R.string.IP_ADDRESS) + ":8080/apt-server/";
     }
 
@@ -104,7 +107,9 @@ public class AucklandPublicTransportAPI {
 
         String serviceName = Context.TELEPHONY_SERVICE;
         TelephonyManager m_telephonyManager = (TelephonyManager) mContext.getSystemService(serviceName);
-        String userName = "username=" + m_telephonyManager.getDeviceId();
+        final String userName = "username=" + m_telephonyManager.getDeviceId();
+
+        //String userName = "username=" + sharedPrefs.getString(Constants.XMPP_USERNAME, "");
 
 //        if (!isRegistered()) {
 //            final String newUsername = newRandomUUID();
@@ -139,7 +144,9 @@ public class AucklandPublicTransportAPI {
 
         String serviceName = Context.TELEPHONY_SERVICE;
         TelephonyManager m_telephonyManager = (TelephonyManager) mContext.getSystemService(serviceName);
-        String userName = "username=" + m_telephonyManager.getDeviceId();
+        final String userName = "username=" + m_telephonyManager.getDeviceId();
+
+        //String userName = "username=" + sharedPrefs.getString(Constants.XMPP_USERNAME, "");
 
         // TODO remove hardcoding
         //String url = main_url + "DeleteJob?" + location + "&" + routeName + "&" + userName;
@@ -314,8 +321,7 @@ public class AucklandPublicTransportAPI {
                                 textView.setPaintFlags(textView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                         }
                         if (routeEngine != null) {
-                            routeEngine.setActualArrivalTime(expectedArrivalTime);
-                            routeEngine.notifyUser(route, routeStep);
+                            checkNewRoute(expectedArrivalTime);
                         }
                         return;
                     }
@@ -339,6 +345,38 @@ public class AucklandPublicTransportAPI {
         }
     }
 
+    private void checkNewRoute(Date arrivalTime) {
+        routeEngine.setActualArrivalTime(arrivalTime);
+        RouteStep nextRoute = route.getSteps().get(routeStep);
 
+        Log.d(TAG, "arrivalTime: " + arrivalTime);
+
+        if (arrivalTime != null) {
+            Calendar c = Calendar.getInstance();
+            long diff = (arrivalTime.getTime() - c.getTimeInMillis()) / 1000L;
+
+            //TODO remove hard coding
+            diff = 301;
+
+            if ((diff > 300) || diff < 0) {
+                String message = "";
+                if(diff > 300)
+                    message = "Your " +
+                        mContext.getResources().getString(nextRoute.getTransportName())
+                        + " " + nextRoute.getShortName()
+                        + " is arriving in next " + Math.round(diff / 60) + " minute.";
+                else
+                message = "Your " +
+                        mContext.getResources().getString(nextRoute.getTransportName())
+                        + " " + nextRoute.getShortName()
+                        + " has left.";
+
+                BestRoutes bestRoutes = new BestRoutes(nextRoute.getDepartureStop(),
+                        route.getEndAddress(), routeStep, route, message);
+                bestRoutes.setRouteEngine(routeEngine);
+                bestRoutes.findBestRoutes();
+            }
+        }
+    }
 
 }

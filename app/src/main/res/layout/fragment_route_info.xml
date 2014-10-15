@@ -37,6 +37,14 @@
                 android:onClick="StartTracking"
                 android:text="@string/Navigation"></Button>
 
+            <Button
+                android:id="@+id/newRoutes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="CheckNewRoutes"
+                android:text="New Routes"
+                android:visibility="gone"></Button>
+
         </LinearLayout>
 
         <View

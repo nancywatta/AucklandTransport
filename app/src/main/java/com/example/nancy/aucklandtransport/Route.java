@@ -67,6 +67,15 @@ public class Route {
         return false;
     }
 
+    public int getTotalTransfers(){
+        int count = 0;
+        for(RouteStep routeStep: steps) {
+            if(routeStep.isTransit())
+                count++;
+        }
+        return count;
+    }
+
     public Route(String json) throws JSONException {
         this(new JSONObject(json));
     }
@@ -222,5 +231,7 @@ public class Route {
     public LatLng getEndLocation() { return endLocation; }
 
     public String getEndAddress() { return endAddress; }
+
+    public String getStartAddress() { return startAddress; }
 
 }

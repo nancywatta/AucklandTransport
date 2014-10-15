@@ -46,6 +46,7 @@ public class RouteInfoFragment extends Fragment implements
     ListView listView;
     private Button mapBtn=null;
     private Button navigationBtn=null;
+    public static Button newRoutesBtn=null;
 
     private boolean isRouteSet = false;
     private Boolean routeStarted = false;
@@ -105,6 +106,14 @@ public class RouteInfoFragment extends Fragment implements
         navigationBtn=(Button)dataView.findViewById(R.id.startNavigation);
         navigationBtn.setOnClickListener(selectButtonListener);
 
+        newRoutesBtn = (Button)dataView.findViewById(R.id.newRoutes);
+        newRoutesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(final View v) {
+                CheckNewRoutes(v);
+            }
+        });
+
         getRoute();
 
         listView = (ListView)dataView.findViewById(R.id.RouteInfoScreenListView);
@@ -158,21 +167,23 @@ public class RouteInfoFragment extends Fragment implements
     private void getRoute() {
         SharedPreferences settings = context.getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         try {
-            routeString = settings.getString("route", "");
+
             routeStarted = settings.getBoolean("routeStarted", false);
             isRouteSet = settings.getBoolean("isRouteSet", false);
 
             if (routeStarted) isRouteSet = routeStarted;
+
+            Intent intent = getActivity().getIntent();
+            routeString = intent.getStringExtra("route");
             if (!routeString.equals("")) route = new Route(routeString);
             else {
-                Intent intent = getActivity().getIntent();
-                routeString = intent.getStringExtra("route");
+                Log.d(TAG, "Shared Working :)");
+                routeString = settings.getString("route", "");
                 route = new Route(routeString);
-                Log.d("Shared Not Working", ":(");
             }
 
         } catch ( Exception e ) {
-            Log.e("ERROR", "Couldn't get the route from JSONobj");
+            Log.e(TAG, "Couldn't get the route from JSONobj");
             e.printStackTrace();
         }
     }
@@ -184,6 +195,11 @@ public class RouteInfoFragment extends Fragment implements
             myIntent.putExtra("route", routeString);
             startActivity(myIntent);
         }catch (Exception e) {}
+    }
+
+    public void CheckNewRoutes(View v) {
+        Intent myIntent = new Intent(context, AlternateRoute.class);
+        context.startActivity(myIntent);
     }
 
     @Override

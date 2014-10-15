@@ -343,6 +343,15 @@ public class XmppManager {
                 String serviceName = Context.TELEPHONY_SERVICE;
                 TelephonyManager m_telephonyManager = (TelephonyManager) context.getSystemService(serviceName);
                 final String newUsername = m_telephonyManager.getDeviceId();
+
+//                SharedPreferences settings = context.getSharedPreferences(
+//                        context.getResources().getString(R.string.PREFS_NAME), 0);
+//                final String newUsername = settings.getString(Constants.XMPP_USERNAME,"");
+//                final String newPassword = settings.getString(Constants.XMPP_PASSWORD, "");
+//
+//                Log.d(LOGTAG, "username=" + newUsername);
+//                Log.d(LOGTAG, "password=" + newPassword);
+
                 //final String newUsername = newRandomUUID();
                 final String newPassword = newRandomUUID();
 

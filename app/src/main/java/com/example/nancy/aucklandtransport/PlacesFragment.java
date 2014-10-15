@@ -42,6 +42,8 @@ import java.util.HashMap;
  */
 public class PlacesFragment extends Fragment {
 
+    private static final String TAG = PlacesFragment.class.getSimpleName();
+
     Context context;
 
     // GoogleMap
@@ -74,14 +76,13 @@ public class PlacesFragment extends Fragment {
     private void getRoute() {
         SharedPreferences settings = context.getSharedPreferences(getString(R.string.PREFS_NAME), 0);
         try {
-            routeString = settings.getString("route", "");
-
+            Intent intent = getActivity().getIntent();
+            routeString = intent.getStringExtra("route");
             if (!routeString.equals("")) route = new Route(routeString);
             else {
-                Intent intent = getActivity().getIntent();
-                routeString = intent.getStringExtra("route");
+                Log.d(TAG, "Shared Working :)");
+                routeString = settings.getString("route", "");
                 route = new Route(routeString);
-                Log.d("Shared Not Working", ":(");
             }
 
         } catch (Exception e) {

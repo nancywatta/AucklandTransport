@@ -59,6 +59,7 @@
     <string name="RouteFinishText">Your trip finished!</string>
     <string name="RouteStart">Route started</string>
     <string name="ArrivalText">You need to get down the vehicle in %d minutes</string>
+    <string name="NewRoutes">There are new Route available</string>
 
     <!-- Activity Titles -->
     <string name="title_activity_path_elevation">RouteInfo</string>
@@ -75,7 +76,7 @@
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
     <string name="play_services_available">Google Play services is available</string>
-    <string name="IP_ADDRESS">192.168.1.4</string>
+    <string name="IP_ADDRESS">192.168.1.5</string>
     <string name="mCancelRoute">Stop Navigation</string>
     <string name="mClickOnBoard">Click the OnBoard Button once you are in the vehicle</string>
     <string name="mNotifyOnBoard">Notify APT when you board the vehicle</string>
@@ -119,5 +120,6 @@
     <string name="title_activity_tourist_planner">TouristPlanner</string>
     <string name="title_activity_tourist_route">TouristRoute</string>
     <string name="title_activity_alternate_route">AlternateRoute</string>
+    <string name="title_activity_route_info">RouteInfo</string>
 
 </resources>
