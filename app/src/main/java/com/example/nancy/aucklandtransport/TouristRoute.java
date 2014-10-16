@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
@@ -14,12 +15,17 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nancy.aucklandtransport.BackgroundTask.NearbyPlacesTask;
@@ -52,6 +58,7 @@ public class TouristRoute extends FragmentActivity {
     private static final String TAG = TouristRoute.class.getSimpleName();
     private View mProgressView;
     private View mRouteInfoView;
+    EditText etLocation;
 
     String fromLoc;
     String toLoc;
@@ -70,6 +77,8 @@ public class TouristRoute extends FragmentActivity {
 
     // A button to find the near by places
     Button mBtnFind = null;
+
+    Button mBtnSearch = null;
 
     // Stores near by places
     Place[] mPlaces = null;
@@ -128,6 +137,32 @@ public class TouristRoute extends FragmentActivity {
             isRouteSave = true;
             History.saveRoute(this, fromLoc, toLoc, fromCoords, toCoords);
         }
+
+        // Getting reference to EditText to get the user input location
+        etLocation = (EditText) findViewById(R.id.et_location);
+
+        etLocation.setSelection(etLocation.getText().length());
+
+        etLocation.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                etLocation.setSelectAllOnFocus(true);
+            }
+        });
+
+        etLocation.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(etLocation.getWindowToken(),
+                            InputMethodManager.RESULT_UNCHANGED_SHOWN);
+                    return true;
+                }
+                return false;
+            }
+        });
 
         showProgress(true);
 
@@ -328,6 +363,9 @@ public class TouristRoute extends FragmentActivity {
         // Getting reference to Find Button
         mBtnFind = (Button) findViewById(R.id.btn_find);
 
+        // Getting reference to btn_find of the layout activity_main
+        mBtnSearch = (Button) findViewById(R.id.btn_search);
+
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
 
@@ -425,6 +463,43 @@ public class TouristRoute extends FragmentActivity {
                     placesTask.execute(sb.toString());
                 }
             });
+
+            // Defining button click event listener for the find button
+            View.OnClickListener findClickListener = new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Getting user input location
+                    String location = etLocation.getText().toString();
+                    etLocation.clearFocus();
+
+                    if (location != null && !location.equals("")) {
+                        StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/textsearch/json?");
+                        try {
+                            // encoding special characters like space in the user input place
+                            location = URLEncoder.encode(location, "utf-8");
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+
+                        sb.append("query=" + location);
+                        sb.append("&sensor=true");
+                        sb.append("&key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw");
+
+                        // Creating a new non-ui thread task to download Google place json data
+                        NearbyPlacesTask placesTask = new NearbyPlacesTask(mGoogleMap,
+                                mHMReference, mPlaces);
+
+                        placesTask.setTextSearch();
+
+                        // Invokes the "doInBackground()" method of the class PlaceTask
+                        placesTask.execute(sb.toString());
+
+                    }
+                }
+            };
+
+            // Setting button click event listener for the find button
+            mBtnSearch.setOnClickListener(findClickListener);
 
             if (route != null) {
                 Log.d(TAG, "not Null");

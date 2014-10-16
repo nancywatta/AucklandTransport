@@ -6,6 +6,7 @@ import android.util.Log;
 import com.example.nancy.aucklandtransport.Parser.PlaceJSONParser;
 import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.example.nancy.aucklandtransport.datatype.Place;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -31,11 +32,15 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
     // GoogleMap
     GoogleMap mGoogleMap;
 
+    private boolean isTextSearch = false;
+
     // Links marker id and place object
     HashMap<String, Place> mHMReference;
 
     // Stores near by places
     Place[] mPlaces;
+
+    public void setTextSearch() { isTextSearch = true; }
 
     public NearbyPlacesTask(GoogleMap googleMap,
                             HashMap<String, Place> hmReference, Place[] places) {
@@ -134,6 +139,8 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
         protected void onPostExecute(Place[] places) {
 
             mPlaces = places;
+            if(places == null)
+                return;
 
             for (int i = 0; i < places.length; i++) {
                 Place place = places[i];
@@ -146,12 +153,16 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
 
                 LatLng latLng = new LatLng(lat, lng);
 
+                if(i==0 && isTextSearch)
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
+
                 Marker m = drawMarker(latLng, Constant.UNDEFINED_COLOR);
 
                 // Adding place reference to HashMap with marker id as HashMap key
                 // to get its reference in infowindow click event listener
                 mHMReference.put(m.getId(), place);
             }
+
         }
     }
 

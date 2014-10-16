@@ -23,6 +23,8 @@ public class Place implements Parcelable {
     // Photo is a Parcelable class
     public Photo[] mPhotos={};
 
+    public Boolean isAdded = false;
+
     @Override
     public int describeContents() {
         // TODO Auto-generated method stub
@@ -36,6 +38,7 @@ public class Place implements Parcelable {
         dest.writeString(mLng);
         dest.writeString(mPlaceName);
         dest.writeString(mVicinity);
+        dest.writeByte((byte) (isAdded ? 1 : 0));
         dest.writeParcelableArray(mPhotos, 0);
     }
 
@@ -48,6 +51,7 @@ public class Place implements Parcelable {
         this.mLng = in.readString();
         this.mPlaceName = in.readString();
         this.mVicinity = in.readString();
+        this.isAdded = in.readByte() != 0;
         this.mPhotos = (Photo[])in.readParcelableArray(Photo.class.getClassLoader());
     }
 

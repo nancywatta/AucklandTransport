@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -18,6 +19,7 @@ import android.widget.ViewFlipper;
 
 import com.example.nancy.aucklandtransport.datatype.Photo;
 import com.example.nancy.aucklandtransport.datatype.Place;
+import com.example.nancy.aucklandtransport.datatype.TouristPlaces;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +36,8 @@ public class PlaceDialogFragment extends DialogFragment {
     Place mPlace = null;
     DisplayMetrics mMetrics = null;
     Context context;
+    Button addBtn;
+    TouristPlaces touristPlaces = new TouristPlaces();
 
     public PlaceDialogFragment(){
         super();
@@ -68,6 +72,8 @@ public class PlaceDialogFragment extends DialogFragment {
         // Getting reference to TextView to display place vicinity
         mTVVicinity = (TextView) v.findViewById(R.id.tv_vicinity);
 
+        addBtn = (Button)v.findViewById(R.id.btn_add);
+
         if(mPlace!=null){
 
             // Setting the title for the Dialog Fragment
@@ -81,6 +87,12 @@ public class PlaceDialogFragment extends DialogFragment {
 
             // Setting the vicinity of the place
             mTVVicinity.setText(mPlace.mVicinity);
+
+            if(mPlace.isAdded)
+                setButtonToDelete();
+            else {
+                setButtonToAdd();
+            }
 
             // Creating an array of ImageDownloadTask to download photos
             ImageDownloadTask[] imageDownloadTask = new ImageDownloadTask[photos.length];
@@ -111,6 +123,38 @@ public class PlaceDialogFragment extends DialogFragment {
         }
         return v;
     }
+
+    private void setButtonToDelete() {
+        addBtn.setText("Delete Place");
+        addBtn.setOnClickListener(deleteButtonListener);
+    }
+
+    private void setButtonToAdd() {
+        addBtn.setText(R.string.str_btn_Add);
+        addBtn.setOnClickListener(addButtonListener);
+    }
+
+    private View.OnClickListener deleteButtonListener = new View.OnClickListener() {
+
+        public void onClick(View v) {
+            if(mPlace.isAdded) {
+                touristPlaces.delete(mPlace.mLat, mPlace.mLng);
+                mPlace.isAdded = false;
+                dismiss();
+            }
+        }
+    };
+
+    private View.OnClickListener addButtonListener = new View.OnClickListener() {
+
+        public void onClick(View v) {
+            if(!mPlace.isAdded) {
+                touristPlaces.add(mPlace.mLat, mPlace.mLng);
+                mPlace.isAdded = true;
+                dismiss();
+            }
+        }
+    };
 
     @Override
     public void onDestroyView() {
@@ -170,7 +214,8 @@ public class PlaceDialogFragment extends DialogFragment {
             mFlipper.addView(iView);
 
             // Showing download completion message
-            Toast.makeText(getActivity().getBaseContext(), "Image downloaded successfully", Toast.LENGTH_SHORT).show();
+            if(getActivity() != null)
+                Toast.makeText(getActivity().getBaseContext(), "Image downloaded successfully", Toast.LENGTH_SHORT).show();
         }
     }
 

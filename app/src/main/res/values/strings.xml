@@ -122,4 +122,6 @@
     <string name="title_activity_alternate_route">AlternateRoute</string>
     <string name="title_activity_route_info">RouteInfo</string>
 
+    <string name="str_btn_Add">Add Place</string>
+
 </resources>
