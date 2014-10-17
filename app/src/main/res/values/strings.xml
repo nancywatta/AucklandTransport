@@ -121,7 +121,9 @@
     <string name="title_activity_tourist_route">TouristRoute</string>
     <string name="title_activity_alternate_route">AlternateRoute</string>
     <string name="title_activity_route_info">RouteInfo</string>
-
     <string name="str_btn_Add">Add Place</string>
+    <string name="duration">Duration</string>
+    <string name="hnt_duration">in Minutes</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

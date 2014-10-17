@@ -1,41 +1,48 @@
 package com.example.nancy.aucklandtransport.datatype;
 
-import com.google.android.gms.maps.model.LatLng;
+import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * Created by Nancy on 10/16/14.
  */
 public class TouristPlaces {
-    private static ArrayList<LatLng> placesArray;
+    private static ArrayList<Place> placesArray;
 
-    public void add(String lat, String lng) {
+    public void add(Place place) {
         if(placesArray == null)
-            placesArray = new ArrayList<LatLng>();
-        placesArray.add(new LatLng(Double.parseDouble(lat),
-                Double.parseDouble(lng)));
+            placesArray = new ArrayList<Place>();
+        placesArray.add(place);
+
+        Log.d("Size" , "Add:" + placesArray.size());
     }
 
-    public void delete(String lat, String lng) {
+    public void delete(Place place) {
         if(placesArray == null)
             return;
 
-        placesArray.remove(new LatLng(Double.parseDouble(lat),
-                Double.parseDouble(lng)));
-    }
-
-    public static class PlaceItem {
-        PlaceItem(int idx, String lat, String lng) {
-            latitude = lat; longitude = lng; index = idx;
+        for (Iterator<Place> it = placesArray.iterator(); it.hasNext(); ) {
+            Place place1 = it.next();
+            if (place1.compare(place)) {
+                it.remove();
+            }
         }
 
-        public String toJSON() {
-            return "{ index: \""+index+"\", latitude: \""+latitude+"\", longitude: \""+longitude+"\"  }";
-        }
-
-        public String latitude;
-        public String longitude;
-        public int index;
+        if(placesArray != null)
+        Log.d("Size" , "Delete:" + placesArray.size());
     }
+
+    public boolean checkExisting(Place place) {
+        if(placesArray == null)
+            return false;
+        for(Place place1: placesArray) {
+            if(place1.compare(place))
+                return true;
+        }
+        return false;
+    }
+
+    public ArrayList<Place> getPlacesArray() { return placesArray; }
 }

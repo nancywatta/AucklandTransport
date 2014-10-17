@@ -25,6 +25,8 @@ public class Place implements Parcelable {
 
     public Boolean isAdded = false;
 
+    public int duration;
+
     @Override
     public int describeContents() {
         // TODO Auto-generated method stub
@@ -38,6 +40,7 @@ public class Place implements Parcelable {
         dest.writeString(mLng);
         dest.writeString(mPlaceName);
         dest.writeString(mVicinity);
+        dest.writeInt(duration);
         dest.writeByte((byte) (isAdded ? 1 : 0));
         dest.writeParcelableArray(mPhotos, 0);
     }
@@ -52,6 +55,7 @@ public class Place implements Parcelable {
         this.mPlaceName = in.readString();
         this.mVicinity = in.readString();
         this.isAdded = in.readByte() != 0;
+        this.duration = in.readInt();
         this.mPhotos = (Photo[])in.readParcelableArray(Photo.class.getClassLoader());
     }
 
@@ -68,5 +72,12 @@ public class Place implements Parcelable {
             return null;
         }
     };
+
+    public boolean compare(Place place) {
+        if(this.mLat.compareTo(place.mLat) ==0 && this.mLng.compareTo(place.mLng)==0
+                && this.mPlaceName.compareTo(place.mPlaceName) ==0 )
+            return true;
+        return false;
+    }
 
 }

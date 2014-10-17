@@ -268,7 +268,8 @@ public class PlacesFragment extends Fragment {
                     getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
 
                     // Creating a dialog fragment to display the photo
-                    PlaceDialogFragment dialogFragment = new PlaceDialogFragment(place, dm, context);
+                    GooglePlacesDialogFragment dialogFragment
+                            = new GooglePlacesDialogFragment(place, dm, context);
 
                     // Getting a reference to Fragment Manager
                     FragmentManager fm = getActivity().getSupportFragmentManager();

@@ -33,6 +33,7 @@ import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
 import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.example.nancy.aucklandtransport.Utils.HTTPConnect;
 import com.example.nancy.aucklandtransport.datatype.Place;
+import com.example.nancy.aucklandtransport.datatype.TouristPlaces;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdate;
@@ -95,7 +96,11 @@ public class TouristRoute extends FragmentActivity {
     // Links marker id and place object
     HashMap<String, Place> mHMReference = new HashMap<String, Place>();
 
+    public static HashMap<String, Place> mAddedReference = new HashMap<String, Place>();
+
     Bundle savedInstanceState;
+
+    TouristPlaces touristPlaces = new TouristPlaces();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -180,6 +185,16 @@ public class TouristRoute extends FragmentActivity {
         drawMarker(route.getStartLocation(), BitmapDescriptorFactory.HUE_VIOLET);
 
         drawMarker(route.getEndLocation(), BitmapDescriptorFactory.HUE_VIOLET);
+
+        if(touristPlaces.getPlacesArray() != null ) {
+            mAddedReference.clear();
+            for(Place place: touristPlaces.getPlacesArray()) {
+                Marker m = drawMarker(new LatLng(
+                        Double.parseDouble(place.mLat),
+                        Double.parseDouble(place.mLng)), BitmapDescriptorFactory.HUE_VIOLET);
+                mAddedReference.put(m.getId(), place);
+            }
+        }
 
         Log.d("Inside ", "Polyline");
         ArrayList<LatLng> points = null;
@@ -473,6 +488,11 @@ public class TouristRoute extends FragmentActivity {
                     etLocation.clearFocus();
 
                     if (location != null && !location.equals("")) {
+                        mGoogleMap.clear();
+
+                        if (route != null)
+                            addPolyLine();
+
                         StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/textsearch/json?");
                         try {
                             // encoding special characters like space in the user input place
@@ -482,6 +502,8 @@ public class TouristRoute extends FragmentActivity {
                         }
 
                         sb.append("query=" + location);
+                        sb.append("&location=" + mLocation.latitude + "," + mLocation.longitude);
+                        sb.append("&radius=50000");
                         sb.append("&sensor=true");
                         sb.append("&key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw");
 
@@ -534,13 +556,21 @@ public class TouristRoute extends FragmentActivity {
 
                 @Override
                 public boolean onMarkerClick(Marker marker) {
+                    if(mAddedReference != null)
+                    Log.d(TAG, "mAddedReference: " +  mAddedReference.size());
 
                     // If touched at User input location
-                    if (!mHMReference.containsKey(marker.getId()))
+                    if (!mHMReference.containsKey(marker.getId())
+                            && !mAddedReference.containsKey(marker.getId()))
                         return false;
 
+                    Log.d(TAG, "Reached Here");
                     // Getting place object corresponding to the currently clicked Marker
-                    Place place = mHMReference.get(marker.getId());
+                    Place place = null;
+                    if (mHMReference.containsKey(marker.getId()) )
+                        place = mHMReference.get(marker.getId());
+                    else
+                    place = mAddedReference.get(marker.getId());
 
                     // Creating an instance of DisplayMetrics
                     DisplayMetrics dm = new DisplayMetrics();
@@ -551,6 +581,10 @@ public class TouristRoute extends FragmentActivity {
                     // Creating a dialog fragment to display the photo
                     PlaceDialogFragment dialogFragment =
                             new PlaceDialogFragment(place, dm, TouristRoute.this);
+
+                    dialogFragment.setTouristPlaces(touristPlaces);
+
+//                    dialogFragment.setMarkerRef(marker.getId());
 
                     // Getting a reference to Fragment Manager
                     FragmentManager fm = getSupportFragmentManager();

@@ -484,6 +484,7 @@ public class MainApp extends FragmentActivity {
         if (id == R.id.action_explore) {
             Intent exploreActivity = new Intent(MainApp.this, TouristPlanner.class);
             startActivity(exploreActivity);
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);
