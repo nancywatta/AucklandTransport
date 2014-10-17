@@ -180,6 +180,11 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.AlternateRoute" />
         </activity>
+
+        <service
+            android:name=".RouteIntentService"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

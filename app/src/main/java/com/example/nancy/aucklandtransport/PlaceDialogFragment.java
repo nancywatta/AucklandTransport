@@ -32,6 +32,8 @@ import java.net.URL;
  * Created by Nancy on 9/9/14.
  */
 public class PlaceDialogFragment extends DialogFragment {
+    private static final String TAG = PlaceDialogFragment.class.getSimpleName();
+
     TextView mTVPhotosCount = null;
     TextView mTVVicinity = null;
     TextView mDurText = null;
@@ -180,11 +182,21 @@ public class PlaceDialogFragment extends DialogFragment {
                 mPlace.duration = Integer.parseInt(mDuration.getText().toString());
                 mPlace.isAdded = true;
                 touristPlaces.add(mPlace);
+                callService();
+
 //                TouristRoute.mAddedReference.put(markerId, mPlace);
                 dismiss();
             }
         }
     };
+
+    private void callService() {
+        String placeCoords = mPlace.mLat + "," + mPlace.mLng;
+        RouteIntentService.startAction(context, touristPlaces,
+                touristPlaces.getPreviousAdd(mPlace), placeCoords);
+        RouteIntentService.endAction(context,
+                placeCoords, touristPlaces.getNextAddress(mPlace));
+    }
 
     @Override
     public void onDestroyView() {

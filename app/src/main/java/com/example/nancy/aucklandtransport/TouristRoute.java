@@ -4,8 +4,10 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Dialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -13,6 +15,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -102,6 +105,9 @@ public class TouristRoute extends FragmentActivity {
 
     TouristPlaces touristPlaces = new TouristPlaces();
 
+    RouteReceiver mReceiver;
+    IntentFilter mFilter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -110,6 +116,15 @@ public class TouristRoute extends FragmentActivity {
         mRouteInfoView = findViewById(R.id.route_info_form);
         mProgressView = findViewById(R.id.login_progress);
         this.savedInstanceState = savedInstanceState;
+
+        // Instantiating BroadcastReceiver
+        mReceiver = new RouteReceiver();
+
+        // Creating an IntentFilter with action
+        mFilter = new IntentFilter(Constant.BROADCAST_ACTION);
+
+        // Registering BroadcastReceiver with this activity for the intent filter
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, mFilter);
 
         Intent intent = getIntent();
         fromLoc = intent.getStringExtra(MainApp.FROM_LOCATION);
@@ -196,29 +211,65 @@ public class TouristRoute extends FragmentActivity {
             }
         }
 
-        Log.d("Inside ", "Polyline");
         ArrayList<LatLng> points = null;
         PolylineOptions lineOptions = null;
-        // Traversing through all the routes
-        for (int i = 0; i < route.getSteps().size(); i++) {
-            points = new ArrayList<LatLng>();
-            lineOptions = new PolylineOptions();
 
-            // Fetching i-th route
-            RouteStep path = route.getSteps().get(i);
+        if(touristPlaces.getRoutesArray() != null &&
+                touristPlaces.getRoutesArray().size() > 0 ) {
 
-            for (int l = 0; l < path.getLatlng().size(); l++) {
-                points.add(path.getLatlng().get(l));
+            for(int index=0; index < touristPlaces.getRoutesArray().size(); index++) {
+                Route route1 = null;
+                try {
+                    route1 = new Route(touristPlaces.getRoutesArray().get(index).getJsonString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                // Traversing through all the routes
+                for (int i = 0; i < route1.getSteps().size(); i++) {
+                    points = new ArrayList<LatLng>();
+                    lineOptions = new PolylineOptions();
+
+                    // Fetching i-th route
+                    RouteStep path = route1.getSteps().get(i);
+
+                    for (int l = 0; l < path.getLatlng().size(); l++) {
+                        points.add(path.getLatlng().get(l));
+                    }
+
+                    if (path.isTransit())
+                        lineOptions.color(Color.RED);
+                    else
+                        lineOptions.color(Color.BLUE);
+                    // Adding all the points in the route to LineOptions
+                    lineOptions.addAll(points);
+                    lineOptions.width(5);
+                    mGoogleMap.addPolyline(lineOptions);
+                }
             }
+        }
+        else {
+            // Traversing through all the routes
+            for (int i = 0; i < route.getSteps().size(); i++) {
+                points = new ArrayList<LatLng>();
+                lineOptions = new PolylineOptions();
 
-            if (path.isTransit())
-                lineOptions.color(Color.RED);
-            else
-                lineOptions.color(Color.BLUE);
-            // Adding all the points in the route to LineOptions
-            lineOptions.addAll(points);
-            lineOptions.width(5);
-            mGoogleMap.addPolyline(lineOptions);
+                // Fetching i-th route
+                RouteStep path = route.getSteps().get(i);
+
+                for (int l = 0; l < path.getLatlng().size(); l++) {
+                    points.add(path.getLatlng().get(l));
+                }
+
+                if (path.isTransit())
+                    lineOptions.color(Color.RED);
+                else
+                    lineOptions.color(Color.BLUE);
+                // Adding all the points in the route to LineOptions
+                lineOptions.addAll(points);
+                lineOptions.width(5);
+                mGoogleMap.addPolyline(lineOptions);
+            }
         }
     }
 
@@ -258,7 +309,7 @@ public class TouristRoute extends FragmentActivity {
         // Building the url to the web service
         String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
 
-        Log.d("url", url);
+        Log.d(TAG, "url: " + url);
 
         return url;
     }
@@ -277,7 +328,7 @@ public class TouristRoute extends FragmentActivity {
                 // Fetching the data from web service
                 data = HTTPConnect.downloadUrl(url[0]);
             }catch(Exception e){
-                Log.d("Background Task",e.toString());
+                Log.d(TAG, "Background Task " + e.toString());
             }
             return data;
         }
@@ -349,8 +400,11 @@ public class TouristRoute extends FragmentActivity {
             if(!isRouteSave)
                 History.saveRoute(TouristRoute.this, fromLoc, toLoc, fromCoords, toCoords);
 
-            if (route != null)
+            if (route != null) {
                 mLocation = route.getStartLocation();
+                TouristPlaces.startAddress = route.getStartAddress();
+                TouristPlaces.endAddress = route.getEndAddress();
+            }
 
             handleMap();
         }
@@ -693,5 +747,17 @@ public class TouristRoute extends FragmentActivity {
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // Defining a BroadcastReceiver
+    private class RouteReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, " RoutesArray: " + touristPlaces.getRoutesArray());
+
+            mGoogleMap.clear();
+
+            addPolyLine();
+        }
     }
 }

@@ -25,4 +25,7 @@ public class Constant {
 
     // Specifies the drawMarker() to draw the marker with default color
     public static final float UNDEFINED_COLOR = -1;
+
+    // Action Name to IntentFilter
+    public static final String BROADCAST_ACTION = "com.example.nancy.aucklandtransport.BROADCAST";
 }

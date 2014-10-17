@@ -104,16 +104,20 @@ public class Route {
         /** Getting duration from the json data */
         jDuration = obj.getJSONObject("duration");
 
-        jDepartureTime = obj.getJSONObject("departure_time");
-
-        jArrivalTime = obj.getJSONObject("arrival_time");
+        try {
+            jDepartureTime = obj.getJSONObject("departure_time");
+            jArrivalTime = obj.getJSONObject("arrival_time");
+            this.departure = new TravelTime(jDepartureTime.getString("text"), jDepartureTime.getLong("value"));
+            this.arrival = new TravelTime(jArrivalTime.getString("text"), jArrivalTime.getLong("value"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
         this.distance = jDistance.getString("text");
         this.duration = new TravelTime(jDuration.getString("text"), jDuration.getLong("value"));
         this.startAddress = obj.getString("start_address");
         this.endAddress = obj.getString("end_address");
-        this.departure = new TravelTime(jDepartureTime.getString("text"), jDepartureTime.getLong("value"));
-        this.arrival = new TravelTime(jArrivalTime.getString("text"), jArrivalTime.getLong("value"));
+
         startLat = obj.getJSONObject("start_location").getDouble("lat");
         startLng = obj.getJSONObject("start_location").getDouble("lng");
         this.startLocation = new LatLng(startLat,startLng);
