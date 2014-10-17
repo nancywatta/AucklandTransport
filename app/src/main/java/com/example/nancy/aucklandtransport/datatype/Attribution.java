@@ -4,6 +4,9 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * Attribution class is used to represent photo attributions.
+ * This is also a parcelable class.
+ *
  * Created by Nancy on 9/9/14.
  */
 public class Attribution implements Parcelable {

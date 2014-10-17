@@ -8,14 +8,26 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 /**
+ * TouristPlaces is used to store all the places a user will visit
+ * when using Explore City Option. The class will also store the
+ * connecting routes of all these places.
+ *
  * Created by Nancy on 10/16/14.
  */
 public class TouristPlaces {
 
     private static final String TAG = TouristPlaces.class.getSimpleName();
+
+    // array of places to be visited
     private static ArrayList<Place> placesArray;
+
+    // array of route the user will follow
     private static ArrayList<Route> routesArray;
+
+    // starting point of the user journey
     public static String startAddress;
+
+    // ending point of the user journey
     public static String endAddress;
 
     public ArrayList<Route> getRoutesArray() { return routesArray; }
@@ -36,6 +48,12 @@ public class TouristPlaces {
         if(routesArray == null)
             return;
 
+        /**
+         *  if the routeArray contains Route from StartPoint to Point A and
+         * Point A to End Point, then when adding place B as a new place
+         *  that user would like to visit, remove route Point A to End Point,
+         *  instead of this add Point A to Point B and Point B to End Point.
+         */
         if(routesArray.size() > 1) {
             routesArray.remove(routesArray.size() - 1);
         }
@@ -76,6 +94,11 @@ public class TouristPlaces {
 
     public ArrayList<Place> getPlacesArray() { return placesArray; }
 
+    /**
+     * returns the previous place to be visited from the
+     * given Place. If No previous place of Interest, then return the
+     * starting point of Journey.
+     */
     public String getPreviousAdd(Place place) {
         if(placesArray == null)
             return "";
@@ -93,6 +116,11 @@ public class TouristPlaces {
         return "";
     }
 
+    /**
+     * returns the next place to be visited from the
+     * given Place. If the given place is the last to be visited, then return the
+     * ending point of Journey.
+     */
     public String getNextAddress(Place place) {
         if(placesArray == null)
             return "";

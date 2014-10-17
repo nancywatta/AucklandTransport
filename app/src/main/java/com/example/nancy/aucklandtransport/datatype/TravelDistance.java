@@ -1,6 +1,9 @@
 package com.example.nancy.aucklandtransport.datatype;
 
 /**
+ * TravelDistance is used to store the distance in meters and
+ * also its string format.
+ *
  * Created by Nancy on 10/5/14.
  */
 public class TravelDistance {

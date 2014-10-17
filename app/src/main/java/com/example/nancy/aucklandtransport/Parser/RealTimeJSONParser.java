@@ -10,10 +10,15 @@ import java.util.Date;
 import java.util.HashMap;
 
 /**
+ * RealTimeJSONParser class receives a JSONObject
+ * and parses the JSON String according to Output parameters sent
+ * by our private application server to store in HashMap.
+ *
  * Created by Nancy on 10/5/14.
  */
 public class RealTimeJSONParser {
 
+    /** Receives a JSONObject and returns a hashMap of scheduled and real time data */
     public HashMap<String, Date> parse(JSONObject jObject) {
         String actualArrivalTime ="", expectedArrivalTime = "";
         HashMap<String, Date> dates = new HashMap<String, Date>();
@@ -23,6 +28,10 @@ public class RealTimeJSONParser {
         try {
             actualArrivalTime = jObject.getString("ActualArrivalTime");
 
+            /**
+             * Getting actualArrivalTime from the json data. This is the scheduled
+             * time of Bus Arrival.
+             */
             if(actualArrivalTime.equals("") || actualArrivalTime  == null) {
                 dates.put("ActualArrivalTime", arrivalTime);
             }
@@ -36,6 +45,11 @@ public class RealTimeJSONParser {
                     e.printStackTrace();
                 }
             }
+
+            /**
+             * Getting expectedArrivalTime from the json data. This is the real
+             * time of Bus Arrival.
+             */
             expectedArrivalTime = jObject.getString("ExpectedArrivalTime");
             if(expectedArrivalTime.equals("") || expectedArrivalTime  == null) {
                 dates.put("ExpectedArrivalTime", expectedTime);

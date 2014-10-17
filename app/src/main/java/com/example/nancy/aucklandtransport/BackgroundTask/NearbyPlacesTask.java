@@ -24,6 +24,10 @@ import java.net.URL;
 import java.util.HashMap;
 
 /**
+ * NearbyPlacesTask lets you search for places within a specified area.
+ * You can refine your search request by supplying keywords or specifying the
+ * type of place you are searching for.
+ *
  * Created by Nancy on 10/6/14.
  */
 public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {

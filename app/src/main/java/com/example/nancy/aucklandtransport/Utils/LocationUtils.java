@@ -6,8 +6,9 @@ import android.location.Location;
 import com.example.nancy.aucklandtransport.R;
 
 /**
+ * LocationUtils class is used to define app-wide constants and utilities.
+ *
  * Created by Nancy on 9/20/14.
- * Defines app-wide constants and utilities
  */
 public final class LocationUtils {
 

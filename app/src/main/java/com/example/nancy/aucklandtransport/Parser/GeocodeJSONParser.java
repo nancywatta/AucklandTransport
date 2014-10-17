@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * GeocodeJSONParser class receives a JSONObject
+ * and parses the JSON String according to Output parameters of
+ * Google GeoCoding and Reverse GeoCoding API to store in custom data Objects.
+ *
  * Created by Nancy on 7/11/14.
  */
 public class GeocodeJSONParser {

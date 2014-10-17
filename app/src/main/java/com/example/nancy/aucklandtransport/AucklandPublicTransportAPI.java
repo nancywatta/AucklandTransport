@@ -29,6 +29,10 @@ import java.util.HashMap;
 import java.util.UUID;
 
 /**
+ * AucklandPublicTransportAPI to communicate with our private
+ * application server to get real time data for Bus and also get
+ * Push Notifications from Server.
+ *
  * Created by Nancy on 9/20/14.
  */
 public class AucklandPublicTransportAPI {
@@ -99,6 +103,7 @@ public class AucklandPublicTransportAPI {
 
     //http://localhost:8080/apt-server/ScheduleJob?lat=-36.861798&lng=174.74301&route=030&tripType=0&username=96ecf6226e93493e8c6c31e72e48114b
 
+    // Allow server to start tracking user to give notifications about Bus Arrival
     public void startServerTracking(LatLng busStop, String busNumber) {
 
         String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
@@ -137,6 +142,7 @@ public class AucklandPublicTransportAPI {
         scheduleTask.execute(url);
     }
 
+    // Allow server to stop tracking user
     public void stopServerTracking(LatLng busStop, String busNumber) {
         String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
 
@@ -226,6 +232,7 @@ public class AucklandPublicTransportAPI {
     }
 
     //http://172.23.208.76:8080/apt-server/showDueTime.do?lat=-36.861798&lng=174.74301&route=030
+    // get real time bus arrival data from application server
     public void getRealTimeDate(LatLng busStop, String busNumber, long depTime) {
         this.depTime = depTime;
         String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
@@ -271,7 +278,7 @@ public class AucklandPublicTransportAPI {
         }
     }
 
-    /** A class to parse the Geocoding Places in non-ui thread */
+    /** A class to parse the RealTime data in non-ui thread */
     class RealTimeParserTask extends AsyncTask<String, Integer, HashMap<String, Date>>{
 
         JSONObject jObject;
@@ -286,7 +293,7 @@ public class AucklandPublicTransportAPI {
             try{
                 jObject = new JSONObject(jsonData[0]);
 
-                /** Getting the parsed data as a an ArrayList */
+                /** Getting the parsed data as a HashMap */
                 dates = parser.parse(jObject);
 
             }catch(Exception e){
@@ -317,10 +324,13 @@ public class AucklandPublicTransportAPI {
                         String shortTimeStr = sdf.format(expectedArrivalTime);
                         if (realTimeText != null) {
                             realTimeText.setText(shortTimeStr);
+
+                            // strike the scheduled time of Bus
                             if(textView != null)
                                 textView.setPaintFlags(textView.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                         }
                         if (routeEngine != null) {
+                            // check if new routes available
                             checkNewRoute(expectedArrivalTime);
                         }
                         return;
@@ -345,6 +355,13 @@ public class AucklandPublicTransportAPI {
         }
     }
 
+    /**
+     * check for new routes available to user in case
+     * there is more than 5 minutes delay for his current Bus to arrive and there are other
+     * shorter routes available.
+     *
+     * @param arrivalTime real time of bus
+     */
     private void checkNewRoute(Date arrivalTime) {
         routeEngine.setActualArrivalTime(arrivalTime);
         RouteStep nextRoute = route.getSteps().get(routeStep);

@@ -24,7 +24,12 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-// Defining DialogFragment class to show the place details with photo
+/**
+ * GooglePlacesDialogFragment class is the dialog window which is opened on clicking a marker.
+ * It shows place name, vicinity and photo corresponding to the marked place.
+ *
+ * Created by Nancy on 9/9/14.
+ */
 public class GooglePlacesDialogFragment extends DialogFragment{
 
     TextView mTVPhotosCount = null;
@@ -53,6 +58,7 @@ public class GooglePlacesDialogFragment extends DialogFragment{
         super.onCreate(savedInstanceState);
     }
 
+    // Defining DialogFragment class to show the place details with photo
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -144,6 +150,10 @@ public class GooglePlacesDialogFragment extends DialogFragment{
         return bitmap;
     }
 
+    /**
+     * This is an inner class of GooglePlacesDialogFragment and is extending the class AsyncTask.
+     * This is used to download image from Google Places Web Service.
+     */
     private class ImageDownloadTask extends AsyncTask<String, Integer, Bitmap>{
         Bitmap bitmap = null;
         @Override

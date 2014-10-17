@@ -5,6 +5,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 /**
+ * ConnectionDetector class is used to
+ * detect internet connection status in your applications.
+ *
  * Created by Nancy on 7/3/14.
  */
 public class ConnectionDetector {

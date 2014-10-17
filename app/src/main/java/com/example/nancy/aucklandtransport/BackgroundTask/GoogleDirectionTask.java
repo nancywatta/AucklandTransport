@@ -13,6 +13,9 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
+ * GoogleDirectionTask to get directions between locations
+ * using an HTTP request.
+ *
  * Created by Nancy on 10/17/14.
  */
 public class GoogleDirectionTask extends AsyncTask<String, Void, String> {
@@ -47,7 +50,7 @@ public class GoogleDirectionTask extends AsyncTask<String, Void, String> {
         parserTask.execute(result);
     }
 
-    /** A class to parse the Google Places in JSON format */
+    /** A class to parse the Google Directions in JSON format */
     private class RouteParserTask extends AsyncTask<String, Integer, ArrayList<Route>>{
 
         // Parsing the data in non-ui thread
@@ -74,8 +77,6 @@ public class GoogleDirectionTask extends AsyncTask<String, Void, String> {
         protected void onPostExecute(ArrayList<Route> result) {
             if(result == null || result.size() < 1)
                 return;
-
-            touristPlaces.addRoute(result);
         }
     }
 }

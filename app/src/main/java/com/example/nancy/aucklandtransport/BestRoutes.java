@@ -20,6 +20,10 @@ import java.util.Calendar;
 import java.util.Locale;
 
 /**
+ * BestRoutes class to find new routes available to user in case
+ * there is more than 5 minutes for his current Bus to arrive and there are other
+ * shorter routes available or routes with minimum transfers.
+ *
  * Created by Nancy on 10/12/14.
  */
 public class BestRoutes {
@@ -169,7 +173,7 @@ public class BestRoutes {
         }
     }
 
-    /** A class to parse the Google Places in JSON format */
+    /** A class to parse the Google Directions in JSON format */
     private class ParserTask extends AsyncTask<String, Integer, ArrayList<Route>>{
 
         // Parsing the data in non-ui thread
@@ -210,6 +214,9 @@ public class BestRoutes {
 
         for(int index=0; index < result.size(); index++) {
             RouteStep routeStep = result.get(index).getSteps().get(0);
+
+            // remove the route from array, if route same as
+            // current route is returned from Google.
             if (routeStep.isTransit() &&
                     routeStep.getShortName().compareTo(presentRoute.getShortName()) == 0
                     && routeStep.getDeparture().getTravelTime().compareTo(presentRoute.getDeparture().getTravelTime()) == 0) {
@@ -226,6 +233,7 @@ public class BestRoutes {
 
         int existingTransfers=0;
 
+        // Count the no of transfers from his current routeStep
         for(int index=busIndex; index <existingRoute.getSteps().size(); index++ ) {
             RouteStep routeStep = existingRoute.getSteps().get(index);
             if(routeStep.isTransit())
@@ -240,6 +248,11 @@ public class BestRoutes {
             Log.d(TAG, "newDiff: " + newdiff + " getTotalTransfers: " +
                     route1.getTotalTransfers());
 
+            /*
+            if new route duration is greater that current route and also
+            the no of transfers is greater,
+            then do no add in final result.
+             */
             if(newdiff > diff &&
                     route1.getTotalTransfers() >= existingTransfers) {
                 Log.d(TAG, "Remove");
@@ -249,6 +262,7 @@ public class BestRoutes {
             }
         }
 
+        // alert user about new routes
         if(routeEngine != null && finalResult.size() > 0)
             routeEngine.notifyUser(finalResult, message);
 

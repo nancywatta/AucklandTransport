@@ -17,10 +17,15 @@ import java.util.List;
 
 
 /**
+ * DirectionsJSONParser class receives a JSONObject
+ * and parses the JSON String according to Output parameters of
+ * Google Directions API to store in custom data Objects.
+ *
  * Created by Nancy on 7/9/14.
  */
 public class DirectionsJSONParser {
 
+    /** Receives a JSONObject and returns a list of routes */
     public ArrayList<Route> parse(JSONObject jObject) {
 
         ArrayList<Route> routes = new ArrayList<Route>();
@@ -139,6 +144,7 @@ public class DirectionsJSONParser {
         return routes;
     }
 
+    /** Receives a JSONObject and returns RouteStep */
     public RouteStep parseRouteStep(JSONObject jObject) {
         RouteStep routeStep = null;
 

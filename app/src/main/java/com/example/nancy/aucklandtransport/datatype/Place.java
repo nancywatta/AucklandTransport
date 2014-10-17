@@ -4,6 +4,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * Place class represents a nearby location with the information like latitude,
+ * longitude, place name, vicinity and photos. We are making this as a Parcelable
+ * class in order to retain the instances of this class during screen rotation.
+ *
  * Created by Nancy on 9/9/14.
  */
 public class Place implements Parcelable {
@@ -23,8 +27,12 @@ public class Place implements Parcelable {
     // Photo is a Parcelable class
     public Photo[] mPhotos={};
 
+    // If the place has been added in the list to be visited
+    // when using Tourist Planner functionality.
     public Boolean isAdded = false;
 
+    // Stores the Duration for how long a user would like
+    // to stay at this Place.
     public int duration;
 
     @Override

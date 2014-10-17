@@ -29,6 +29,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
+ * PlaceDialogFragment class is the dialog window which is opened on clicking a marker.
+ * It shows place name, vicinity and photo corresponding to the marked place.
+ *
  * Created by Nancy on 9/9/14.
  */
 public class PlaceDialogFragment extends DialogFragment {
@@ -108,6 +111,8 @@ public class PlaceDialogFragment extends DialogFragment {
             // Setting the vicinity of the place
             mTVVicinity.setText(mPlace.mVicinity);
 
+            // check if the place is added by user in to Visit list. If Yes,
+            // then do not show Add Place Button, instead show Delete Button.
             if(touristPlaces.checkExisting(mPlace)) {
                 mPlace.isAdded = true;
                 mDurText.setVisibility(View.GONE);
@@ -190,6 +195,7 @@ public class PlaceDialogFragment extends DialogFragment {
         }
     };
 
+    // Background Service to calculate route for the newly added place
     private void callService() {
         String placeCoords = mPlace.mLat + "," + mPlace.mLng;
         RouteIntentService.startAction(context, touristPlaces,
@@ -231,6 +237,10 @@ public class PlaceDialogFragment extends DialogFragment {
         return bitmap;
     }
 
+    /**
+     * This is an inner class of PlaceDialogFragment and is extending the class AsyncTask.
+     * This is used to download image from Google Places Web Service.
+     */
     private class ImageDownloadTask extends AsyncTask<String, Integer, Bitmap> {
         Bitmap bitmap = null;
         @Override

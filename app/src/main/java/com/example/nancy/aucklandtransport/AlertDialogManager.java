@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 
 /**
+ * AlertDialogManager class to show alert messages.
+ *
  * Created by Nancy on 7/3/14.
  */
 public class AlertDialogManager {

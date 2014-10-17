@@ -15,6 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * PlaceJSONParser class receives a JSONObject
+ * and parses the JSON String according to Output parameters of
+ * Google Places API to store in custom data Objects.
+ *
  * Created by Nancy on 7/9/14.
  */
 public class PlaceJSONParser {

@@ -24,11 +24,18 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * GooglePlacesTask returns place predictions in response to an HTTP request.
+ * The request specifies a textual search string and optional geographic bounds.
+ * The service is used to provide autocomplete functionality for text-based searches,
+ * by returning places such as businesses, addresses and points of interest as a user types.
+ *
  * Created by Nancy on 10/5/14.
  */
 public class GooglePlacesTask extends AsyncTask<String, Void, String> {
 
+    // used to store the textual search string input by user
     String prefix="";
+
     AutoCompleteTextView textView;
     Context mContext;
 
@@ -89,10 +96,12 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
         parserTask.execute(result);
     }
 
+    /** A class to parse the Google Place Autocomplete in JSON format */
     private class ParserTask extends AsyncTask<String, Integer, List<HashMap<String,String>>>{
 
         JSONObject jObject;
 
+        // Parsing the data in non-ui thread
         @Override
         protected List<HashMap<String, String>> doInBackground(String... jsonData) {
 
@@ -112,6 +121,7 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
             return places;
         }
 
+        // Executes in UI thread, after the parsing process
         @Override
         protected void onPostExecute(List<HashMap<String, String>> result) {
 
@@ -119,6 +129,12 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
             int[] to = new int[] { android.R.id.text1 };
 
             List<HashMap<String, String>> finalResult = new ArrayList<HashMap<String, String>>();
+
+            /**
+             * In addition to places returned from Google, also populate
+             * the places visited in the past that are stored in Shared Preferences
+             * in the autocomplete drop down list.
+            */
             ArrayList<String> historyPlaces = History.getHistoryArray();
             for(String place:historyPlaces) {
                 if(place.startsWith(prefix)) {

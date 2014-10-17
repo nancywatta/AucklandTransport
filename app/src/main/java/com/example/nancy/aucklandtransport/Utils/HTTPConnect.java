@@ -10,6 +10,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
+ * HTTPConnect class used to define method to download
+ * json data from url.
+ *
  * Created by Nancy on 10/6/14.
  */
 public class HTTPConnect {

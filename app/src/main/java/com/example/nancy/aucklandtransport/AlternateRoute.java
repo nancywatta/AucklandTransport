@@ -14,6 +14,13 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 
+/**
+ * AlternateRoute class to show new routes available to user in case
+ * there is more than 5 minutes for his current Bus to arrive and there are other
+ * shorter routes available.
+ *
+ * Created by Nancy on 7/3/14.
+ */
 public class AlternateRoute extends Activity {
 
     private static final String TAG = AlternateRoute.class.getSimpleName();

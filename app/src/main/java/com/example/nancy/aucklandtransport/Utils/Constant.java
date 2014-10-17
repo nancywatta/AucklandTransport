@@ -1,6 +1,8 @@
 package com.example.nancy.aucklandtransport.Utils;
 
 /**
+ * Constant class is used to define app-wide constants and utilities.
+ *
  * Created by Nancy on 8/12/14.
  */
 public class Constant {

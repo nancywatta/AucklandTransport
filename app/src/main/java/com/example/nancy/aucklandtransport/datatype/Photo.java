@@ -4,6 +4,10 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
+ * Photo class represents a photo returned from Google Places Web Service
+ * with the information like width, height, photo reference and attributions.
+ * This is also a parcelable class.
+ *
  * Created by Nancy on 9/9/14.
  */
 public class Photo implements Parcelable {
