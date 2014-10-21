@@ -1,0 +1,34 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:layout_centerHorizontal="true"
+    android:gravity="center_vertical|center_horizontal"
+    tools:context="com.example.nancy.aucklandtransport.HomePage">
+
+    <Button
+        android:id="@+id/journeyBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_custom"
+        android:drawableRight="@drawable/ic_action_next_item"
+        style="?android:attr/borderlessButtonStyle"
+        android:text="@string/journeyBtn"
+        android:onClick="goToSimplePlanner">
+    </Button>
+
+    <Button
+        android:id="@+id/touristBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/journeyBtn"
+        android:background="@drawable/button_custom"
+        android:drawableRight="@drawable/ic_action_next_item"
+        style="?android:attr/borderlessButtonStyle"
+        android:text="@string/touristBtn"
+        android:onClick="goToTouristPlanner">
+    </Button>
+
+</RelativeLayout>

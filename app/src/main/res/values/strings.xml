@@ -41,6 +41,7 @@
     <string name="TabRoutesMenuSetBackwards">Set backwards</string>
     <string name="TabRoutesMenuDelete">Delete</string>
     <string name="Timer">APTTimer</string>
+    <string name="home_page">Home</string>
 
     <!-- Notifications Strings -->
     <string name="DepartureText1">You need to start departure in less than %d minutes</string>
@@ -72,6 +73,11 @@
     <string name="title_activity_route_details">RouteDetails</string>
     <string name="title_activity_route_info_fragment">RouteInfoFragment</string>
     <string name="title_activity_display_map">Map</string>
+    <string name="title_activity_home_page">APT</string>
+    <string name="title_activity_tourist_planner">TouristPlanner</string>
+    <string name="title_activity_tourist_route">TouristRoute</string>
+    <string name="title_activity_alternate_route">AlternateRoute</string>
+    <string name="title_activity_route_info">RouteInfo</string>
 
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
@@ -117,13 +123,14 @@
     <!-- Path Tracker Activity -->
     <string name="yes">Continue</string>
     <string name="no">Other Options</string>
-    <string name="title_activity_tourist_planner">TouristPlanner</string>
-    <string name="title_activity_tourist_route">TouristRoute</string>
-    <string name="title_activity_alternate_route">AlternateRoute</string>
-    <string name="title_activity_route_info">RouteInfo</string>
     <string name="str_btn_Add">Add Place</string>
     <string name="duration">Duration</string>
     <string name="hnt_duration">in Minutes</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+
+    <!-- Home Page -->
+    <string name="journeyBtn">Journey Planner</string>
+    <string name="touristBtn">Tourist Planner</string>
 
 </resources>

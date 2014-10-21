@@ -10,6 +10,9 @@ import android.widget.DatePicker;
 import java.util.Calendar;
 
 /**
+ * DatePickerDialogFragment class is used to create a simple dialog containing
+ * a widget for selecting a date. The date can be selected by a year, month, and day spinners.
+ *
  * Created by Nancy on 7/19/14.
  */
 public class DatePickerDialogFragment extends DialogFragment
@@ -41,6 +44,8 @@ public class DatePickerDialogFragment extends DialogFragment
         mYear = yearSelected;
         mMonth = monthOfYear;
         mDay = dayOfMonth;
+
+        // set the Button text to the date selected
         ((Button)getActivity().findViewById(buttonId))
                 .setText(twodigits(dayOfMonth) + "/" + twodigits((monthOfYear+1)) + "/" + yearSelected);
     }

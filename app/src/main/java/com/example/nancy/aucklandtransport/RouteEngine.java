@@ -442,10 +442,11 @@ public class RouteEngine {
     }
 
     private void notifyIntent(Route mRoute) {
-//        service.createNotification(context.getResources().getString(R.string.mNotifyOnBoard),
-//                context.getResources().getString(R.string.app_name),
-//                context.getResources().getString(R.string.mClickOnBoard), true, true, Toast.LENGTH_LONG);
+        service.createNotification(context.getResources().getString(R.string.mNotifyOnBoard),
+                context.getResources().getString(R.string.app_name),
+                context.getResources().getString(R.string.mClickOnBoard), true, true, Toast.LENGTH_LONG);
         RouteInfoFragment.onBoardBtn.setVisibility(View.VISIBLE);
+        RouteMapActivity.onBoardBtn.setVisibility(View.VISIBLE);
         Intent myIntent = new Intent(context, PathTracker.class);
         String message = "Click on the onBoard CheckBox when you are in vehicle";
         myIntent.putExtra("MESSAGE", message);
@@ -464,7 +465,9 @@ public class RouteEngine {
             remainingTime = s.getDuration().getSeconds();
             routeState = state;
             RouteInfoFragment.boardedBus = false;
+            RouteMapActivity.boardedBus = false;
             RouteInfoFragment.onBoardBtn.setVisibility(View.GONE);
+            RouteMapActivity.onBoardBtn.setVisibility(View.GONE);
             RouteInfoFragment.newRoutesBtn.setVisibility(View.GONE);
             return true;
         } else {
@@ -473,12 +476,14 @@ public class RouteEngine {
                 return false;
             }
             else {
-                if(RouteInfoFragment.boardedBus) {
+                if(RouteInfoFragment.boardedBus || RouteMapActivity.boardedBus) {
                     Log.d(TAG, "I am in Vehicle");
                     remainingTime = s.getDuration().getSeconds();
                     routeState = state;
                     RouteInfoFragment.boardedBus = false;
+                    RouteMapActivity.boardedBus = false;
                     RouteInfoFragment.onBoardBtn.setVisibility(View.GONE);
+                    RouteMapActivity.onBoardBtn.setVisibility(View.GONE);
                     RouteInfoFragment.newRoutesBtn.setVisibility(View.GONE);
                     firstTime = true;
                     return true;

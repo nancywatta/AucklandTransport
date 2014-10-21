@@ -58,6 +58,14 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * TouristRoute class is the activity displaying the route selected by the user
+ * in TouristPlanner activity on the Map.
+ * The activity also allows a user to search for nearby places of Interest and
+ * add or delete in the final list to be visited.
+ *
+ * Created by Nancy on 9/9/14.
+ */
 public class TouristRoute extends FragmentActivity {
     private static final String TAG = TouristRoute.class.getSimpleName();
     private View mProgressView;
@@ -127,7 +135,7 @@ public class TouristRoute extends FragmentActivity {
         LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, mFilter);
 
         Intent intent = getIntent();
-        fromLoc = intent.getStringExtra(MainApp.FROM_LOCATION);
+        fromLoc = intent.getStringExtra(Constant.FROM_LOCATION);
         try {
             // encoding special characters like space in the user input place
             fromLoc = URLDecoder.decode(fromLoc, "utf-8");
@@ -135,7 +143,7 @@ public class TouristRoute extends FragmentActivity {
             e.printStackTrace();
         }
 
-        toLoc = intent.getStringExtra(MainApp.TO_LOCATION);
+        toLoc = intent.getStringExtra(Constant.TO_LOCATION);
         try {
             // encoding special characters like space in the user input place
             toLoc = URLDecoder.decode(toLoc, "utf-8");
@@ -143,9 +151,9 @@ public class TouristRoute extends FragmentActivity {
             e.printStackTrace();
         }
 
-        timeSinceEpoch = intent.getLongExtra(MainApp.TIME, 0);
-        fromCoords = intent.getStringExtra(MainApp.FROM_COORDS);
-        toCoords = intent.getStringExtra(MainApp.TO_COORDS);
+        timeSinceEpoch = intent.getLongExtra(Constant.TIME, 0);
+        fromCoords = intent.getStringExtra(Constant.FROM_COORDS);
+        toCoords = intent.getStringExtra(Constant.TO_COORDS);
 
         Log.d(TAG, "fromCoords" + fromCoords);
         if (fromCoords != "" && !fromCoords.equals(""))
@@ -346,7 +354,7 @@ public class TouristRoute extends FragmentActivity {
         }
     }
 
-    /** A class to parse the Google Places in JSON format */
+    /** A class to parse the Google Directions in JSON format */
     private class RouteParserTask extends AsyncTask<String, Integer, ArrayList<Route>>{
 
         // Parsing the data in non-ui thread
@@ -402,8 +410,10 @@ public class TouristRoute extends FragmentActivity {
 
             if (route != null) {
                 mLocation = route.getStartLocation();
+                touristPlaces.setArray();
                 TouristPlaces.startAddress = route.getStartAddress();
                 TouristPlaces.endAddress = route.getEndAddress();
+                touristPlaces.setDepartureTime(timeSinceEpoch);
             }
 
             handleMap();
@@ -567,7 +577,7 @@ public class TouristRoute extends FragmentActivity {
 
                         placesTask.setTextSearch();
 
-                        // Invokes the "doInBackground()" method of the class PlaceTask
+                        // Invokes the "doInBackground()" method of the class NearbyPlacesTask
                         placesTask.execute(sb.toString());
 
                     }
@@ -743,7 +753,9 @@ public class TouristRoute extends FragmentActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_home) {
+            Intent exploreActivity = new Intent(TouristRoute.this, HomePage.class);
+            startActivity(exploreActivity);
             return true;
         }
         return super.onOptionsItemSelected(item);

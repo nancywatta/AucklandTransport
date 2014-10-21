@@ -22,18 +22,30 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.example.nancy.aucklandtransport.BackgroundJobs.GPSTracker;
 import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
+import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
+/**
+ * TouristPlanner class is the activity asking for user to enter the origin
+ * and destination of the journey to be planned.
+ * The activity also allows a user to select a place in the origin or destination
+ * from the Recent Places Tab.
+ * It also allows a user to select the entire route from the Recent Route Tab.
+ *
+ * Created by Nancy on 9/9/14.
+ */
 public class TouristPlanner extends FragmentActivity {
 
     private static final String TAG = TouristPlanner.class.getSimpleName();
@@ -49,6 +61,7 @@ public class TouristPlanner extends FragmentActivity {
     Button date;
     Button leaveTime;
     Button arriveTime;
+    CheckBox arriveCheck;
 
     String fromCoords ="";
     String toCoords="";
@@ -68,6 +81,14 @@ public class TouristPlanner extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tourist_planner);
+
+        arriveCheck = (CheckBox)findViewById(R.id.arriveChk);
+
+        if(arriveTimeFragment==null)
+            arriveTimeFragment = new TimePickerFragment();
+
+        if(leaveTimeFragment==null)
+            leaveTimeFragment = new TimePickerFragment();
 
         history = History.getHistory(this);
         routes = History.getRoutes(this);
@@ -313,12 +334,7 @@ public class TouristPlanner extends FragmentActivity {
         }
         else
         {
-            Calendar calendar = Calendar.getInstance();
-            leaveTime.setText(twodigits(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + twodigits(calendar.get(Calendar.MINUTE)));
-            arriveTime.setText(twodigits(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + twodigits(calendar.get(Calendar.MINUTE)));
-            int month = calendar.get(Calendar.MONTH) +1;
-            date.setText(twodigits(calendar.get(Calendar.DAY_OF_MONTH)) + "/" +
-                    twodigits(month) + "/" + calendar.get(Calendar.YEAR));
+            updateTime();
         }
     }
 
@@ -339,9 +355,9 @@ public class TouristPlanner extends FragmentActivity {
         try {
             String fromAddress = origin1.getText().toString(); // Get address
             Intent intent = new Intent(this, DisplayMapActivity.class);
-            intent.putExtra(MainApp.ADDRSTR, fromAddress);
-            intent.putExtra(MainApp.ORIGIN, true);
-            startActivityForResult(intent, MainApp.PICK_ADDRESS_REQUEST);
+            intent.putExtra(Constant.ADDRSTR, fromAddress);
+            intent.putExtra(Constant.ORIGIN, true);
+            startActivityForResult(intent, Constant.PICK_ADDRESS_REQUEST);
         } catch (Exception e){
         }
     }
@@ -350,9 +366,9 @@ public class TouristPlanner extends FragmentActivity {
         try {
             String toAddress = destination.getText().toString(); // Get address
             Intent intent = new Intent(this, DisplayMapActivity.class);
-            intent.putExtra(MainApp.ADDRSTR, toAddress);
-            intent.putExtra(MainApp.ORIGIN, false);
-            startActivityForResult(intent, MainApp.PICK_ADDRESS_REQUEST);
+            intent.putExtra(Constant.ADDRSTR, toAddress);
+            intent.putExtra(Constant.ORIGIN, false);
+            startActivityForResult(intent, Constant.PICK_ADDRESS_REQUEST);
         } catch (Exception e){
         }
     }
@@ -362,6 +378,8 @@ public class TouristPlanner extends FragmentActivity {
         try {
             String toAddress = destination.getText().toString(); // Get address
             String fromAddress = origin.getText().toString(); // Get address
+            long secondsSinceEpoch = getTimeSinceEpoch(leaveTimeFragment, dateFragment);
+            long arrivalSecEpoch = getTimeSinceEpoch(arriveTimeFragment, dateFragment);
 
             if(toAddress.equals("") || toAddress==null) {
                 AlertDialog alertDialog = new AlertDialog.Builder(TouristPlanner.this).create();
@@ -373,6 +391,15 @@ public class TouristPlanner extends FragmentActivity {
                     } });
                 alertDialog.show();
 
+            } else if(secondsSinceEpoch >= arrivalSecEpoch && arriveCheck.isChecked()) {
+                AlertDialog alertDialog = new AlertDialog.Builder(TouristPlanner.this).create();
+                alertDialog.setTitle("Validation Error");
+                alertDialog.setMessage("Arrival Time should be greater than Departure");
+                alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    } });
+                alertDialog.show();
             }
             else {
                 if (fromAddress.equals("") || fromAddress == null) {
@@ -382,43 +409,46 @@ public class TouristPlanner extends FragmentActivity {
                     Log.d(TAG, "fromAdd " + fromAddress);
                 }
 
-                Calendar calendar = Calendar.getInstance(Locale.getDefault());
-
-                if (dateFragment != null && leaveTimeFragment != null) {
-                    calendar.clear();
-                    calendar.set(Calendar.MONTH, dateFragment.mMonth);
-                    calendar.set(Calendar.YEAR, dateFragment.mYear);
-                    calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
-                    calendar.set(Calendar.HOUR_OF_DAY, leaveTimeFragment.mHour);
-                    calendar.set(Calendar.MINUTE, leaveTimeFragment.mMinute);
-                } else if (leaveTimeFragment != null) {
-                    calendar.set(Calendar.HOUR_OF_DAY, leaveTimeFragment.mHour);
-                    calendar.set(Calendar.MINUTE, leaveTimeFragment.mMinute);
-                } else if (dateFragment != null) {
-                    calendar.set(Calendar.MONTH, dateFragment.mMonth);
-                    calendar.set(Calendar.YEAR, dateFragment.mYear);
-                    calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
-                }
-
-                long secondsSinceEpoch = calendar.getTimeInMillis() / 1000L;
-
-                Log.d("MainApp", "secondsSinceEpoch " + secondsSinceEpoch +
-                        " Hour: " + calendar.get(Calendar.HOUR_OF_DAY)
-                        + " Month: " + calendar.get(Calendar.MONTH) + " Year: " + calendar.get(Calendar.YEAR) + " Date: " + calendar.get(Calendar.DAY_OF_MONTH)
-                        + " Day of Month: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + calendar.getTime());
-
                 Intent intent = new Intent(this, TouristRoute.class);
-                intent.putExtra(MainApp.FROM_LOCATION, fromAddress);
-                intent.putExtra(MainApp.TO_LOCATION, toAddress);
-                intent.putExtra(MainApp.TIME, secondsSinceEpoch);
-                intent.putExtra(MainApp.FROM_COORDS, fromCoords);
-                intent.putExtra(MainApp.TO_COORDS, toCoords);
+                intent.putExtra(Constant.FROM_LOCATION, fromAddress);
+                intent.putExtra(Constant.TO_LOCATION, toAddress);
+                intent.putExtra(Constant.TIME, secondsSinceEpoch);
+                intent.putExtra(Constant.FROM_COORDS, fromCoords);
+                intent.putExtra(Constant.TO_COORDS, toCoords);
+                intent.putExtra(Constant.ARRIVE_TIME, arrivalSecEpoch);
                 startActivity(intent);
             }
         } catch (Exception e){
             e.printStackTrace();
 
         }
+    }
+
+    public long getTimeSinceEpoch(TimePickerFragment timeFrag,
+            DatePickerDialogFragment dateFrag) {
+        Calendar calendar = Calendar.getInstance(Locale.getDefault());
+        if (dateFrag != null && timeFrag != null) {
+            calendar.clear();
+            calendar.set(Calendar.MONTH, dateFrag.mMonth);
+            calendar.set(Calendar.YEAR, dateFrag.mYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dateFrag.mDay);
+            calendar.set(Calendar.HOUR_OF_DAY, timeFrag.mHour);
+            calendar.set(Calendar.MINUTE, timeFrag.mMinute);
+        } else if (timeFrag != null) {
+            calendar.set(Calendar.HOUR_OF_DAY, timeFrag.mHour);
+            calendar.set(Calendar.MINUTE, timeFrag.mMinute);
+        } else if (dateFrag != null) {
+            calendar.set(Calendar.MONTH, dateFrag.mMonth);
+            calendar.set(Calendar.YEAR, dateFrag.mYear);
+            calendar.set(Calendar.DAY_OF_MONTH, dateFrag.mDay);
+        }
+
+        Log.d(TAG, "secondsSinceEpoch " + calendar.getTimeInMillis() +
+                " Hour: " + calendar.get(Calendar.HOUR_OF_DAY)
+                + " Month: " + calendar.get(Calendar.MONTH) + " Year: " + calendar.get(Calendar.YEAR) + " Date: " + calendar.get(Calendar.DAY_OF_MONTH)
+                + " Day of Month: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + calendar.getTime());
+
+        return (calendar.getTimeInMillis() / 1000L);
     }
 
     public void showTimePickerDialog(View v) {
@@ -453,21 +483,21 @@ public class TouristPlanner extends FragmentActivity {
         super.onActivityResult(requestCode, resultCode, data);
         placeAdapter.notifyDataSetChanged();
         switch(requestCode) {
-            case (MainApp.PICK_ADDRESS_REQUEST) : {
+            case (Constant.PICK_ADDRESS_REQUEST) : {
                 if (resultCode == Activity.RESULT_OK) {
                     // TODO Extract the data returned from the child Activity.
-                    String fromAddr = data.getStringExtra(MainApp.FROM_ADDRSTR);
+                    String fromAddr = data.getStringExtra(Constant.FROM_ADDRSTR);
                     if(fromAddr!=null && !fromAddr.equals(""))
                         origin.setText(fromAddr);
-                    String toAddr = data.getStringExtra(MainApp.TO_ADDRSTR);
+                    String toAddr = data.getStringExtra(Constant.TO_ADDRSTR);
                     if(toAddr!=null && !toAddr.equals(""))
                         destination.setText(toAddr);
 
-                    String fCoords = data.getStringExtra(MainApp.FROM_COORDS);
+                    String fCoords = data.getStringExtra(Constant.FROM_COORDS);
                     Log.d(TAG, "fCoords" + fCoords);
                     if(fCoords!=null && fCoords!="")
                         fromCoords = fCoords;
-                    String tCoords = data.getStringExtra(MainApp.TO_COORDS);
+                    String tCoords = data.getStringExtra(Constant.TO_COORDS);
                     Log.d(TAG, "tCoords" + tCoords);
                     if(tCoords!=null && tCoords!="")
                         toCoords = tCoords;
@@ -512,6 +542,27 @@ public class TouristPlanner extends FragmentActivity {
         placeAdapter = new History.PlaceAdapter(this);
         refreshYourAdapter();
         myPlaces.setAdapter(placeAdapter);
+
+        updateTime();
+    }
+
+    private void updateTime() {
+        Calendar calendar = Calendar.getInstance(Locale.getDefault());
+        if(leaveTimeFragment != null) {
+            calendar.set(Calendar.HOUR_OF_DAY, leaveTimeFragment.mHour);
+            calendar.set(Calendar.MINUTE, leaveTimeFragment.mMinute);
+        }
+        leaveTime.setText(twodigits(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + twodigits(calendar.get(Calendar.MINUTE)));
+
+        calendar = Calendar.getInstance(Locale.getDefault());
+        if(arriveTimeFragment != null) {
+            calendar.set(Calendar.HOUR_OF_DAY, arriveTimeFragment.mHour);
+            calendar.set(Calendar.MINUTE, arriveTimeFragment.mMinute);
+        }
+        arriveTime.setText(twodigits(calendar.get(Calendar.HOUR_OF_DAY)) + ":" + twodigits(calendar.get(Calendar.MINUTE)));
+        int month = calendar.get(Calendar.MONTH) +1;
+        date.setText(twodigits(calendar.get(Calendar.DAY_OF_MONTH)) + "/" +
+                twodigits(month) + "/" + calendar.get(Calendar.YEAR));
     }
 
     @Override
@@ -527,7 +578,9 @@ public class TouristPlanner extends FragmentActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_home) {
+            Intent exploreActivity = new Intent(TouristPlanner.this, HomePage.class);
+            startActivity(exploreActivity);
             return true;
         }
         return super.onOptionsItemSelected(item);

@@ -1,6 +1,5 @@
 package com.example.nancy.aucklandtransport;
 
-import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +10,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.BackgroundJobs.GPSTracker;
 import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
 import com.example.nancy.aucklandtransport.Parser.GeocodeJSONParser;
 import com.google.android.gms.common.ConnectionResult;
@@ -97,6 +98,20 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
             }
         });
 
+        etLocation.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_RIGHT = 2;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (etLocation.getRight() - etLocation.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        etLocation.setText("");
+                    }
+                }
+                return false;
+            }
+        });
+
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
 
@@ -142,6 +157,12 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                     // Getting user input location
                     String location = etLocation.getText().toString();
                     etLocation.clearFocus();
+
+                    InputMethodManager inputManager = (InputMethodManager)
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                    inputManager.hideSoftInputFromWindow((null == getCurrentFocus()) ? null : getCurrentFocus().getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
 
                     if (location != null && !location.equals("")) {
                         startDownload(location);
@@ -417,11 +438,11 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.display_map, menu);
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(false); // disable the button
-            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
-        }
+//        ActionBar actionBar = getActionBar();
+//        if (actionBar != null) {
+//            actionBar.setHomeButtonEnabled(false); // disable the button
+//            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+//        }
         return true;
     }
 
@@ -440,6 +461,10 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                 finish();
                 return true;
             case R.id.action_settings:
+                return true;
+            case R.id.action_home:
+                Intent exploreActivity = new Intent(DisplayMapActivity.this, HomePage.class);
+                startActivity(exploreActivity);
                 return true;
         }
         return super.onOptionsItemSelected(item);

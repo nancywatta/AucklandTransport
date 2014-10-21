@@ -154,28 +154,23 @@
                     <Button
                         android:id="@+id/button6"
                         android:layout_width="0dp"
-                        android:layout_weight="0.325"
+                        android:layout_weight="0.375"
                         android:layout_height="wrap_content"
+                        android:background="@drawable/button_blue"
                         android:drawableLeft="@android:drawable/arrow_down_float"
                         android:onClick="showTimePickerDialog"
                         android:text="@string/Time"></Button>
 
-                    <TextView
-                        android:id="@+id/arrive_at"
-                        android:layout_width="0dp"
-                        android:layout_weight="0.125"
-                        android:layout_height="wrap_content"
-                        android:width="1dp"
-                        android:text="@string/Arrive_at" />
 
                     <Button
-                        android:id="@+id/button5"
+                        android:id="@+id/button3"
                         android:layout_width="0dp"
-                        android:layout_weight="0.325"
                         android:layout_height="wrap_content"
+                        android:layout_weight="0.5"
+                        android:background="@drawable/button_default"
                         android:drawableLeft="@android:drawable/arrow_down_float"
-                        android:onClick="showArriveTimeDialog"
-                        android:text="@string/Time"></Button>
+                        android:onClick="showDatePickerDialog"
+                        android:text="@string/Date"></Button>
 
                 </TableRow>
 
@@ -186,14 +181,23 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <Button
-                    android:id="@+id/button3"
+                <CheckBox
+                    android:id="@+id/arriveChk"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="0.66"
+                    android:layout_weight="0.5"
+                    android:checked="false"
+                    android:text="@string/arrive_before" />
+
+                <Button
+                    android:id="@+id/button5"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.5"
+                    android:background="@drawable/button_blue"
                     android:drawableLeft="@android:drawable/arrow_down_float"
-                    android:onClick="showDatePickerDialog"
-                    android:text="@string/Date"></Button>
+                    android:onClick="showArriveTimeDialog"
+                    android:text="@string/Time"></Button>
 
             </LinearLayout>
 

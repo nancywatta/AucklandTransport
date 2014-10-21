@@ -29,6 +29,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
+import com.example.nancy.aucklandtransport.BackgroundJobs.ActivityRecognitionService;
 
 import org.androidpn.client.ServiceManager;
 
@@ -332,10 +333,13 @@ public class RouteInfoFragment extends Fragment implements
                     Toast.LENGTH_SHORT).show();
         }
 
-        Intent setIntent = new Intent(Intent.ACTION_MAIN);
-        setIntent.addCategory(Intent.CATEGORY_HOME);
-        setIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(setIntent);
+//        Intent setIntent = new Intent(Intent.ACTION_MAIN);
+//        setIntent.addCategory(Intent.CATEGORY_HOME);
+//        setIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//        startActivity(setIntent);
+        Intent myIntent = new Intent(getActivity(), RouteMapActivity.class);
+        myIntent.putExtra("route", routeString);
+        startActivity(myIntent);
     }
 
     public void startUpdates() {

@@ -10,6 +10,10 @@ import android.widget.TimePicker;
 import java.util.Calendar;
 
 /**
+ * TimePickerFragment class is used to create a dialog that prompts the user for the time of day
+ * using a view for selecting the time of day, in AM/PM mode.
+ * The hour, each minute digit, and AM/PM (if applicable) can be controlled by vertical spinners.
+ *
  * Created by Nancy on 7/1/14.
  */
 public class TimePickerFragment extends DialogFragment
@@ -42,6 +46,8 @@ public class TimePickerFragment extends DialogFragment
         mHour = hourOfDay;
         mMinute = minute;
         isTimeSet = true;
+
+        // set the Button text to the time selected
         ((Button)getActivity().findViewById(buttonId))
                 .setText(twodigits(hourOfDay) + ":" + twodigits(minute));
     }

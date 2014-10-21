@@ -21,11 +21,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.RouteMapActivity;
 import com.example.nancy.aucklandtransport.Utils.Constant;
-import com.example.nancy.aucklandtransport.NotificationUpdates;
 
 import java.util.Random;
 
@@ -104,7 +105,7 @@ public class Notifier {
 //            Intent intent = new Intent(context,
 //                    NotificationDetailsActivity.class);
             Intent intent = new Intent(context,
-                    NotificationUpdates.class);
+                    RouteMapActivity.class);
             intent.putExtra(Constants.NOTIFICATION_ID, notificationId);
             intent.putExtra(Constants.NOTIFICATION_API_KEY, apiKey);
             intent.putExtra(Constants.NOTIFICATION_TITLE, title);
@@ -117,6 +118,13 @@ public class Notifier {
             intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
             intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
             intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+            // Creating an intent for broadcastreceiver
+            Intent broadcastIntent = new Intent(Constant.BROADCAST_NOTIFICATION);
+            // Attaching data to the intent
+            broadcastIntent.putExtra(Constants.NOTIFICATION_MESSAGE, message);
+            // Sending the broadcast
+            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
 
             PendingIntent contentIntent = PendingIntent.getActivity(context, 0,
                     intent, PendingIntent.FLAG_UPDATE_CURRENT);

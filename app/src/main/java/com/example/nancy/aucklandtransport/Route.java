@@ -58,7 +58,7 @@ public class Route {
         RouteStep firstStep = steps.get(0);
         if (firstStep.getTransportName() == R.string.tr_bus) {
             return true;
-        } else if (!firstStep.isTransit()) {
+        } else if (!firstStep.isTransit() && steps.size() > 1) {
             RouteStep secondStep = steps.get(1);
             if (secondStep.getTransportName() == R.string.tr_bus)
                 return true;

@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -560,13 +561,20 @@ public class BackgroundService extends Service implements
         final NotificationManager mNotificationManager = (NotificationManager) getSystemService(ns);
         long when = System.currentTimeMillis();
 
-        notificationIntent = new Intent(this, NotificationUpdates.class);
+        notificationIntent = new Intent(this, RouteMapActivity.class);
         notificationIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
         notificationIntent
                 .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         notification = new Notification(R.drawable.notification, ticker, when);
 
-        notificationIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
+        // Creating an intent for broadcastreceiver
+        Intent broadcastIntent = new Intent(Constant.BROADCAST_NOTIFICATION);
+        // Attaching data to the intent
+        broadcastIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
+        // Sending the broadcast
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
+
+        //notificationIntent.putExtra(Constants.NOTIFICATION_MESSAGE, text);
 
         contentIntent =
                 PendingIntent.getActivity(this, 0, notificationIntent,

@@ -1,11 +1,13 @@
 package com.example.nancy.aucklandtransport;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -19,6 +21,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
+import com.example.nancy.aucklandtransport.BackgroundJobs.RouteIntentService;
+import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.example.nancy.aucklandtransport.datatype.Photo;
 import com.example.nancy.aucklandtransport.datatype.Place;
 import com.example.nancy.aucklandtransport.datatype.TouristPlaces;
@@ -168,6 +172,8 @@ public class PlaceDialogFragment extends DialogFragment {
 
         public void onClick(View v) {
             if(mPlace.isAdded) {
+                // call background service to recalculate route on delete place
+                callIntentServiceToDelete();
                 touristPlaces.delete(mPlace);
 //                TouristRoute.mAddedReference.remove(markerId);
                 mPlace.isAdded = false;
@@ -187,8 +193,9 @@ public class PlaceDialogFragment extends DialogFragment {
                 mPlace.duration = Integer.parseInt(mDuration.getText().toString());
                 mPlace.isAdded = true;
                 touristPlaces.add(mPlace);
-                callService();
 
+                // call background service to recalculate route on add place
+                callIntentServiceToAdd();
 //                TouristRoute.mAddedReference.put(markerId, mPlace);
                 dismiss();
             }
@@ -196,12 +203,31 @@ public class PlaceDialogFragment extends DialogFragment {
     };
 
     // Background Service to calculate route for the newly added place
-    private void callService() {
+    private void callIntentServiceToAdd() {
         String placeCoords = mPlace.mLat + "," + mPlace.mLng;
         RouteIntentService.startAction(context, touristPlaces,
                 touristPlaces.getPreviousAdd(mPlace), placeCoords);
         RouteIntentService.endAction(context,
-                placeCoords, touristPlaces.getNextAddress(mPlace));
+                placeCoords, touristPlaces.getNextAddress(mPlace), mPlace.duration);
+    }
+
+    // Background Service to calculate route when delete place
+    private void callIntentServiceToDelete() {
+        String prevAdd = touristPlaces.getPreviousAdd(mPlace);
+        String nextAdd = touristPlaces.getNextAddress(mPlace);
+        String placeCoords = mPlace.mLat + "," + mPlace.mLng;
+        if(!(prevAdd.compareTo(TouristPlaces.startAddress) == 0 &&
+                nextAdd.compareTo(TouristPlaces.endAddress) == 0)) {
+            RouteIntentService.deleteAction(context, touristPlaces,
+                    prevAdd, placeCoords, nextAdd);
+        } else {
+            Log.d(TAG, " Initial Route");
+            touristPlaces.deleteRoute(placeCoords, null);
+            // Creating an intent for broadcastreceiver
+            Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
+            // Sending the broadcast
+            LocalBroadcastManager.getInstance(context).sendBroadcast(broadcastIntent);
+        }
     }
 
     @Override

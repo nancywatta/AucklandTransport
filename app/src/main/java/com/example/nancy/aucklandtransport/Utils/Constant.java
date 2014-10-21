@@ -30,4 +30,20 @@ public class Constant {
 
     // Action Name to IntentFilter
     public static final String BROADCAST_ACTION = "com.example.nancy.aucklandtransport.BROADCAST";
+
+    public static final String BROADCAST_NOTIFICATION = "com.example.nancy.aucklandtransport.BROADCAST_NOTIFICATION";
+
+    public final static String FROM_LOCATION = "com.example.nancy.aucklandtransport.FROMADDRESS";
+    public final static String TO_LOCATION = "com.example.nancy.aucklandtransport.TOADDRESS";
+    public final static String TIME = "com.example.nancy.aucklandtransport.TIME";
+    public final static String FROM_COORDS = "com.example.nancy.aucklandtransport.FROM_COORDS";
+    public final static String TO_COORDS = "com.example.nancy.aucklandtransport.TO_COORDS";
+    public final static String ARRIVE_TIME = "com.example.nancy.aucklandtransport.ARRIVE_TIME";
+    public final static String FROM_ADDRSTR = "com.example.nancy.aucklandtransport.FROM_ADDRSTR";
+    public final static String TO_ADDRSTR = "com.example.nancy.aucklandtransport.TO_ADDRSTR";
+    public final static String ORIGIN = "com.example.nancy.aucklandtransport.ORIGIN";
+    public final static String ADDRSTR = "com.example.nancy.aucklandtransport.ADDRESS";
+    public static final int PICK_ADDRESS_REQUEST = 1;
+
+    public static String NOTIFICATION_MESSAGE = "";
 }

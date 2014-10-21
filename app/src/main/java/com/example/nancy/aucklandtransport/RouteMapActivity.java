@@ -1,20 +1,29 @@
 package com.example.nancy.aucklandtransport;
 
 import android.app.ActionBar;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -23,6 +32,8 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.androidpn.client.Constants;
 
 import java.util.ArrayList;
 
@@ -34,11 +45,42 @@ public class RouteMapActivity extends FragmentActivity {
     Route route = null;
     private boolean isRouteSet = false;
     private IBackgroundServiceAPI api = null;
+    NotifReceiver mReceiver;
+    IntentFilter mFilter;
+    public static CheckBox onBoardBtn;
+    public static boolean boardedBus = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_route_map);
+
+        int id = Resources.getSystem().getIdentifier("btn_check_holo_light", "drawable", "android");
+        ((CheckBox) findViewById(R.id.onBoardBtn)).setButtonDrawable(id);
+
+        onBoardBtn =(CheckBox)findViewById(R.id.onBoardBtn);
+        onBoardBtn.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                //is chkIos checked?
+                if (((CheckBox) v).isChecked()) {
+                    boardedBus = true;
+                }
+                else
+                    boardedBus = false;
+            }
+        });
+
+
+        // Instantiating BroadcastReceiver
+        mReceiver = new NotifReceiver();
+
+        // Creating an IntentFilter with action
+        mFilter = new IntentFilter(Constant.BROADCAST_NOTIFICATION);
+
+        // Registering BroadcastReceiver with this activity for the intent filter
+        LocalBroadcastManager.getInstance(getApplicationContext()).registerReceiver(mReceiver, mFilter);
 
         getRoute();
 
@@ -50,6 +92,11 @@ public class RouteMapActivity extends FragmentActivity {
 
         SupportMapFragment supportMapFragment = (SupportMapFragment)
                 getSupportFragmentManager().findFragmentById(R.id.mapPath);
+
+        // Handling action bar title
+        if (Constant.NOTIFICATION_MESSAGE.compareTo("")!=0) {
+            setTitle();
+        }
 
         googleMap = supportMapFragment.getMap();
         if (googleMap == null) {
@@ -122,6 +169,26 @@ public class RouteMapActivity extends FragmentActivity {
         }
     }
 
+    // Defining a BroadcastReceiver
+    private class NotifReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Constant.NOTIFICATION_MESSAGE =  intent.getStringExtra(Constants.NOTIFICATION_MESSAGE);
+            setTitle();
+        }
+    }
+
+    private void setTitle() {
+        ActionBar actionBar = getActionBar();
+        // add the custom view to the action bar
+        actionBar.setCustomView(R.layout.actionbar_view);
+        TextView textView = (TextView) actionBar.getCustomView().findViewById(R.id.txt_search);
+        textView.setText(Constant.NOTIFICATION_MESSAGE );
+        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM
+                | ActionBar.DISPLAY_SHOW_HOME);
+        actionBar.setDisplayHomeAsUpEnabled(true);
+    }
+
     private ServiceConnection serviceConection = new ServiceConnection() {
 
         public void onServiceDisconnected(ComponentName name) {
@@ -170,7 +237,6 @@ public class RouteMapActivity extends FragmentActivity {
         }
     };
 
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -186,12 +252,13 @@ public class RouteMapActivity extends FragmentActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.route_map, menu);
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(false); // disable the button
-            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
-        }
+//        getMenuInflater().inflate(R.menu.route_map, menu);
+//        ActionBar actionBar = getActionBar();
+//        if (actionBar != null) {
+//            actionBar.setHomeButtonEnabled(false); // disable the button
+//            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+//        }
+
         return true;
     }
 

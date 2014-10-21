@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.BackgroundJobs;
 
 import android.app.IntentService;
 import android.content.Intent;

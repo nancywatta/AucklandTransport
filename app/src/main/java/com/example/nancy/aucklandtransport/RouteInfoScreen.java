@@ -28,6 +28,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
+import com.example.nancy.aucklandtransport.BackgroundJobs.ActivityRecognitionService;
 
 public class RouteInfoScreen extends FragmentActivity implements AlertPositiveListener,
         GooglePlayServicesClient.ConnectionCallbacks,

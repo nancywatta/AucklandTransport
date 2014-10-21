@@ -7,6 +7,9 @@ import android.widget.AutoCompleteTextView;
 import java.util.HashMap;
 
 /**
+ * CustomAutoCompleteTextView is used to create a Customizing AutoCompleteTextView
+ * to return Place Description corresponding to the selected item
+ *
  * Created by Nancy on 7/9/14.
  */
 public class CustomAutoCompleteTextView extends AutoCompleteTextView {

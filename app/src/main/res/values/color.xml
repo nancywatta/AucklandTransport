@@ -7,4 +7,5 @@
     <color name="light_green">#31B404</color>
     <color name="text_tab_selected">#5d5d5d</color>
     <color name="text_tab_unselected">#838183</color>
+    <color name="light_blue">#A9BCF5</color>
 </resources>

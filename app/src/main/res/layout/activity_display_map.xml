@@ -25,6 +25,7 @@
             android:ellipsize="end"
             android:singleLine="true"
             android:hint="@string/hnt_et_location"
+            android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
             android:layout_toLeftOf="@id/btn_find"/>
 
     </RelativeLayout>

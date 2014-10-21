@@ -37,6 +37,7 @@ import android.widget.RadioButton;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.example.nancy.aucklandtransport.BackgroundJobs.GPSTracker;
 import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
 import com.example.nancy.aucklandtransport.History.PlaceItem;
 import com.example.nancy.aucklandtransport.History.RouteHistoryItem;
@@ -481,10 +482,9 @@ public class MainApp extends FragmentActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_explore) {
-            Intent exploreActivity = new Intent(MainApp.this, TouristPlanner.class);
+        if (id == R.id.action_home) {
+            Intent exploreActivity = new Intent(MainApp.this, HomePage.class);
             startActivity(exploreActivity);
-            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);

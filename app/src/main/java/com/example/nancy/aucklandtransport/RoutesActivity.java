@@ -3,7 +3,6 @@ package com.example.nancy.aucklandtransport;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -344,11 +343,11 @@ public class RoutesActivity extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.routes, menu);
-        ActionBar actionBar = getActionBar();
-        if (actionBar != null) {
-            actionBar.setHomeButtonEnabled(false); // disable the button
-            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
-        }
+//        ActionBar actionBar = getActionBar();
+//        if (actionBar != null) {
+//            actionBar.setHomeButtonEnabled(false); // disable the button
+//            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+//        }
         return true;
     }
 
@@ -360,6 +359,10 @@ public class RoutesActivity extends Activity {
                 finish();
                 return true;
             case R.id.action_settings:
+                return true;
+            case R.id.action_home:
+                Intent exploreActivity = new Intent(RoutesActivity.this, HomePage.class);
+                startActivity(exploreActivity);
                 return true;
         }
         return super.onOptionsItemSelected(item);
