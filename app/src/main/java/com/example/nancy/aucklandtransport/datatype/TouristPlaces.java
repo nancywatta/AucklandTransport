@@ -44,9 +44,9 @@ public class TouristPlaces {
     public void setDepartureTime(long value) { departureTime = value; }
 
     public void setArray() {
-        placesArray.clear();
-        routesArray.clear();
-        mHMReference.clear();
+        if(placesArray != null) placesArray.clear();
+        if(routesArray != null) routesArray.clear();
+        if(mHMReference != null) mHMReference.clear();
     }
 
     public void addRoute(String intermediateAdd, ArrayList<Route> array, long timeSinceEpoch) {

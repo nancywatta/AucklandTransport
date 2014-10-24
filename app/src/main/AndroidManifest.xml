@@ -46,7 +46,7 @@
 
         <meta-data
             android:name="com.google.android.gms.version"
-            android:value="4323000" />
+            android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw" />
@@ -83,8 +83,8 @@
         <activity
             android:name=".RouteMapActivity"
             android:label="@string/title_activity_route_map"
-            android:theme="@style/Theme.MyFancyTheme"
-            android:parentActivityName=".RouteInfoScreen" >
+            android:parentActivityName=".RouteInfoScreen"
+            android:theme="@style/Theme.MyFancyTheme" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.RouteInfoScreen" />

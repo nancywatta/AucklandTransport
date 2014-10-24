@@ -43,6 +43,7 @@ public class Constant {
     public final static String TO_ADDRSTR = "com.example.nancy.aucklandtransport.TO_ADDRSTR";
     public final static String ORIGIN = "com.example.nancy.aucklandtransport.ORIGIN";
     public final static String ADDRSTR = "com.example.nancy.aucklandtransport.ADDRESS";
+
     public static final int PICK_ADDRESS_REQUEST = 1;
 
     public static String NOTIFICATION_MESSAGE = "";

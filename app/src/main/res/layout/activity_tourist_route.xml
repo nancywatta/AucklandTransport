@@ -20,56 +20,81 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <Button
-                android:id="@+id/btn_search"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:text="@string/str_btn_find" />
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <EditText
                 android:id="@+id/et_location"
-                android:layout_width="fill_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.6"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_toLeftOf="@id/btn_search"
                 android:ellipsize="end"
-                android:hint="@string/hnt_et_location"
+                android:text=""
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
+                android:hint="@string/hnt_et_keyword"
                 android:inputType="text"
                 android:singleLine="true" />
 
-        </RelativeLayout>
+            <TextView
+                android:id="@+id/text_view2"
+                android:layout_width="0dp"
+                android:layout_weight="0.15"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/et_location"
+                android:text="@string/str_within"
+                android:gravity="center" />
+
+            <Spinner
+                android:id="@+id/spr_distance"
+                android:layout_width="0dp"
+                android:layout_weight="0.25"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/et_location"
+                android:layout_alignParentTop="true" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_view1"
+                android:layout_width="0dp"
+                android:layout_weight="0.15"
+                android:layout_height="wrap_content"
+                android:text="@string/str_of" />
+
+            <Spinner
+                android:id="@+id/spr_location"
+                android:layout_width="0dp"
+                android:layout_weight="0.6"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/btn_search"
+                android:layout_width="0dp"
+                android:layout_weight="0.25"
+                android:layout_height="wrap_content"
+                android:text="@string/str_btn_find" />
+
+        </LinearLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-            <Spinner
-                android:id="@+id/spr_place_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true" />
-
-            <Button
-                android:id="@+id/btn_find"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_toRightOf="@id/spr_place_type"
-                android:text="@string/str_btn_find" />
-
 
             <fragment
                 android:id="@+id/map"
                 class="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/spr_place_type" />
+                android:layout_height="wrap_content" />
         </RelativeLayout>
     </LinearLayout>
 

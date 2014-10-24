@@ -3,9 +3,12 @@ package com.example.nancy.aucklandtransport;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
@@ -21,6 +24,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -31,6 +35,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.Adapters.CustomSpinnerAdapter;
 import com.example.nancy.aucklandtransport.BackgroundTask.NearbyPlacesTask;
 import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
 import com.example.nancy.aucklandtransport.Utils.Constant;
@@ -85,10 +90,16 @@ public class TouristRoute extends FragmentActivity {
     GoogleMap mGoogleMap;
 
     // Spinner in which the location types are stored
-    Spinner mSprPlaceType;
+    //Spinner mSprPlaceType;
+
+    // Spinner in which the distance are stored
+    Spinner mSprDistance;
+
+    // Spinner in which the location near which the user wants to search are stored
+    Spinner mSprLocation;
 
     // A button to find the near by places
-    Button mBtnFind = null;
+    //Button mBtnFind = null;
 
     Button mBtnSearch = null;
 
@@ -96,10 +107,19 @@ public class TouristRoute extends FragmentActivity {
     Place[] mPlaces = null;
 
     // A String array containing place types sent to Google Place service
-    String[] mPlaceType = null;
+    //String[] mPlaceType = null;
 
     // A String array containing place types displayed to user
-    String[] mPlaceTypeName = null;
+    //String[] mPlaceTypeName = null;
+
+    // A String array containing distnace in meters to be sent to Google Place service
+    String[] mDistanceValue = null;
+
+    // A String array containing distance displayed to user
+    String[] mDistanceStr = null;
+
+    // A String array containing locations
+    String[] mLocationStr = null;
 
     // The location at which user touches the Google Map
     LatLng mLocation = null;
@@ -115,6 +135,8 @@ public class TouristRoute extends FragmentActivity {
 
     RouteReceiver mReceiver;
     IntentFilter mFilter;
+
+    CustomSpinnerAdapter customAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -187,6 +209,21 @@ public class TouristRoute extends FragmentActivity {
                     imm.hideSoftInputFromWindow(etLocation.getWindowToken(),
                             InputMethodManager.RESULT_UNCHANGED_SHOWN);
                     return true;
+                }
+                return false;
+            }
+        });
+
+        // Delete text on cross button click
+        etLocation.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_RIGHT = 2;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (etLocation.getRight() - etLocation.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        etLocation.setText("");
+                    }
                 }
                 return false;
             }
@@ -409,7 +446,7 @@ public class TouristRoute extends FragmentActivity {
                 History.saveRoute(TouristRoute.this, fromLoc, toLoc, fromCoords, toCoords);
 
             if (route != null) {
-                mLocation = route.getStartLocation();
+                //mLocation = route.getStartLocation();
                 touristPlaces.setArray();
                 TouristPlaces.startAddress = route.getStartAddress();
                 TouristPlaces.endAddress = route.getEndAddress();
@@ -422,25 +459,53 @@ public class TouristRoute extends FragmentActivity {
 
     public void handleMap() {
     // Array of place types
-        mPlaceType = getResources().getStringArray(R.array.place_type);
+        //mPlaceType = getResources().getStringArray(R.array.place_type);
 
         // Array of place type names
-        mPlaceTypeName = getResources().getStringArray(R.array.place_type_name);
+        //mPlaceTypeName = getResources().getStringArray(R.array.place_type_name);
+
+        // Array of distance value
+        mDistanceValue = getResources().getStringArray(R.array.distance_value);
+
+        // Array of distance names
+        mDistanceStr = getResources().getStringArray(R.array.distance_string);
+
+        // Array of distance names
+        mLocationStr = getResources().getStringArray(R.array.location_string);
 
         // Creating an array adapter with an array of Place types
         // to populate the spinner
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(TouristRoute.this,
-                android.R.layout.simple_spinner_dropdown_item,
-                mPlaceTypeName);
+//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(TouristRoute.this,
+//                android.R.layout.simple_spinner_dropdown_item,
+//                mPlaceTypeName);
 
         // Getting reference to the Spinner
-        mSprPlaceType = (Spinner) findViewById(R.id.spr_place_type);
+        //mSprPlaceType = (Spinner) findViewById(R.id.spr_place_type);
 
         // Setting adapter on Spinner to set place types
-        mSprPlaceType.setAdapter(adapter);
+        //mSprPlaceType.setAdapter(adapter);
+
+        // Creating an array adapter with an array of Distance string
+        // to populate the spinner
+        ArrayAdapter<String> disAdapter = new ArrayAdapter<String>(TouristRoute.this,
+                android.R.layout.simple_spinner_dropdown_item,
+                mDistanceStr);
+
+        // Getting reference to the Spinner
+        mSprDistance = (Spinner) findViewById(R.id.spr_distance);
+
+        // Setting adapter on Spinner to set distance
+        mSprDistance.setAdapter(disAdapter);
+
+        mSprLocation = (Spinner) findViewById(R.id.spr_location);
+
+        customAdapter = new CustomSpinnerAdapter(getBaseContext(),
+                        TouristRoute.this, R.layout.spinner_row, mLocationStr);
+
+        mSprLocation.setAdapter(customAdapter);
 
         // Getting reference to Find Button
-        mBtnFind = (Button) findViewById(R.id.btn_find);
+        //mBtnFind = (Button) findViewById(R.id.btn_find);
 
         // Getting reference to btn_find of the layout activity_main
         mBtnSearch = (Button) findViewById(R.id.btn_search);
@@ -506,42 +571,42 @@ public class TouristRoute extends FragmentActivity {
             }
 
             // Setting click event lister for the find button
-            mBtnFind.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-
-                    int selectedPosition = mSprPlaceType.getSelectedItemPosition();
-                    String type = mPlaceType[selectedPosition];
-
-                    mGoogleMap.clear();
-
-                    if (route != null)
-                        addPolyLine();
-
-                    if (mLocation == null) {
-                        Toast.makeText(TouristRoute.this,
-                                "Please mark a location", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    drawMarker(mLocation, BitmapDescriptorFactory.HUE_GREEN);
-
-                    StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
-                    sb.append("location=" + mLocation.latitude + "," + mLocation.longitude);
-                    sb.append("&radius=500");
-                    sb.append("&types=" + type);
-                    sb.append("&sensor=true");
-                    sb.append("&key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw");
-
-                    // Creating a new non-ui thread task to download Google place json data
-                    NearbyPlacesTask placesTask = new NearbyPlacesTask(mGoogleMap,
-                            mHMReference, mPlaces);
-
-                    // Invokes the "doInBackground()" method of the class PlaceTask
-                    placesTask.execute(sb.toString());
-                }
-            });
+//            mBtnFind.setOnClickListener(new View.OnClickListener() {
+//
+//                @Override
+//                public void onClick(View v) {
+//
+//                    //int selectedPosition = mSprPlaceType.getSelectedItemPosition();
+//                    String type = ""; //mPlaceType[selectedPosition];
+//
+//                    mGoogleMap.clear();
+//
+//                    if (route != null)
+//                        addPolyLine();
+//
+//                    if (mLocation == null) {
+//                        Toast.makeText(TouristRoute.this,
+//                                "Please mark a location", Toast.LENGTH_SHORT).show();
+//                        return;
+//                    }
+//
+//                    drawMarker(mLocation, BitmapDescriptorFactory.HUE_GREEN);
+//
+//                    StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
+//                    sb.append("location=" + mLocation.latitude + "," + mLocation.longitude);
+//                    sb.append("&radius=500");
+//                    sb.append("&types=" + type);
+//                    sb.append("&sensor=true");
+//                    sb.append("&key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw");
+//
+//                    // Creating a new non-ui thread task to download Google place json data
+//                    NearbyPlacesTask placesTask = new NearbyPlacesTask(mGoogleMap,
+//                            mHMReference, mPlaces);
+//
+//                    // Invokes the "doInBackground()" method of the class PlaceTask
+//                    placesTask.execute(sb.toString());
+//                }
+//            });
 
             // Defining button click event listener for the find button
             View.OnClickListener findClickListener = new View.OnClickListener() {
@@ -552,12 +617,35 @@ public class TouristRoute extends FragmentActivity {
                     etLocation.clearFocus();
 
                     if (location != null && !location.equals("")) {
+
+                        String coords = "";
+                        int selectedPosition = mSprDistance.getSelectedItemPosition();
+                        String radius = mDistanceValue[selectedPosition];
+
+                        selectedPosition = mSprLocation.getSelectedItemPosition();
+                        Log.d(TAG, "selectedPosition: " + selectedPosition);
+
+                        if (selectedPosition == 2 &&
+                                mLocation == null) {
+                            Toast.makeText(TouristRoute.this,
+                                    "Please mark a location", Toast.LENGTH_SHORT).show();
+                            return;
+                        } else if(selectedPosition == 0) {
+                            LatLng latLng = route.getStartLocation();
+                            coords = latLng.latitude + "," + latLng.longitude;
+                        } else if (selectedPosition == 1) {
+                            LatLng latLng = route.getEndLocation();
+                            coords = latLng.latitude + "," + latLng.longitude;
+                        } else
+                            coords = mLocation.latitude + "," + mLocation.longitude;
+
                         mGoogleMap.clear();
 
                         if (route != null)
                             addPolyLine();
 
-                        StringBuilder sb = new StringBuilder("https://maps.googleapis.com/maps/api/place/textsearch/json?");
+                        StringBuilder sb =
+                                new StringBuilder("https://maps.googleapis.com/maps/api/place/nearbysearch/json?");
                         try {
                             // encoding special characters like space in the user input place
                             location = URLEncoder.encode(location, "utf-8");
@@ -565,11 +653,13 @@ public class TouristRoute extends FragmentActivity {
                             e.printStackTrace();
                         }
 
-                        sb.append("query=" + location);
-                        sb.append("&location=" + mLocation.latitude + "," + mLocation.longitude);
-                        sb.append("&radius=50000");
+                        sb.append("&location=" + coords);
+                        sb.append("&radius="+radius);
+                        sb.append("&keyword=" + location);
                         sb.append("&sensor=true");
                         sb.append("&key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw");
+
+                        Log.d(TAG, "url: " + sb.toString());
 
                         // Creating a new non-ui thread task to download Google place json data
                         NearbyPlacesTask placesTask = new NearbyPlacesTask(mGoogleMap,
@@ -580,6 +670,16 @@ public class TouristRoute extends FragmentActivity {
                         // Invokes the "doInBackground()" method of the class NearbyPlacesTask
                         placesTask.execute(sb.toString());
 
+                    }
+                    else {
+                        AlertDialog alertDialog = new AlertDialog.Builder(TouristRoute.this).create();
+                        alertDialog.setTitle("Validation Error");
+                        alertDialog.setMessage("Enter a Search Keyword like attractions, restaurant etc");
+                        alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            } });
+                        alertDialog.show();
                     }
                 }
             };
@@ -708,13 +808,19 @@ public class TouristRoute extends FragmentActivity {
      * Drawing marker at latLng with color
      */
     private Marker drawMarker(LatLng latLng, float color) {
+
         // Creating a marker
         MarkerOptions markerOptions = new MarkerOptions();
 
         // Setting the position for the marker
         markerOptions.position(latLng);
 
-        if (color != Constant.UNDEFINED_COLOR)
+        if(route!= null && latLng.equals(route.getEndLocation())) {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.finish_flag));
+        } else if(route!= null && latLng.equals(route.getStartLocation())) {
+            markerOptions.icon(BitmapDescriptorFactory.fromResource(R.drawable.start_flag));
+        }
+        else if(color != Constant.UNDEFINED_COLOR)
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(color));
 
         // Placing a marker on the touched position
@@ -757,8 +863,49 @@ public class TouristRoute extends FragmentActivity {
             Intent exploreActivity = new Intent(TouristRoute.this, HomePage.class);
             startActivity(exploreActivity);
             return true;
+        } else if(id == R.id.action_map) {
+            Intent mapActivity = new Intent(TouristRoute.this, DisplayMapActivity.class);
+            mapActivity.putExtra(Constant.ORIGIN, true);
+            startActivityForResult(mapActivity, Constant.PICK_ADDRESS_REQUEST);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (Constant.PICK_ADDRESS_REQUEST) : {
+                if (resultCode == Activity.RESULT_OK) {
+                    // Clears all the existing markers
+                    mGoogleMap.clear();
+
+                    if (route != null)
+                        addPolyLine();
+
+                    String fromAddress = data.getStringExtra(Constant.FROM_ADDRSTR);
+                    if(fromAddress!=null) {
+                        String fCoords = data.getStringExtra(Constant.FROM_COORDS);
+                        int index = fCoords.indexOf(',');
+                        String latitude  = "", longitude = "";
+                        if(index > 0) {
+                            latitude = fCoords.substring(0, index);
+                            longitude = fCoords.substring(index+1);
+                        }
+
+                        Place place = new Place();
+                        place.mPlaceName = fromAddress;
+                        place.mLat = latitude;
+                        place.mLng = longitude;
+
+                        Marker m = drawMarker( new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude)),
+                                Constant.UNDEFINED_COLOR);
+                        mHMReference.put(m.getId(), place);
+                    }
+                }
+                break;
+            }
+        }
     }
 
     // Defining a BroadcastReceiver

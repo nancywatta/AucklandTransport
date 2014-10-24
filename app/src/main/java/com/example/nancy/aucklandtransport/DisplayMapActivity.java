@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -15,12 +17,13 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nancy.aucklandtransport.BackgroundJobs.GPSTracker;
+import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
 import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
 import com.example.nancy.aucklandtransport.Parser.GeocodeJSONParser;
 import com.google.android.gms.common.ConnectionResult;
@@ -54,9 +57,12 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
     MarkerOptions markerOptions;
     LatLng latLng;
     GPSTracker gps;
-    EditText etLocation;
+    //EditText etLocation;
     Boolean isOrigin;
     Intent output;
+
+    AutoCompleteTextView tvLocation;
+    String prefix="";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,26 +77,55 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
         isOrigin = intent.getBooleanExtra(MainApp.ORIGIN, true);
         String message = intent.getStringExtra(MainApp.ADDRSTR);
 
-        // Getting reference to EditText to get the user input location
-        etLocation = (EditText) findViewById(R.id.et_location);
+        // Getting reference to AutoCompleteTextView to get the user input location
+        tvLocation = (AutoCompleteTextView) findViewById(R.id.editText1);
+        tvLocation.setText(message);
 
-        etLocation.setText(message);
-        etLocation.setSelection(etLocation.getText().length());
+        tvLocation.setThreshold(1);
 
-        etLocation.setOnClickListener(new View.OnClickListener() {
+        tvLocation.addTextChangedListener(new TextWatcher() {
 
             @Override
-            public void onClick(View v) {
-                etLocation.setSelectAllOnFocus(true);
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                prefix = s.toString();
+                GooglePlacesTask placesTask = new GooglePlacesTask(getBaseContext(),
+                        tvLocation, prefix);
+                placesTask.execute(s.toString());
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count,
+                                          int after) {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                // TODO Auto-generated method stub
+            }
+
+        });
+
+        tvLocation.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                final int DRAWABLE_RIGHT = 2;
+
+                if(event.getAction() == MotionEvent.ACTION_UP) {
+                    if(event.getRawX() >= (tvLocation.getRight() - tvLocation.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+                        tvLocation.setText("");
+                    }
+                }
+                return false;
             }
         });
 
-        etLocation.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        tvLocation.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(etLocation.getWindowToken(),
+                    imm.hideSoftInputFromWindow(tvLocation.getWindowToken(),
                             InputMethodManager.RESULT_UNCHANGED_SHOWN);
                     return true;
                 }
@@ -98,19 +133,15 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
             }
         });
 
-        etLocation.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int DRAWABLE_RIGHT = 2;
-
-                if(event.getAction() == MotionEvent.ACTION_UP) {
-                    if(event.getRawX() >= (etLocation.getRight() - etLocation.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                        etLocation.setText("");
-                    }
-                }
-                return false;
-            }
-        });
+//        etLocation.setSelection(etLocation.getText().length());
+//
+//        etLocation.setOnClickListener(new View.OnClickListener() {
+//
+//            @Override
+//            public void onClick(View v) {
+//                etLocation.setSelectAllOnFocus(true);
+//            }
+//        });
 
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
@@ -154,9 +185,10 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
             OnClickListener findClickListener = new OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    //etLocation.clearFocus();
+
                     // Getting user input location
-                    String location = etLocation.getText().toString();
-                    etLocation.clearFocus();
+                    String location = tvLocation.getText().toString();
 
                     InputMethodManager inputManager = (InputMethodManager)
                             getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -213,9 +245,9 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
     @Override
     public void onPositiveClick(boolean isLocationSet) {
         if(isOrigin == true)
-            output.putExtra(MainApp.FROM_ADDRSTR, etLocation.getText().toString());
+            output.putExtra(MainApp.FROM_ADDRSTR, tvLocation.getText().toString());
         else
-            output.putExtra(MainApp.TO_ADDRSTR, etLocation.getText().toString());
+            output.putExtra(MainApp.TO_ADDRSTR, tvLocation.getText().toString());
         setResult(RESULT_OK, output);
         finish();
     }
@@ -416,7 +448,8 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                     marker.showInfoWindow();
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15));
-                    etLocation.setText(name);
+
+                    tvLocation.setText(name);
                     String temp = latLng.latitude + "," + latLng.longitude;
                     if(isOrigin == true)
                         output.putExtra(MainApp.FROM_COORDS, temp);

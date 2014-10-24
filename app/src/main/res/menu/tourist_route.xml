@@ -5,4 +5,8 @@
         android:title="@string/home_page"
         android:orderInCategory="100"
         android:showAsAction="never" />
+    <item android:id="@+id/action_map"
+        android:icon="@android:drawable/ic_dialog_map"
+        android:title="@string/action_map"
+        android:showAsAction="ifRoom" />
 </menu>

@@ -3,39 +3,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity">
 
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/btn_find"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/str_btn_find"
-            android:layout_alignParentRight="true" />
+            android:layout_alignParentRight="true"
+            android:text="@string/str_btn_find" />
 
-        <EditText
-            android:id="@+id/et_location"
+        <com.example.nancy.aucklandtransport.CustomAutoCompleteTextView
+            android:id="@+id/editText1"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:inputType="text"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:hint="@string/hnt_et_location"
+            android:autoText="true"
+            android:background="@drawable/rounded_edittext"
+            android:bufferType="normal"
             android:drawableRight="@android:drawable/ic_menu_close_clear_cancel"
-            android:layout_toLeftOf="@id/btn_find"/>
+            android:ellipsize="end"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:hint="@string/hnt_et_location"
+            android:maxLines="1"
+            android:nextFocusLeft="@+id/editText1"
+            android:nextFocusUp="@+id/editText1"
+            android:scrollHorizontally="true"
+            android:layout_toLeftOf="@id/btn_find"
+            android:singleLine="true"
+            android:text="" />
 
     </RelativeLayout>
 
+
+
     <fragment xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/map"
+        class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clickable="true"
         android:apiKey="AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw"
-        class="com.google.android.gms.maps.SupportMapFragment" />
+        android:clickable="true" />
 
 </LinearLayout>
