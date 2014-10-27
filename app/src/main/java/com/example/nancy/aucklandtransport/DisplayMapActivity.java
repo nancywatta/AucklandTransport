@@ -498,6 +498,7 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
             case R.id.action_home:
                 Intent exploreActivity = new Intent(DisplayMapActivity.this, HomePage.class);
                 startActivity(exploreActivity);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);

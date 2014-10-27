@@ -86,16 +86,26 @@
 
         </LinearLayout>
 
-        <RelativeLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
             <fragment
                 android:id="@+id/map"
                 class="com.google.android.gms.maps.SupportMapFragment"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+            <Button
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-        </RelativeLayout>
+                android:layout_height="wrap_content"
+                android:background="@color/green"
+                android:onClick="showAllRoutes"
+                android:layout_alignParentBottom="true"
+                android:drawableLeft="@android:drawable/ic_menu_search"
+                android:text="@string/go"
+                />
+
+        </FrameLayout>
     </LinearLayout>
 
 </LinearLayout>

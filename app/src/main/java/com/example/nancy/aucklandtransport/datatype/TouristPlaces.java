@@ -4,8 +4,9 @@ import android.util.Log;
 
 import com.example.nancy.aucklandtransport.Route;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.Iterator;
 
 /**
@@ -35,21 +36,64 @@ public class TouristPlaces {
     private static long departureTime;
 
     // Links lat and lng with the formatted address
-    HashMap<String, String> mHMReference = new HashMap<String, String>();
+    //HashMap<String, String> mHMReference = new HashMap<String, String>();
 
     public ArrayList<Route> getRoutesArray() { return routesArray; }
 
-    public long getDepartureTime() { return departureTime; }
+    public long getDepartureTime() {
+        Log.d(TAG, "departureTime: " + departureTime);
+        return departureTime; }
 
     public void setDepartureTime(long value) { departureTime = value; }
 
     public void setArray() {
         if(placesArray != null) placesArray.clear();
         if(routesArray != null) routesArray.clear();
-        if(mHMReference != null) mHMReference.clear();
+        //if(mHMReference != null) mHMReference.clear();
     }
 
-    public void addRoute(String intermediateAdd, ArrayList<Route> array, long timeSinceEpoch) {
+//    public void addRoute(String intermediateAdd, ArrayList<Route> array, long timeSinceEpoch) {
+//        if(array == null || array.size() < 1) {
+//            Log.d(TAG, " Input array Zero");
+//            return;
+//        }
+//
+//        if(routesArray == null)
+//            routesArray = new ArrayList<Route>();
+//
+//
+//        Log.d(TAG, "Valid timeSinceEpoch");
+//        for (Route route : array) {
+//            if (timeSinceEpoch != 0) {
+//                if (route.getArrival().seconds == 0) {
+//                    Log.d(TAG, "Arrival Null");
+//                    route.getArrival().seconds = timeSinceEpoch +
+//                            route.getDuration().seconds;
+//                    Date date = new Date(route.getArrival().seconds * 1000L); // *1000 is to convert seconds to milliseconds
+//                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm"); // the format of your date
+//                    route.getArrival().travelTime = sdf.format(date);
+//                }
+//                if (route.getDeparture().seconds == 0) {
+//                    Log.d(TAG, "Departure Null: " + timeSinceEpoch);
+//                    route.getDeparture().seconds = timeSinceEpoch;
+//                    Date date = new Date(timeSinceEpoch * 1000L); // *1000 is to convert minutes to milliseconds
+//                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm"); // the format of your date
+//                    route.getDeparture().travelTime = sdf.format(date);
+//                }
+//
+//            }
+//        }
+//
+//        routesArray.addAll(array);
+//
+//        // add the reference of lat and lng with the formatted address
+//        if(!mHMReference.containsKey(intermediateAdd)) {
+//            Log.d(TAG, " Adding Reference");
+//            mHMReference.put(intermediateAdd, array.get(0).getEndAddress());
+//        }
+//    }
+
+    public void addRoute(String start, String end, ArrayList<Route> array, long timeSinceEpoch) {
         if(array == null || array.size() < 1) {
             Log.d(TAG, " Input array Zero");
             return;
@@ -58,71 +102,221 @@ public class TouristPlaces {
         if(routesArray == null)
             routesArray = new ArrayList<Route>();
 
-        if(timeSinceEpoch != 0) {
-            Log.d(TAG, "Valid timeSinceEpoch");
-            for (Route route : array) {
+
+        Log.d(TAG, "Valid timeSinceEpoch");
+        for (Route route : array) {
+            if (timeSinceEpoch != 0) {
                 if (route.getArrival().seconds == 0) {
                     Log.d(TAG, "Arrival Null");
                     route.getArrival().seconds = timeSinceEpoch +
                             route.getDuration().seconds;
+                    Date date = new Date(route.getArrival().seconds * 1000L); // *1000 is to convert seconds to milliseconds
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm"); // the format of your date
+                    route.getArrival().travelTime = sdf.format(date);
                 }
                 if (route.getDeparture().seconds == 0) {
-                    Log.d(TAG, "Arrival Null");
+                    Log.d(TAG, "Departure Null: " + timeSinceEpoch);
                     route.getDeparture().seconds = timeSinceEpoch;
+                    Date date = new Date(timeSinceEpoch * 1000L); // *1000 is to convert minutes to milliseconds
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm"); // the format of your date
+                    route.getDeparture().travelTime = sdf.format(date);
                 }
             }
+            route.setStartTouristPlace(start);
+            route.setEndTouristPlace(end);
         }
 
         routesArray.addAll(array);
-
-        // add the reference of lat and lng with the formatted address
-        if(!mHMReference.containsKey(intermediateAdd)) {
-            Log.d(TAG, " Adding Reference");
-            mHMReference.put(intermediateAdd, array.get(0).getEndAddress());
-        }
     }
 
-    public void deleteRoute(String intermediateAdd, ArrayList<Route> array) {
+//    public void deleteRoute(String intermediateAdd, ArrayList<Route> array,
+//                            long timeSinceEpoch, boolean isDelete) {
+//        if(routesArray == null)
+//            return;
+//            // only one place in between actual start Address and End Address
+//        else if(routesArray.size() < 3 ) {
+//            /**
+//            * clear the routes array since, the actual route between start and end address
+//            * is already available in the Shared Preferences
+//            */
+//            routesArray.clear();
+//
+//            // clear the reference of lat and lng with the formatted address
+//            mHMReference.clear();
+//            return;
+//        } else if(array == null || array.size() < 1 ||
+//                routesArray == null || !mHMReference.containsKey(intermediateAdd)) {
+//            Log.d(TAG, " Input array Zero");
+//            return;
+//        }
+//
+//        String deleteAddress = mHMReference.get(intermediateAdd);
+//        int index;
+//        for(index = 0; index < routesArray.size(); index++) {
+//            Route route = routesArray.get(index);
+//            if(route.getEndAddress().compareTo(deleteAddress) == 0 && isDelete)
+//                break;
+//            else if(route.getStartAddress().compareTo(deleteAddress) == 0 && !isDelete)
+//                break;
+//        }
+//
+//        Log.d(TAG , "deleteRoute: " + routesArray.size() + " deleteAddress: "
+//                + deleteAddress + " index: " + index);
+//
+//        // remove route from start address to intermediateAdd
+//        routesArray.remove(index);
+//        // remove route from intermediateAdd to end address
+//        if(isDelete)
+//            routesArray.remove(index);
+//
+//        if(timeSinceEpoch != 0) {
+//            Log.d(TAG, "Valid timeSinceEpoch");
+//            for (Route route : array) {
+//                if (route.getArrival().seconds == 0) {
+//                    Log.d(TAG, "Arrival Null");
+//                    route.getArrival().seconds = timeSinceEpoch +
+//                            route.getDuration().seconds;
+//                    Date date = new Date(route.getArrival().seconds*1000L); // *1000 is to convert seconds to milliseconds
+//                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm"); // the format of your date
+//                    route.getArrival().travelTime = sdf.format(date);
+//                }
+//                if (route.getDeparture().seconds == 0) {
+//                    Log.d(TAG, "Departure Null: " + timeSinceEpoch);
+//                    route.getDeparture().seconds = timeSinceEpoch;
+//                    Date date = new Date(timeSinceEpoch*1000L); // *1000 is to convert minutes to milliseconds
+//                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm"); // the format of your date
+//                    route.getDeparture().travelTime = sdf.format(date);
+//                }
+//            }
+//        }
+//
+//        // add route from start address to end address disconnecting the intermediateAdd
+//        routesArray.addAll(index, array);
+//
+//        // remove the reference of lat and lng with the formatted address
+//        if(isDelete)
+//            mHMReference.remove(intermediateAdd);
+//    }
+
+    public void deleteRoute(String start, String end, String intermediateAdd,
+                            ArrayList<Route> array, long timeSinceEpoch, boolean isDelete) {
         if(routesArray == null)
             return;
-            // only one place in between actual start Address and End Address
-        else if(routesArray.size() < 3 ) {
-            /**
-            * clear the routes array since, the actual route between start and end address
-            * is already available in the Shared Preferences
-            */
-            routesArray.clear();
-
-            // clear the reference of lat and lng with the formatted address
-            mHMReference.clear();
-            return;
-        } else if(array == null || array.size() < 1 ||
-                routesArray == null || !mHMReference.containsKey(intermediateAdd)) {
+        else if(array == null || array.size() < 1) {
             Log.d(TAG, " Input array Zero");
             return;
         }
 
-        String deleteAddress = mHMReference.get(intermediateAdd);
         int index;
         for(index = 0; index < routesArray.size(); index++) {
-            Route route = routesArray.get(0);
-            if(route.getEndAddress().compareTo(deleteAddress) == 0)
+            Route route = routesArray.get(index);
+            if(route.getEndTouristPlace().compareTo(intermediateAdd) == 0 && isDelete)
+                break;
+            else if(route.getStartTouristPlace().compareTo(intermediateAdd) == 0 && !isDelete)
                 break;
         }
 
         Log.d(TAG , "deleteRoute: " + routesArray.size() + " deleteAddress: "
-                + deleteAddress + " index: " + index);
+                + intermediateAdd + " index: " + index);
 
         // remove route from start address to intermediateAdd
         routesArray.remove(index);
         // remove route from intermediateAdd to end address
-        routesArray.remove(index);
+        if(isDelete)
+            routesArray.remove(index);
+
+
+        Log.d(TAG, "Valid timeSinceEpoch");
+        for (Route route : array) {
+            if (timeSinceEpoch != 0) {
+                if (route.getArrival().seconds == 0) {
+                    Log.d(TAG, "Arrival Null");
+                    route.getArrival().seconds = timeSinceEpoch +
+                            route.getDuration().seconds;
+                    Date date = new Date(route.getArrival().seconds * 1000L); // *1000 is to convert seconds to milliseconds
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm"); // the format of your date
+                    route.getArrival().travelTime = sdf.format(date);
+                }
+                if (route.getDeparture().seconds == 0) {
+                    Log.d(TAG, "Departure Null: " + timeSinceEpoch);
+                    route.getDeparture().seconds = timeSinceEpoch;
+                    Date date = new Date(timeSinceEpoch * 1000L); // *1000 is to convert minutes to milliseconds
+                    SimpleDateFormat sdf = new SimpleDateFormat("HH:mm"); // the format of your date
+                    route.getDeparture().travelTime = sdf.format(date);
+                }
+            }
+            route.setStartTouristPlace(start);
+            route.setEndTouristPlace(end);
+        }
 
         // add route from start address to end address disconnecting the intermediateAdd
         routesArray.addAll(index, array);
+    }
 
-        // remove the reference of lat and lng with the formatted address
-        mHMReference.remove(intermediateAdd);
+//    public long getTimeOfStart(String intermediateAdd) {
+//        if(routesArray == null)
+//            return 0;
+//
+//        String deleteAddress = mHMReference.get(intermediateAdd);
+//        Log.d(TAG, "deleteAddress: " + deleteAddress);
+//        int index;
+//        for(index = 0; index < routesArray.size(); index++) {
+//            Route route = routesArray.get(index);
+//            Log.d(TAG, "EndAdress: " + route.getEndAddress());
+//            if(route.getEndAddress().compareTo(deleteAddress) == 0)
+//                break;
+//        }
+//
+//        return routesArray.get(index).getDeparture().getSeconds();
+//    }
+
+    public long getTimeOfStart(String intermediateAdd) {
+        if(routesArray == null)
+            return 0;
+
+        Log.d(TAG, "deleteAddress: " + intermediateAdd);
+        int index;
+        for(index = 0; index < routesArray.size(); index++) {
+            Route route = routesArray.get(index);
+            Log.d(TAG, "EndAdress: " + route.getEndTouristPlace());
+            if(route.getEndTouristPlace().compareTo(intermediateAdd) == 0)
+                break;
+        }
+
+        return routesArray.get(index).getDeparture().getSeconds();
+    }
+
+//    public long getTimeOfDepart(String intermediateAdd, long duration) {
+//        if(routesArray == null)
+//            return 0;
+//
+//        String deleteAddress = mHMReference.get(intermediateAdd);
+//        Log.d(TAG, "deleteAddress: " + deleteAddress);
+//        int index;
+//        for(index = 0; index < routesArray.size(); index++) {
+//            Route route = routesArray.get(index);
+//            Log.d(TAG, "EndAdress: " + route.getEndAddress());
+//            if(route.getEndAddress().compareTo(deleteAddress) == 0)
+//                break;
+//        }
+//
+//        return routesArray.get(index).getArrival().getSeconds() + (duration*60);
+//    }
+
+    public long getTimeOfDepart(String intermediateAdd, long duration) {
+        if(routesArray == null)
+            return 0;
+
+        Log.d(TAG, "deleteAddress: " + intermediateAdd);
+        int index;
+        for(index = 0; index < routesArray.size(); index++) {
+            Route route = routesArray.get(index);
+            Log.d(TAG, "EndAdress: " + route.getEndTouristPlace());
+            if(route.getEndTouristPlace().compareTo(intermediateAdd) == 0)
+                break;
+        }
+
+        return routesArray.get(index).getArrival().getSeconds() + (duration*60);
     }
 
     public void deletePreviousRoute() {
@@ -142,8 +336,10 @@ public class TouristPlaces {
     }
 
     public long getTimeOfStart() {
-        if(routesArray == null)
+        if(routesArray == null) {
+            Log.d(TAG, "start of Journey");
             return 0;
+        }
 
         int size = routesArray.size();
         if(size > 1) {
@@ -217,21 +413,21 @@ public class TouristPlaces {
      * given Place. If the given place is the last to be visited, then return the
      * ending point of Journey.
      */
-    public String getNextAddress(Place place) {
+    public Place getNextAddress(Place place) {
         if(placesArray == null)
-            return "";
+            return null;
         if(placesArray.size() <= 1)
-            return endAddress;
+            return null;
 
         for(int index=0; index < placesArray.size(); index++) {
             Place place1 = placesArray.get(index);
             if (place1.compare(place) && index < placesArray.size() - 1) {
-                Place tempPlace = placesArray.get(index + 1);
-                return tempPlace.mLat + "," + tempPlace.mLng;
+                //Place tempPlace = placesArray.get(index + 1);
+                return placesArray.get(index + 1);
             }
         }
 
-        return endAddress;
+        return null;
     }
 
     public long getDepartureTime(long duration) {

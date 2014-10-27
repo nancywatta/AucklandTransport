@@ -158,5 +158,6 @@
 
     <string name="action_map">Map</string>
     <string name="title_activity_tourist_map">TouristMapActivity</string>
+    <string name="title_activity_tourist_route_info">TouristRouteInfo</string>
 
 </resources>

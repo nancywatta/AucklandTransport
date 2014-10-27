@@ -616,6 +616,12 @@ public class TouristRoute extends FragmentActivity {
                     String location = etLocation.getText().toString();
                     etLocation.clearFocus();
 
+                    InputMethodManager inputManager = (InputMethodManager)
+                            getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                    inputManager.hideSoftInputFromWindow((null == getCurrentFocus()) ? null : getCurrentFocus().getWindowToken(),
+                            InputMethodManager.HIDE_NOT_ALWAYS);
+
                     if (location != null && !location.equals("")) {
 
                         String coords = "";
@@ -918,5 +924,12 @@ public class TouristRoute extends FragmentActivity {
 
             addPolyLine();
         }
+    }
+
+    public void showAllRoutes(View view) {
+        Intent routeInfoActivity = new Intent(TouristRoute.this, TouristRouteInfo.class);
+        if(touristPlaces.getRoutesArray() == null || touristPlaces.getRoutesArray().size() < 1)
+            routeInfoActivity.putExtra("route", route.getJsonString());
+        startActivity(routeInfoActivity);
     }
 }

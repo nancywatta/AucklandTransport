@@ -35,6 +35,7 @@ public class RouteIntentService extends IntentService {
     private static final String ACTION_START = "com.example.nancy.aucklandtransport.action.START";
     private static final String ACTION_END = "com.example.nancy.aucklandtransport.action.END";
     private static final String ACTION_DELETE = "com.example.nancy.aucklandtransport.action.DELETE";
+    private static final String ACTION_RECALCULATE = "com.example.nancy.aucklandtransport.action.ACTION_RECALCULATE";
 
     private static final String START_ADD = "com.example.nancy.aucklandtransport.extra.START_ADD";
     private static final String INTERMEDIATE_ADD = "com.example.nancy.aucklandtransport.extra.INTERMEDIATE_ADD";
@@ -90,6 +91,22 @@ public class RouteIntentService extends IntentService {
         context.startService(intent);
     }
 
+    /**
+     * Starts this service to perform action Recalculate with the given parameters. If
+     * the service is already performing a task this action will be queued.
+     *
+     * @see IntentService
+     */
+    public static void recalculateAction(Context context,  String param1,
+                                    String param2, long duration) {
+        Intent intent = new Intent(context, RouteIntentService.class);
+        intent.setAction(ACTION_RECALCULATE);
+        intent.putExtra(START_ADD, param1);
+        intent.putExtra(END_ADD, param2);
+        intent.putExtra(DURATION, duration);
+        context.startService(intent);
+    }
+
     public RouteIntentService() {
         super("RouteIntentService");
     }
@@ -115,6 +132,12 @@ public class RouteIntentService extends IntentService {
                 final String param3 = intent.getStringExtra(END_ADD);
                 Log.d(TAG, "DELETE: " + param1 + " --> " + param2 + " ---> " + param3);
                 handleActionDelete(param1, param2, param3);
+            } else if (ACTION_RECALCULATE.equals(action)) {
+                final String param1 = intent.getStringExtra(START_ADD);
+                final String param2 = intent.getStringExtra(END_ADD);
+                final long duration = intent.getLongExtra(DURATION, 0);
+                Log.d(TAG, "RECALCULATE: " + param1 + " --> " + param2);
+                handleActionRecalculate(param1, param2, duration);
             }
         }
     }
@@ -161,7 +184,7 @@ public class RouteIntentService extends IntentService {
          *  and function addRoute will add route , param1 to param2.
          */
         touristPlaces.deletePreviousRoute();
-        touristPlaces.addRoute(param2,routes, duration);
+        touristPlaces.addRoute(param1,param2,routes, duration);
 
         // Creating an intent for broadcastreceiver
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
@@ -245,7 +268,7 @@ public class RouteIntentService extends IntentService {
         }catch(Exception e){
             e.printStackTrace();
         }
-        touristPlaces.addRoute(param1,routes, departureTime);
+        touristPlaces.addRoute(param1,param2,routes, departureTime);
 
         // Creating an intent for broadcastreceiver
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
@@ -258,8 +281,11 @@ public class RouteIntentService extends IntentService {
      * parameters.
      */
     private void handleActionDelete(String param1, String param2, String param3) {
+
+        long duration = touristPlaces.getTimeOfStart(param2);
+
         // Getting URL to the Google Directions API
-        String url = getDirectionsUrl(param1, param3,0);
+        String url = getDirectionsUrl(param1, param3,duration);
         String jsonData = "";
         JSONObject jObject;
         ArrayList<Route> routes = null;
@@ -280,11 +306,50 @@ public class RouteIntentService extends IntentService {
             e.printStackTrace();
         }
 
-        touristPlaces.deleteRoute(param2, routes);
+        touristPlaces.deleteRoute(param1, param3, param2, routes, duration, true);
 
         // Creating an intent for broadcastreceiver
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
         // Sending the broadcast
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
+    }
+
+    /**
+     * Handle action recalculate in the provided background thread with the provided
+     * parameters.
+     */
+    private void handleActionRecalculate(String param1, String param2,
+                                         long duration) {
+        long departureTime = touristPlaces.getTimeOfDepart(param1, duration);
+
+        // Getting URL to the Google Directions API
+        String url = getDirectionsUrl(param1, param2,departureTime);
+        String jsonData = "";
+        JSONObject jObject;
+        ArrayList<Route> routes = null;
+
+        try {
+            jsonData = HTTPConnect.downloadUrl(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try{
+            jObject = new JSONObject(jsonData);
+            DirectionsJSONParser parser = new DirectionsJSONParser();
+
+            // Starts parsing data
+            routes = parser.parse(jObject);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
+        touristPlaces.deleteRoute(param1, param2, param1, routes, departureTime, false);
+
+        // Creating an intent for broadcastreceiver
+        Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
+        // Sending the broadcast
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
+
     }
 }

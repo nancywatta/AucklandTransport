@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.Adapters;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -22,6 +22,11 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.example.nancy.aucklandtransport.AucklandPublicTransportAPI;
+import com.example.nancy.aucklandtransport.R;
+import com.example.nancy.aucklandtransport.Route;
+import com.example.nancy.aucklandtransport.RouteStep;
 
 import java.util.ArrayList;
 

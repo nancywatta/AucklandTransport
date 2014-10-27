@@ -20,6 +20,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.nancy.aucklandtransport.Adapters.PathAdapter;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;

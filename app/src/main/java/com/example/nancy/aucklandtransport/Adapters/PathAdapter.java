@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.Adapters;
 
 import android.content.Context;
 import android.text.Html;
@@ -7,6 +7,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
+
+import com.example.nancy.aucklandtransport.PathSegment;
+import com.example.nancy.aucklandtransport.R;
+import com.example.nancy.aucklandtransport.RouteStep;
 
 /**
  * Created by Nancy on 9/4/14.
