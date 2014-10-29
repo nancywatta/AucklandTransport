@@ -142,7 +142,8 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView journeyDetails = (TextView) convertView
                 .findViewById(R.id.title);
 
-        journeyDetails.setText(route.getDeparture().getTravelTime() +
+        if(route.getDeparture() != null && route.getArrival() != null)
+            journeyDetails.setText(route.getDeparture().getTravelTime() +
                 " - " + route.getArrival().getTravelTime() +
                 " (" + route.getDuration().getTravelTime() + ")");
 

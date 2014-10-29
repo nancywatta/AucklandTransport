@@ -54,7 +54,9 @@ public class PathElevation extends Activity {
         isTransit = intent.getBooleanExtra("IS_TRANSIT", false);
         pathString = intent.getStringExtra("PathJSON");
 
-        if (!pathString.equals("")) try {
+        if(pathString == null)
+            Log.d(TAG, "Null");
+        else if (!pathString.equals("")) try {
             routeStep = new RouteStep(pathString);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -128,6 +130,8 @@ public class PathElevation extends Activity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             Log.d(TAG, "Response : " + result);
+            if(result == null)
+                return;
 
             new ImageLoadTask(result, imageView).execute(null, null);
         }
