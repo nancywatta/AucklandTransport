@@ -205,37 +205,71 @@ public class PlaceDialogFragment extends DialogFragment {
     // Background Service to calculate route for the newly added place
     private void callIntentServiceToAdd() {
         String placeCoords = mPlace.mLat + "," + mPlace.mLng;
+        Place prevPlace = touristPlaces.getPreviousAdd(mPlace);
+        String prevCoords = "", prevName = "";
+        if(prevPlace == null) {
+            prevCoords = touristPlaces.getStartAddress();
+            prevName = touristPlaces.getStartAddress();
+        }
+        else {
+            prevCoords = prevPlace.mLat + "," + prevPlace.mLng;
+            prevName = prevPlace.mPlaceName;
+        }
+
         RouteIntentService.startAction(context, touristPlaces,
-                touristPlaces.getPreviousAdd(mPlace), placeCoords);
+                prevCoords , prevName
+                , placeCoords, mPlace.mPlaceName);
+
         Place nextPlace = touristPlaces.getNextAddress(mPlace);
-        String nextAddress = "";
-        if(nextPlace == null)
-            nextAddress = touristPlaces.endAddress;
-        else
-            nextAddress = nextPlace.mLat + "," + nextPlace.mLng;
+        String nextCoords = "", nextAddress = "";
+        if(nextPlace == null) {
+            nextCoords = touristPlaces.getEndAddress();
+            nextAddress = touristPlaces.getEndAddress();
+        }
+        else {
+            nextCoords = nextPlace.mLat + "," + nextPlace.mLng;
+            nextAddress = nextPlace.mPlaceName;
+        }
         RouteIntentService.endAction(context,
-                placeCoords, nextAddress, mPlace.duration);
+                placeCoords, mPlace.mPlaceName,
+                nextCoords, nextAddress, mPlace.duration);
     }
 
     // Background Service to calculate route when delete place
     private void callIntentServiceToDelete() {
 
-        String prevAdd = touristPlaces.getPreviousAdd(mPlace);
-        String nextAdd = "";
+        Place prevPlace = touristPlaces.getPreviousAdd(mPlace);
+        String prevAdd = "", prevCoords="";
+        if(prevPlace == null) {
+            prevCoords = touristPlaces.getStartAddress();
+            prevAdd = touristPlaces.getStartAddress();
+        }
+        else {
+            prevCoords = prevPlace.mLat + "," + prevPlace.mLng;
+            prevAdd = prevPlace.mPlaceName;
+        }
+
+        String nextAdd = "", nextCoords="";
         Place nextPlace = touristPlaces.getNextAddress(mPlace);
         long duration = 0;
-        if(nextPlace == null)
-            nextAdd = touristPlaces.endAddress;
+        if(nextPlace == null) {
+            nextCoords = touristPlaces.getEndAddress();
+            nextAdd = touristPlaces.getEndAddress();
+        }
         else {
-            nextAdd = nextPlace.mLat + "," + nextPlace.mLng;
+            nextCoords = nextPlace.mLat + "," + nextPlace.mLng;
+            nextAdd = nextPlace.mPlaceName;
             duration = nextPlace.duration;
         }
 
         String placeCoords = mPlace.mLat + "," + mPlace.mLng;
         if(!(prevAdd.compareTo(TouristPlaces.startAddress) == 0 &&
                 nextAdd.compareTo(TouristPlaces.endAddress) == 0)) {
+
             RouteIntentService.deleteAction(context, touristPlaces,
-                    prevAdd, placeCoords, nextAdd);
+                    prevCoords, prevAdd,
+                    placeCoords,
+                    nextCoords, nextAdd);
 
             while (nextAdd.compareTo(TouristPlaces.endAddress) != 0) {
                 Place nextToNextPlace = touristPlaces.getNextAddress(nextPlace);

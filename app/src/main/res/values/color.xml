@@ -8,4 +8,7 @@
     <color name="text_tab_selected">#5d5d5d</color>
     <color name="text_tab_unselected">#838183</color>
     <color name="light_blue">#A9BCF5</color>
+    <color name="dark_blue">#0101DF</color>
+    <color name="yellow">#f9f93d</color>
+    <color name="black">#000000</color>
 </resources>

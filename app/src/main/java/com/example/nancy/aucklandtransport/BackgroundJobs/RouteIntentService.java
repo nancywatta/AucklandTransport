@@ -38,8 +38,11 @@ public class RouteIntentService extends IntentService {
     private static final String ACTION_RECALCULATE = "com.example.nancy.aucklandtransport.action.ACTION_RECALCULATE";
 
     private static final String START_ADD = "com.example.nancy.aucklandtransport.extra.START_ADD";
+    private static final String START_COORDS = "com.example.nancy.aucklandtransport.extra.START_COORDS";
     private static final String INTERMEDIATE_ADD = "com.example.nancy.aucklandtransport.extra.INTERMEDIATE_ADD";
+    private static final String INTERMEDIATE_COORDS = "com.example.nancy.aucklandtransport.extra.INTERMEDIATE_COORDS";
     private static final String END_ADD = "com.example.nancy.aucklandtransport.extra.END_ADD";
+    private static final String END_COORDS = "com.example.nancy.aucklandtransport.extra.END_COORDS";
     private static final String DURATION = "com.example.nancy.aucklandtransport.extra.DURATION";
 
     private static TouristPlaces touristPlaces;
@@ -51,12 +54,15 @@ public class RouteIntentService extends IntentService {
      * @see IntentService
      */
     public static void startAction(Context context, TouristPlaces places,
-                                      String param1, String param2) {
+                                      String param1, String param2,
+                                      String param3, String param4) {
         touristPlaces = places;
         Intent intent = new Intent(context, RouteIntentService.class);
         intent.setAction(ACTION_START);
-        intent.putExtra(START_ADD, param1);
-        intent.putExtra(INTERMEDIATE_ADD, param2);
+        intent.putExtra(START_COORDS, param1);
+        intent.putExtra(START_ADD, param2);
+        intent.putExtra(INTERMEDIATE_COORDS, param3);
+        intent.putExtra(INTERMEDIATE_ADD, param4);
         context.startService(intent);
     }
 
@@ -66,11 +72,14 @@ public class RouteIntentService extends IntentService {
      *
      * @see IntentService
      */
-    public static void endAction(Context context, String param1, String param2, long duration) {
+    public static void endAction(Context context, String param1, String param2,
+                                 String param3, String param4, long duration) {
         Intent intent = new Intent(context, RouteIntentService.class);
         intent.setAction(ACTION_END);
-        intent.putExtra(INTERMEDIATE_ADD, param1);
-        intent.putExtra(END_ADD, param2);
+        intent.putExtra(INTERMEDIATE_COORDS, param1);
+        intent.putExtra(INTERMEDIATE_ADD, param2);
+        intent.putExtra(END_COORDS, param3);
+        intent.putExtra(END_ADD, param4);
         intent.putExtra(DURATION, duration);
         context.startService(intent);
     }
@@ -81,13 +90,17 @@ public class RouteIntentService extends IntentService {
      *
      * @see IntentService
      */
-    public static void deleteAction(Context context, TouristPlaces places, String param1,
-                                    String param2, String param3) {
+    public static void deleteAction(Context context, TouristPlaces places,
+                                    String param1, String param2,
+                                    String param3,
+                                    String param4, String param5) {
         Intent intent = new Intent(context, RouteIntentService.class);
         intent.setAction(ACTION_DELETE);
-        intent.putExtra(START_ADD, param1);
-        intent.putExtra(INTERMEDIATE_ADD, param2);
-        intent.putExtra(END_ADD, param3);
+        intent.putExtra(START_COORDS, param1);
+        intent.putExtra(START_ADD, param2);
+        intent.putExtra(INTERMEDIATE_ADD, param3);
+        intent.putExtra(END_COORDS, param4);
+        intent.putExtra(END_ADD, param5);
         context.startService(intent);
     }
 
@@ -116,22 +129,28 @@ public class RouteIntentService extends IntentService {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_START.equals(action)) {
-                final String param1 = intent.getStringExtra(START_ADD);
-                final String param2 = intent.getStringExtra(INTERMEDIATE_ADD);
-                Log.d(TAG, "START: " + param1 + " --> " + param2);
-                handleActionStart(param1, param2);
+                final String param1 = intent.getStringExtra(START_COORDS);
+                final String param2 = intent.getStringExtra(START_ADD);
+                final String param3 = intent.getStringExtra(INTERMEDIATE_COORDS);
+                final String param4 = intent.getStringExtra(INTERMEDIATE_ADD);
+                Log.d(TAG, "START: " + param1 + " --> " + param3);
+                handleActionStart(param1, param2, param3, param4);
             } else if (ACTION_END.equals(action)) {
-                final String param1 = intent.getStringExtra(INTERMEDIATE_ADD);
-                final String param2 = intent.getStringExtra(END_ADD);
-                final long duration = intent.getLongExtra(DURATION, 0);
-                Log.d(TAG, "END: " + param1 + " --> " + param2);
-                handleActionEnd(param1, param2, duration);
-            } else if (ACTION_DELETE.equals(action)) {
-                final String param1 = intent.getStringExtra(START_ADD);
+                final String param1 = intent.getStringExtra(INTERMEDIATE_COORDS);
                 final String param2 = intent.getStringExtra(INTERMEDIATE_ADD);
-                final String param3 = intent.getStringExtra(END_ADD);
-                Log.d(TAG, "DELETE: " + param1 + " --> " + param2 + " ---> " + param3);
-                handleActionDelete(param1, param2, param3);
+                final String param3 = intent.getStringExtra(END_COORDS);
+                final String param4 = intent.getStringExtra(END_ADD);
+                final long duration = intent.getLongExtra(DURATION, 0);
+                Log.d(TAG, "END: " + param1 + " --> " + param3);
+                handleActionEnd(param1, param2, param3, param4, duration);
+            } else if (ACTION_DELETE.equals(action)) {
+                final String param1 = intent.getStringExtra(START_COORDS);
+                final String param2 = intent.getStringExtra(START_ADD);
+                final String param3 = intent.getStringExtra(INTERMEDIATE_ADD);
+                final String param4 = intent.getStringExtra(END_COORDS);
+                final String param5 = intent.getStringExtra(END_ADD);
+                Log.d(TAG, "DELETE: " + param1 + " --> " + param3 + " ---> " + param4);
+                handleActionDelete(param1, param2, param3, param4, param5);
             } else if (ACTION_RECALCULATE.equals(action)) {
                 final String param1 = intent.getStringExtra(START_ADD);
                 final String param2 = intent.getStringExtra(END_ADD);
@@ -146,14 +165,15 @@ public class RouteIntentService extends IntentService {
      * Handle action Start in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionStart(String param1, String param2) {
+    private void handleActionStart(String startCoords, String startAdd,
+                                   String intCoords, String intAdd) {
         long duration = touristPlaces.getTimeOfStart();
 
         if(duration == 0)
             duration = touristPlaces.getDepartureTime();
 
         // Getting URL to the Google Directions API
-        String url = getDirectionsUrl(param1, param2,duration);
+        String url = getDirectionsUrl(startCoords, intCoords,duration);
         // For storing data from web service
         String jsonData = "";
         JSONObject jObject;
@@ -184,7 +204,8 @@ public class RouteIntentService extends IntentService {
          *  and function addRoute will add route , param1 to param2.
          */
         touristPlaces.deletePreviousRoute();
-        touristPlaces.addRoute(param1,param2,routes, duration);
+        touristPlaces.addRoute(startCoords, startAdd,
+                intCoords, intAdd, routes, duration);
 
         // Creating an intent for broadcastreceiver
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
@@ -242,13 +263,14 @@ public class RouteIntentService extends IntentService {
      * Handle action End in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionEnd(String param1, String param2, long duration) {
+    private void handleActionEnd(String intCoords, String intAdd,
+                                 String endCoords, String endAdd, long duration) {
 
         // get Departure time adding the duration the user is going to stay at the current
         // place
         long departureTime = touristPlaces.getDepartureTime(duration);
         // Getting URL to the Google Directions API
-        String url = getDirectionsUrl(param1, param2, departureTime);
+        String url = getDirectionsUrl(intCoords, endCoords, departureTime);
         String jsonData = "";
         JSONObject jObject;
         ArrayList<Route> routes = null;
@@ -268,7 +290,8 @@ public class RouteIntentService extends IntentService {
         }catch(Exception e){
             e.printStackTrace();
         }
-        touristPlaces.addRoute(param1,param2,routes, departureTime);
+        touristPlaces.addRoute(intCoords, intAdd,
+                endCoords, endAdd, routes, departureTime);
 
         // Creating an intent for broadcastreceiver
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
@@ -280,12 +303,13 @@ public class RouteIntentService extends IntentService {
      * Handle action Delete in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionDelete(String param1, String param2, String param3) {
+    private void handleActionDelete(String startCoords, String startAdd,
+                                    String inCoords, String endCoords, String endAdd) {
 
-        long duration = touristPlaces.getTimeOfStart(param2);
+        long duration = touristPlaces.getTimeOfStart(inCoords);
 
         // Getting URL to the Google Directions API
-        String url = getDirectionsUrl(param1, param3,duration);
+        String url = getDirectionsUrl(startCoords, endCoords,duration);
         String jsonData = "";
         JSONObject jObject;
         ArrayList<Route> routes = null;
@@ -306,7 +330,8 @@ public class RouteIntentService extends IntentService {
             e.printStackTrace();
         }
 
-        touristPlaces.deleteRoute(param1, param3, param2, routes, duration, true);
+        touristPlaces.deleteRoute(startCoords, startAdd,
+                endCoords, endAdd, inCoords, routes, duration, true);
 
         // Creating an intent for broadcastreceiver
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
@@ -344,7 +369,7 @@ public class RouteIntentService extends IntentService {
             e.printStackTrace();
         }
 
-        touristPlaces.deleteRoute(param1, param2, param1, routes, departureTime, false);
+        touristPlaces.deleteRoute(param1, "", param2, "", param1, routes, departureTime, false);
 
         // Creating an intent for broadcastreceiver
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);

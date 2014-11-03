@@ -149,6 +149,7 @@
         <activity
             android:name=".TouristRoute"
             android:label="@string/title_activity_tourist_route"
+            android:screenOrientation="portrait"
             android:parentActivityName=".TouristPlanner"
             android:windowSoftInputMode="stateHidden|adjustResize" >
             <meta-data

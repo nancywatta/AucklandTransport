@@ -153,6 +153,7 @@
     <string name="hnt_et_keyword">Enter Keyword</string>
     <string name="str_within">within</string>
     <string name="str_of">Of</string>
+    <string name="str_btn_search">Search</string>
 
     <drawable name="red">#C11B17</drawable>
 

@@ -78,7 +78,6 @@ public class ManageRoute extends ActionBarActivity implements
         }
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -96,10 +95,10 @@ public class ManageRoute extends ActionBarActivity implements
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
+//        int id = item.getItemId();
+//        if (id == R.id.action_settings) {
+//            return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -151,7 +150,7 @@ public class ManageRoute extends ActionBarActivity implements
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
             fragments.add(RouteInfoFragment.class.getName());
-            fragments.add(PlacesFragment.class.getName());
+            //fragments.add(PlacesFragment.class.getName());
         }
 
         @Override
@@ -164,8 +163,8 @@ public class ManageRoute extends ActionBarActivity implements
 
         @Override
         public int getCount() {
-            // Show 2 total pages.
-            return 2;
+            // Show only 1  page.
+            return 1;
         }
 
         @Override
@@ -174,8 +173,8 @@ public class ManageRoute extends ActionBarActivity implements
             switch (position) {
                 case 0:
                     return getString(R.string.title_section1).toUpperCase(l);
-                case 1:
-                    return getString(R.string.title_section2).toUpperCase(l);
+//                case 1:
+//                    return getString(R.string.title_section2).toUpperCase(l);
             }
             return null;
         }

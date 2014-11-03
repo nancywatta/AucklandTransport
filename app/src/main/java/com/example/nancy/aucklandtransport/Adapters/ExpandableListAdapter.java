@@ -137,7 +137,24 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         TextView lblListHeader = (TextView) convertView
                 .findViewById(R.id.lblListHeader);
         lblListHeader.setTypeface(null, Typeface.BOLD);
-        lblListHeader.setText(route.getStartAddress() + " To " + route.getEndAddress());
+
+        String startAdd = "";
+        if(route.getStartTouristName().isEmpty())
+            startAdd = route.getStartAddress();
+        else
+            startAdd = route.getStartTouristName();
+        lblListHeader.setText(startAdd);
+
+        TextView lblListEnd = (TextView) convertView
+                .findViewById(R.id.lblListEnd);
+        lblListEnd.setTypeface(null, Typeface.BOLD);
+
+        String endAdd = "";
+        if(route.getEndTouristName().isEmpty())
+            endAdd = route.getEndAddress();
+        else
+            endAdd = route.getEndTouristName();
+        lblListEnd.setText(endAdd);
 
         TextView journeyDetails = (TextView) convertView
                 .findViewById(R.id.title);

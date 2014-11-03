@@ -71,7 +71,8 @@ import java.util.HashMap;
  *
  * Created by Nancy on 9/9/14.
  */
-public class TouristRoute extends FragmentActivity {
+public class TouristRoute extends FragmentActivity implements
+        MyAlertDialogWIndow.AlertPositiveListener {
     private static final String TAG = TouristRoute.class.getSimpleName();
     private View mProgressView;
     private View mRouteInfoView;
@@ -869,12 +870,21 @@ public class TouristRoute extends FragmentActivity {
             Intent exploreActivity = new Intent(TouristRoute.this, HomePage.class);
             startActivity(exploreActivity);
             return true;
-        } else if(id == R.id.action_map) {
-            Intent mapActivity = new Intent(TouristRoute.this, DisplayMapActivity.class);
-            mapActivity.putExtra(Constant.ORIGIN, true);
-            startActivityForResult(mapActivity, Constant.PICK_ADDRESS_REQUEST);
+//        } else if(id == R.id.action_map) {
+//            Intent mapActivity = new Intent(TouristRoute.this, DisplayMapActivity.class);
+//            mapActivity.putExtra(Constant.ORIGIN, true);
+//            startActivityForResult(mapActivity, Constant.PICK_ADDRESS_REQUEST);
+        } else if ( id == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public void addAddress(View v) {
+        Intent mapActivity = new Intent(TouristRoute.this, DisplayMapActivity.class);
+        mapActivity.putExtra(Constant.ORIGIN, true);
+        startActivityForResult(mapActivity, Constant.PICK_ADDRESS_REQUEST);
     }
 
     @Override
@@ -932,4 +942,29 @@ public class TouristRoute extends FragmentActivity {
             routeInfoActivity.putExtra("route", route.getJsonString());
         startActivity(routeInfoActivity);
     }
+
+    @Override
+    public void onBackPressed() {
+
+        if( !(touristPlaces.getRoutesArray() == null ||
+                touristPlaces.getRoutesArray().size() < 1 )) {
+            /** Instantiating the DialogFragment */
+            MyAlertDialogWIndow alert = new MyAlertDialogWIndow();
+
+            Bundle args = new Bundle();
+            args.putString("message", "Are you sure you want to exit this activity? You will loose the saved places.");
+            alert.setArguments(args);
+
+            /** Opening the dialog window */
+            alert.show(getSupportFragmentManager(), "Alert_Dialog");
+        } else
+            super.onBackPressed();
+    }
+
+    /** Defining button click listener for the OK button of the alert dialog window */
+    @Override
+    public void onPositiveClick(boolean isLocationSet) {
+        super.onBackPressed();
+    }
+
 }

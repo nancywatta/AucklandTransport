@@ -7,7 +7,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ExpandableListView;
+import android.widget.Toast;
 
 import com.example.nancy.aucklandtransport.Adapters.ExpandableListAdapter;
 import com.example.nancy.aucklandtransport.datatype.TouristPlaces;
@@ -28,7 +30,18 @@ public class TouristRouteInfo extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tourist_route_info);
 
+        Toast.makeText(getBaseContext(),
+                "Long press the Group list for Start Navigation Activity",
+                Toast.LENGTH_LONG).show();
+
         // get the listview
+//        expListView = getExpandableListView();
+//        metrics = new DisplayMetrics();
+//        getWindowManager().getDefaultDisplay().getMetrics(metrics);
+//        width = metrics.widthPixels;
+//        //this code for adjusting the group indicator into right side of the view
+//        expListView.setIndicatorBounds(width - GetDipsFromPixel(10), width - GetDipsFromPixel(10));
+
         expListView = (ExpandableListView) findViewById(R.id.lvExp);
 
         Intent intent = getIntent();
@@ -74,8 +87,42 @@ public class TouristRouteInfo extends Activity {
                 return false;
             }
         });
+
+        // Listview on child long click listener
+        expListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                int itemType = ExpandableListView.getPackedPositionType(id);
+
+                if(itemType == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
+                    int groupPosition = ExpandableListView.getPackedPositionGroup(id);
+
+                    Route route = null;
+                    try {
+                        route = new Route(finalArrayList.get(groupPosition).getJsonString());
+                    } catch (JSONException e) {
+                        Log.d(TAG, e.getMessage());
+                    }
+                    if(route != null) {
+                        Intent myIntent = new Intent(TouristRouteInfo.this, ManageRoute.class);
+                        myIntent.putExtra("route", route.getJsonString());
+                        myIntent.putExtra("from", route.getStartAddress());
+                        myIntent.putExtra("to", route.getEndAddress());
+                        startActivity(myIntent);
+                    }
+                }
+                return false;
+            }
+        });
     }
 
+//    public int GetDipsFromPixel(float pixels)
+//    {
+//        // Get the screen's density scale
+//        final float scale = getResources().getDisplayMetrics().density;
+//        // Convert the dps to pixels, based on density scale
+//        return (int) (pixels * scale + 0.5f);
+//    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

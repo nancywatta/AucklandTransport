@@ -30,6 +30,8 @@ public class Route {
     private TravelTime duration;
     private String startTouristPlace;
     private String endTouristPlace;
+    private String startTouristName = "";
+    private String endTouristName = "";
 
     public Route(String distance, String duration, long durSeconds, String startAddress, String endAddress,
                  String depTime, long depSeconds, String arrTime, long arrSeconds, LatLng startLocation, LatLng endLocation, String jsonString) {
@@ -263,4 +265,12 @@ public class Route {
     public String getStartTouristPlace() { return  startTouristPlace; }
 
     public String getEndTouristPlace() { return endTouristPlace; }
+
+    public String getStartTouristName() { return startTouristName; }
+
+    public String getEndTouristName() { return endTouristName; }
+
+    public void setStartTouristName(String value) { this.startTouristName = value; }
+
+    public void setEndTouristName(String value) { this.endTouristName = value; }
 }

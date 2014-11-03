@@ -40,6 +40,10 @@ public class TouristPlaces {
 
     public ArrayList<Route> getRoutesArray() { return routesArray; }
 
+    public String getStartAddress() { return startAddress; }
+
+    public String getEndAddress() { return endAddress; }
+
     public long getDepartureTime() {
         Log.d(TAG, "departureTime: " + departureTime);
         return departureTime; }
@@ -51,7 +55,8 @@ public class TouristPlaces {
         if(routesArray != null) routesArray.clear();
     }
 
-    public void addRoute(String start, String end, ArrayList<Route> array, long timeSinceEpoch) {
+    public void addRoute(String start, String startName,
+                         String end, String endName, ArrayList<Route> array, long timeSinceEpoch) {
         if(array == null || array.size() < 1) {
             Log.d(TAG, " Input array Zero");
             return;
@@ -82,12 +87,15 @@ public class TouristPlaces {
             }
             route.setStartTouristPlace(start);
             route.setEndTouristPlace(end);
+            route.setStartTouristName(startName);
+            route.setEndTouristName(endName);
         }
 
         routesArray.addAll(array);
     }
 
-    public void deleteRoute(String start, String end, String intermediateAdd,
+    public void deleteRoute(String start, String startName,
+                            String end, String endName, String intermediateAdd,
                             ArrayList<Route> array, long timeSinceEpoch, boolean isDelete) {
         if(routesArray == null)
             return;
@@ -101,8 +109,11 @@ public class TouristPlaces {
             Route route = routesArray.get(index);
             if(route.getEndTouristPlace().compareTo(intermediateAdd) == 0 && isDelete)
                 break;
-            else if(route.getStartTouristPlace().compareTo(intermediateAdd) == 0 && !isDelete)
+            else if(route.getStartTouristPlace().compareTo(intermediateAdd) == 0 && !isDelete) {
+                startName = route.getStartTouristName();
+                endName = route.getEndTouristName();
                 break;
+            }
         }
 
         Log.d(TAG , "deleteRoute: " + routesArray.size() + " deleteAddress: "
@@ -136,6 +147,8 @@ public class TouristPlaces {
             }
             route.setStartTouristPlace(start);
             route.setEndTouristPlace(end);
+            route.setStartTouristName(startName);
+            route.setEndTouristName(endName);
         }
 
         // add route from start address to end address disconnecting the intermediateAdd
@@ -244,23 +257,40 @@ public class TouristPlaces {
      * given Place. If No previous place of Interest, then return the
      * starting point of Journey.
      */
-    public String getPreviousAdd(Place place) {
+//    public String getPreviousAdd(Place place) {
+//        if(placesArray == null)
+//            return "";
+//        if(placesArray.size() <= 1)
+//            return startAddress;
+//
+//        for(int index=0; index < placesArray.size(); index++) {
+//            Place place1 = placesArray.get(index);
+//            if (place1.compare(place)) {
+//                if(index == 0)
+//                    return startAddress;
+//                Place tempPlace = placesArray.get(index - 1);
+//                return tempPlace.mLat + "," + tempPlace.mLng;
+//            }
+//        }
+//
+//        return "";
+//    }
+    public Place getPreviousAdd(Place place) {
         if(placesArray == null)
-            return "";
+            return null;
         if(placesArray.size() <= 1)
-            return startAddress;
+            return null;
 
         for(int index=0; index < placesArray.size(); index++) {
             Place place1 = placesArray.get(index);
             if (place1.compare(place)) {
                 if(index == 0)
-                    return startAddress;
-                Place tempPlace = placesArray.get(index - 1);
-                return tempPlace.mLat + "," + tempPlace.mLng;
+                    return null;
+                return placesArray.get(index - 1);
             }
         }
 
-        return "";
+        return null;
     }
 
     /**
