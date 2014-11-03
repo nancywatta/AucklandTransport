@@ -714,6 +714,9 @@ public class TouristRoute extends FragmentActivity implements
                     if (route != null)
                         addPolyLine();
 
+                    // Set spinner item to tap on screen
+                    mSprLocation.setSelection(2);
+
                     // Setting the touched location in member variable
                     mLocation = point;
 
@@ -727,54 +730,67 @@ public class TouristRoute extends FragmentActivity implements
 
                 @Override
                 public boolean onMarkerClick(Marker marker) {
-                    if(mAddedReference != null)
-                    Log.d(TAG, "mAddedReference: " +  mAddedReference.size());
 
-                    // If touched at User input location
-                    if (!mHMReference.containsKey(marker.getId())
-                            && !mAddedReference.containsKey(marker.getId()))
-                        return false;
+                    return markerClick(marker);
+                }
+            });
 
-                    Log.d(TAG, "Reached Here");
-                    // Getting place object corresponding to the currently clicked Marker
-                    Place place = null;
-                    if (mHMReference.containsKey(marker.getId()) )
-                        place = mHMReference.get(marker.getId());
-                    else
-                    place = mAddedReference.get(marker.getId());
+            // Setting click event handler for InfoWIndow
+            mGoogleMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
 
-                    // Creating an instance of DisplayMetrics
-                    DisplayMetrics dm = new DisplayMetrics();
-
-                    // Getting the screen display metrics
-                    getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-                    // Creating a dialog fragment to display the photo
-                    PlaceDialogFragment dialogFragment =
-                            new PlaceDialogFragment(place, dm, TouristRoute.this);
-
-                    dialogFragment.setTouristPlaces(touristPlaces);
-
-//                    dialogFragment.setMarkerRef(marker.getId());
-
-                    // Getting a reference to Fragment Manager
-                    FragmentManager fm = getSupportFragmentManager();
-
-                    // Starting Fragment Transaction
-                    FragmentTransaction ft = fm.beginTransaction();
-
-                    // Adding the dialog fragment to the transaction
-                    ft.add(dialogFragment, "TAG");
-
-                    // Committing the fragment transaction
-                    ft.commit();
-
-                    return false;
+                @Override
+                public void onInfoWindowClick(Marker marker) {
+                    markerClick(marker);
                 }
             });
         }
     }
 
+    private boolean  markerClick(Marker marker) {
+        if(mAddedReference != null)
+            Log.d(TAG, "mAddedReference: " +  mAddedReference.size());
+
+        // If touched at User input location
+        if (!mHMReference.containsKey(marker.getId())
+                && !mAddedReference.containsKey(marker.getId()))
+            return false;
+
+        Log.d(TAG, "Reached Here");
+        // Getting place object corresponding to the currently clicked Marker
+        Place place = null;
+        if (mHMReference.containsKey(marker.getId()) )
+            place = mHMReference.get(marker.getId());
+        else
+            place = mAddedReference.get(marker.getId());
+
+        // Creating an instance of DisplayMetrics
+        DisplayMetrics dm = new DisplayMetrics();
+
+        // Getting the screen display metrics
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+        // Creating a dialog fragment to display the photo
+        PlaceDialogFragment dialogFragment =
+                new PlaceDialogFragment(place, dm, TouristRoute.this);
+
+        dialogFragment.setTouristPlaces(touristPlaces);
+
+//                    dialogFragment.setMarkerRef(marker.getId());
+
+        // Getting a reference to Fragment Manager
+        FragmentManager fm = getSupportFragmentManager();
+
+        // Starting Fragment Transaction
+        FragmentTransaction ft = fm.beginTransaction();
+
+        // Adding the dialog fragment to the transaction
+        ft.add(dialogFragment, "TAG");
+
+        // Committing the fragment transaction
+        ft.commit();
+
+        return false;
+    }
     /**
      * Shows the progress UI and hides the login form.
      */
@@ -914,9 +930,24 @@ public class TouristRoute extends FragmentActivity implements
                         place.mLat = latitude;
                         place.mLng = longitude;
 
-                        Marker m = drawMarker( new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude)),
-                                Constant.UNDEFINED_COLOR);
+                        // Creating a marker
+                        MarkerOptions markerOptions = new MarkerOptions();
+
+                        LatLng locLatLng = new LatLng(Double.parseDouble(latitude), Double.parseDouble(longitude));
+
+                        // Setting the position for the marker
+                        markerOptions.position(locLatLng);
+
+                        // Setting the title for the marker
+                        markerOptions.title(fromAddress);
+
+                        markerOptions.snippet("Tap here to add location");
+
+                        // Placing a marker on the touched position
+                        Marker m = mGoogleMap.addMarker(markerOptions);
                         mHMReference.put(m.getId(), place);
+                        m.showInfoWindow();
+                        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locLatLng, 15));
                     }
                 }
                 break;

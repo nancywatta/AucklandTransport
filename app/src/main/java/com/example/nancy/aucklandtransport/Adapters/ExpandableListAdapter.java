@@ -37,6 +37,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public Object getChild(int groupPosition, int childPosititon) {
 //        return this._listDataChild.get(this._listDataHeader.get(groupPosition))
 //                .get(childPosititon);
+        if(childPosititon == 0)
+            return null;
+
+        int childPos = childPosititon - 1;
         Route route = null;
         try {
             route = new Route(this._listDataHeader.get(groupPosition).getJsonString());
@@ -44,7 +48,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             e.printStackTrace();
             return null;
         }
-        return route.getSteps().get(childPosititon);
+        return route.getSteps().get(childPos);
     }
 
     @Override
@@ -73,23 +77,31 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        if(childRoute ==null)
-            return convertView;
-
-        if (childRoute.isTransit()) {
-            holder.text5.setVisibility(View.VISIBLE);
-            holder.text1.setText(childRoute.getDeparture().getTravelTime()
-                    + " - " + childRoute.getArrival().getTravelTime());
-
-            holder.text5.setText(childRoute.getType() + " --- "
-                    + childRoute.getShortName() + "(" + childRoute.getVehicleName() + ")");
-            holder.text4.setText(childRoute.getDepartureStop() + " To " + childRoute.getArrivalStop());
-        } else {
+        if(childPosition == 0) {
+            holder.image.setImageResource(android.R.drawable.ic_menu_directions);
             holder.text5.setVisibility(View.GONE);
-            holder.text1.setText(childRoute.getDistance().getTravelDistance() + " (" + childRoute.getDuration().getTravelTime() + ")");
-            holder.text4.setText(childRoute.getDesc());
+            holder.text1.setVisibility(View.GONE);
+            holder.text4.setText("Go to Navigation Page");
         }
-        holder.image.setImageResource(childRoute.getIconId());
+        else {
+            if(childRoute ==null)
+                return convertView;
+
+            if (childRoute.isTransit()) {
+                holder.text5.setVisibility(View.VISIBLE);
+                holder.text1.setText(childRoute.getDeparture().getTravelTime()
+                        + " - " + childRoute.getArrival().getTravelTime());
+
+                holder.text5.setText(childRoute.getType() + " --- "
+                        + childRoute.getShortName() + "(" + childRoute.getVehicleName() + ")");
+                holder.text4.setText(childRoute.getDepartureStop() + " To " + childRoute.getArrivalStop());
+            } else {
+                holder.text5.setVisibility(View.GONE);
+                holder.text1.setText(childRoute.getDistance().getTravelDistance() + " (" + childRoute.getDuration().getTravelTime() + ")");
+                holder.text4.setText(childRoute.getDesc());
+            }
+            holder.image.setImageResource(childRoute.getIconId());
+        }
 
         return convertView;
     }
@@ -105,7 +117,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
     public int getChildrenCount(int groupPosition) {
 //        return this._listDataChild.get(this._listDataHeader.get(groupPosition))
 //                .size();
-        return this._listDataHeader.get(groupPosition).getSteps().size();
+        return this._listDataHeader.get(groupPosition).getSteps().size() + 1;
     }
 
     @Override
@@ -141,9 +153,15 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         String startAdd = "";
         if(route.getStartTouristName().isEmpty())
             startAdd = route.getStartAddress();
-        else
+        else {
             startAdd = route.getStartTouristName();
+        }
         lblListHeader.setText(startAdd);
+
+        if(groupPosition == 0) {
+            lblListHeader.setCompoundDrawablesWithIntrinsicBounds(R.drawable.start, 0, 0, 0);
+        } else
+            lblListHeader.setCompoundDrawablesWithIntrinsicBounds(R.drawable.from_marker, 0, 0, 0);
 
         TextView lblListEnd = (TextView) convertView
                 .findViewById(R.id.lblListEnd);
@@ -155,6 +173,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         else
             endAdd = route.getEndTouristName();
         lblListEnd.setText(endAdd);
+
+        if(groupPosition != this._listDataHeader.size() -1 ) {
+            lblListEnd.setCompoundDrawablesWithIntrinsicBounds(R.drawable.to_marker, 0, 0, 0);
+        } else
+            lblListEnd.setCompoundDrawablesWithIntrinsicBounds(R.drawable.finish, 0, 0, 0);
 
         TextView journeyDetails = (TextView) convertView
                 .findViewById(R.id.title);

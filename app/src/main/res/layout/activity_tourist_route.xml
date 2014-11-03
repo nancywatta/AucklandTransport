@@ -67,14 +67,14 @@
             <TextView
                 android:id="@+id/text_view1"
                 android:layout_width="0dp"
-                android:layout_weight="0.1"
+                android:layout_weight="0.05"
                 android:layout_height="wrap_content"
                 android:text="@string/str_of" />
 
             <Spinner
                 android:id="@+id/spr_location"
                 android:layout_width="0dp"
-                android:layout_weight="0.475"
+                android:layout_weight="0.525"
                 android:layout_height="wrap_content" />
 
             <Button

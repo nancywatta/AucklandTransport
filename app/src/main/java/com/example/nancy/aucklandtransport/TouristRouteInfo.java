@@ -71,17 +71,33 @@ public class TouristRouteInfo extends Activity {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
-
-                Intent myIntent = new Intent(TouristRouteInfo.this, PathElevation.class);
                 Route route = null;
+                if(childPosition == 0) {
+                    try {
+                        route = new Route(finalArrayList.get(groupPosition).getJsonString());
+                    } catch (JSONException e) {
+                        Log.d(TAG, e.getMessage());
+                    }
+                    if(route != null) {
+                        Intent myIntent = new Intent(TouristRouteInfo.this, ManageRoute.class);
+                        myIntent.putExtra("route", route.getJsonString());
+                        myIntent.putExtra("from", route.getStartAddress());
+                        myIntent.putExtra("to", route.getEndAddress());
+                        startActivity(myIntent);
+                    }
+                    return false;
+                }
+                int childPos = childPosition - 1;
+                Intent myIntent = new Intent(TouristRouteInfo.this, PathElevation.class);
+
                 try {
                      route = new Route(finalArrayList.get(groupPosition).getJsonString());
                 } catch (JSONException e) {
                     Log.d(TAG, e.getMessage());
                 }
                 if(route != null) {
-                    myIntent.putExtra("IS_TRANSIT", route.getSteps().get(childPosition).isTransit());
-                    myIntent.putExtra("PathJSON", route.getSteps().get(childPosition).getJsonString());
+                    myIntent.putExtra("IS_TRANSIT", route.getSteps().get(childPos).isTransit());
+                    myIntent.putExtra("PathJSON", route.getSteps().get(childPos).getJsonString());
                     startActivity(myIntent);
                 }
                 return false;

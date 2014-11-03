@@ -4,14 +4,14 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:padding="8dp"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/dark_grey">
 
     <TextView
         android:id="@+id/lblListHeader"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:drawablePadding="10dp"
-        android:drawableLeft="@drawable/start_line"
+        android:drawableLeft="@drawable/start"
         android:textSize="17dp"
         android:textColor="@color/yellow" />
 
@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:drawableLeft="@drawable/finish"
         android:textSize="17dp"
-        android:textColor="@color/light_red" />
+        android:textColor="@color/white" />
 
     <TextView
         android:id="@+id/title"
