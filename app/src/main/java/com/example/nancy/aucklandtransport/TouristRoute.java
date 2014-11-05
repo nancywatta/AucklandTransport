@@ -419,7 +419,7 @@ public class TouristRoute extends FragmentActivity implements
         protected void onPostExecute(ArrayList<Route> result) {
             showProgress(false);
 
-            if(result.size()<1){
+            if(result == null || result.size()<1){
                 Toast.makeText(getBaseContext(), "No Routes Available", Toast.LENGTH_SHORT).show();
                 return;
             }

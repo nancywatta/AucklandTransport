@@ -698,11 +698,11 @@ public class MainApp extends FragmentActivity {
 
         try {
             if (api != null) api.removeListener(serviceListener);
+            unbindService(serviceConection);
         } catch(Exception e) {
             Log.e(TAG, "ERROR!!", e);
         }
 
-        unbindService(serviceConection);
         Log.i(TAG, "unbind ");
     }
 

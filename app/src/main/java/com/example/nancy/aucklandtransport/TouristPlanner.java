@@ -30,6 +30,7 @@ import android.widget.TextView;
 
 import com.example.nancy.aucklandtransport.BackgroundJobs.GPSTracker;
 import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
+import com.example.nancy.aucklandtransport.Utils.ConnectionDetector;
 import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -58,6 +59,15 @@ public class TouristPlanner extends FragmentActivity {
     TimePickerFragment arriveTimeFragment = null;
     DatePickerDialogFragment dateFragment = null;
 
+    // Connection detector class
+    ConnectionDetector cd;
+
+    // Alert Dialog Manager
+    AlertDialogManager alert = new AlertDialogManager();
+
+    // flag for Internet connection status
+    Boolean isInternetPresent = false;
+
     Button date;
     Button leaveTime;
     Button arriveTime;
@@ -81,6 +91,18 @@ public class TouristPlanner extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tourist_planner);
+
+        // creating connection detector class instance
+        cd = new ConnectionDetector(getApplicationContext());
+        // Check if Internet present
+        isInternetPresent = cd.isConnectingToInternet();
+        if (!isInternetPresent) {
+            // Internet Connection is not present
+            alert.showAlertDialog(TouristPlanner.this, "Internet Connection Error",
+                    "Please connect to working Internet connection", false);
+            // stop executing code by return
+            return;
+        }
 
         arriveCheck = (CheckBox)findViewById(R.id.arriveChk);
 
@@ -548,6 +570,10 @@ public class TouristPlanner extends FragmentActivity {
 
     private void updateTime() {
         Calendar calendar = Calendar.getInstance(Locale.getDefault());
+        leaveTime = (Button)findViewById(R.id.button6);
+        arriveTime = (Button)findViewById(R.id.button5);
+        date = (Button)findViewById(R.id.button3);
+
         if(leaveTimeFragment != null) {
             calendar.set(Calendar.HOUR_OF_DAY, leaveTimeFragment.mHour);
             calendar.set(Calendar.MINUTE, leaveTimeFragment.mMinute);

@@ -149,8 +149,8 @@
         <activity
             android:name=".TouristRoute"
             android:label="@string/title_activity_tourist_route"
-            android:screenOrientation="portrait"
             android:parentActivityName=".TouristPlanner"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden|adjustResize" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -194,6 +194,14 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.nancy.aucklandtransport.TouristRoute" />
+        </activity>
+        <activity
+            android:name=".WebActivity"
+            android:label="@string/title_activity_web"
+            android:parentActivityName=".HomePage" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.example.nancy.aucklandtransport.HomePage" />
         </activity>
     </application>
 

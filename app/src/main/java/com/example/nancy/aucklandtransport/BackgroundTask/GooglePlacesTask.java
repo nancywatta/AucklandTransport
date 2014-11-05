@@ -143,7 +143,8 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
                     finalResult.add(hm);
                 }
             }
-            finalResult.addAll(result);
+            if(result != null)
+                finalResult.addAll(result);
 
             // Creating a SimpleAdapter for the AutoCompleteTextView
             SimpleAdapter adapter = new SimpleAdapter(mContext, finalResult, android.R.layout.simple_list_item_1, from, to);
