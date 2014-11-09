@@ -42,6 +42,7 @@ import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
 import com.example.nancy.aucklandtransport.History.PlaceItem;
 import com.example.nancy.aucklandtransport.History.RouteHistoryItem;
 import com.example.nancy.aucklandtransport.Utils.ConnectionDetector;
+import com.example.nancy.aucklandtransport.Utils.SurveyAPI;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.io.BufferedReader;
@@ -561,6 +562,7 @@ public class MainApp extends FragmentActivity {
                     calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
                 }
 
+                trackUsageRequest();
                 long secondsSinceEpoch = calendar.getTimeInMillis() / 1000L;
 
                 Log.d("MainApp", "secondsSinceEpoch " + secondsSinceEpoch +
@@ -584,6 +586,11 @@ public class MainApp extends FragmentActivity {
             e.printStackTrace();
 
         }
+    }
+
+    private void trackUsageRequest() {
+        SurveyAPI surveyAPI = new SurveyAPI(getApplicationContext());
+        surveyAPI.getServerCount();
     }
 
     @Override

@@ -8,9 +8,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
+import com.example.nancy.aucklandtransport.Utils.SurveyAPI;
+
 public class HomePage extends Activity {
 
     private Button button;
+    private SurveyAPI surveyAPI = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +31,10 @@ public class HomePage extends Activity {
             }
 
         });
+
+        surveyAPI = new SurveyAPI(getApplicationContext());
+        if(surveyAPI.getUsageCount())
+            button.setVisibility(View.VISIBLE);
     }
 
     public void goToSimplePlanner(View view) {

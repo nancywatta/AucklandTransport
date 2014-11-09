@@ -321,6 +321,9 @@ public class AucklandPublicTransportAPI {
                     Date depDate = new Date();
                     depDate.setTime(depTime * 1000L);
 
+                    Log.d(TAG, "depDate: " + depDate + " actualArrivalTime: " +
+                            actualArrivalTime);
+
                     if (depDate.compareTo(actualArrivalTime) == 0) {
                         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
                         String shortTimeStr = sdf.format(expectedArrivalTime);

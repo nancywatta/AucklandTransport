@@ -44,7 +44,11 @@ public class Constant {
     public final static String ORIGIN = "com.example.nancy.aucklandtransport.ORIGIN";
     public final static String ADDRSTR = "com.example.nancy.aucklandtransport.ADDRESS";
 
+    public final static String USAGE_COUNT = "com.example.nancy.aucklandtransport.USAGE_COUNT";
+
     public static final int PICK_ADDRESS_REQUEST = 1;
+
+    public static final int SURVEY_ELIG_COUNT = 5;
 
     public static String NOTIFICATION_MESSAGE = "";
 }
