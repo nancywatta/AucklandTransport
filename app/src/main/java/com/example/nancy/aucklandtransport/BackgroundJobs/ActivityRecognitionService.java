@@ -26,10 +26,16 @@ public class ActivityRecognitionService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if(ActivityRecognitionResult.hasResult(intent)){
 
-            // receive activity detections
+            /*
+             receive activity detections
+              */
             ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
             Log.d(TAG, getType(result.getMostProbableActivity().getType()));
 
+            /*
+            Send an intent broadcast of the detected user activity to all the
+            interested receivers
+             */
             Intent i = new Intent("com.example.nancy.aucklandtransport.ACTIVITY_RECOGNITION_DATA");
             i.putExtra("Activity", getType(result.getMostProbableActivity().getType()) );
             i.putExtra("Confidence", result.getMostProbableActivity().getConfidence());

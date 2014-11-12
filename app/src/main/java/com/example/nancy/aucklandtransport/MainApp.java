@@ -562,7 +562,7 @@ public class MainApp extends FragmentActivity {
                     calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
                 }
 
-                trackUsageRequest();
+                //trackUsageRequest();
                 long secondsSinceEpoch = calendar.getTimeInMillis() / 1000L;
 
                 Log.d("MainApp", "secondsSinceEpoch " + secondsSinceEpoch +

@@ -11,17 +11,25 @@ import android.os.Parcelable;
  * Created by Nancy on 9/9/14.
  */
 public class Photo implements Parcelable {
-    // Width of the Photo
+    /*
+    Width of the Photo
+     */
     public int mWidth=0;
 
-    // Height of the Photo
+    /*
+    Height of the Photo
+     */
     public int mHeight=0;
 
-    // Reference of the photo to be used in Google Web Services
+    /*
+    Reference of the photo to be used in Google Web Services
+     */
     public String mPhotoReference="";
 
-    // Attributions of the photo
-    // Attribution is a Parcelable class
+    /**
+     * Attributions of the photo
+     * Attribution is a Parcelable class
+     */
     public Attribution[] mAttributions={};
 
     @Override

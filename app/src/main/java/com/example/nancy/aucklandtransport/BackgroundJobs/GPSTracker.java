@@ -11,25 +11,36 @@ import android.os.IBinder;
 import android.util.Log;
 
 /**
+ * GPSTracker is a Background service to detect the user current location
+ * from the location providers such as WIFI or GPS
+ *
  * Created by Nancy on 7/3/14.
  */
 public class GPSTracker extends Service implements LocationListener {
     private final Context mContext;
 
-    // flag for GPS status
+    /*
+     flag for GPS status
+      */
     boolean isGPSEnabled = false;
 
-    // flag for network status
+    /*
+     flag for network status
+      */
     boolean isNetworkEnabled = false;
 
-    // flag for GPS status
+    /*
+     flag for GPS status
+      */
     boolean canGetLocation = false;
 
     Location location = null; // location
     double latitude; // latitude
     double longitude; // longitude
 
-    // Declaring a Location Manager
+    /*
+     Declaring a Location Manager
+      */
     protected LocationManager locationManager;
 
     public GPSTracker(Context context) {
@@ -42,16 +53,22 @@ public class GPSTracker extends Service implements LocationListener {
             locationManager = (LocationManager) mContext
                     .getSystemService(LOCATION_SERVICE);
 
-            // getting GPS status
+            /*
+             getting GPS status
+              */
             isGPSEnabled = locationManager
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-            // getting network status
+            /*
+             getting network status
+              */
             isNetworkEnabled = locationManager
                     .isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 
             if (!isGPSEnabled && !isNetworkEnabled) {
-                // no network provider is enabled
+                /*
+                 no network provider is enabled
+                  */
             } else {
                 this.canGetLocation = true;
                 if (isNetworkEnabled) {
@@ -69,7 +86,9 @@ public class GPSTracker extends Service implements LocationListener {
                         }
                     }
                 }
-                // if GPS Enabled get lat/long using GPS Services
+                /*
+                 if GPS Enabled get lat/long using GPS Services
+                  */
                 if (isGPSEnabled) {
                     if (location == null) {
                         locationManager.requestLocationUpdates(

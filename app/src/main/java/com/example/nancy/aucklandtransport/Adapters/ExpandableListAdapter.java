@@ -18,28 +18,37 @@ import org.json.JSONException;
 import java.util.ArrayList;
 
 /**
+ * ExpandableListAdapter class is used to populate the
+ * expandable list view with the tourist route.
+ * The group view gives the start and end address whereas
+ * the child view gives detailed route information.
+ *
  * Created by Nancy on 10/25/14.
  */
 public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     private Context _context;
     private ArrayList<Route> _listDataHeader; // header titles
-    // child data in format of header title, child title
-    //private HashMap<String, List<String>> _listDataChild;
+
 
     public ExpandableListAdapter(Context context, ArrayList<Route> listDataHeader) {
         this._context = context;
         this._listDataHeader = listDataHeader;
-        //this._listDataChild = listChildData;
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosititon) {
-//        return this._listDataChild.get(this._listDataHeader.get(groupPosition))
-//                .get(childPosititon);
+        /*
+         The first row of the child should be a link to the Navigation Page
+          */
         if(childPosititon == 0)
             return null;
 
+        /*
+         Rest child rows should come from the Route object providing
+         detailed instruction on walking and public transport step of the
+          journey.
+          */
         int childPos = childPosititon - 1;
         Route route = null;
         try {
@@ -77,6 +86,9 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
+        /*
+         The first row of the child is a link to the Navigation Page
+          */
         if(childPosition == 0) {
             holder.image.setImageResource(android.R.drawable.ic_menu_directions);
             holder.text5.setVisibility(View.GONE);
@@ -115,8 +127,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-//        return this._listDataChild.get(this._listDataHeader.get(groupPosition))
-//                .size();
+
+        /*
+         Add 1 to the route steps size, since an extra row will be added in the
+         Child view that takes the user to Navigation Page
+          */
         return this._listDataHeader.get(groupPosition).getSteps().size() + 1;
     }
 
@@ -150,6 +165,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 .findViewById(R.id.lblListHeader);
         lblListHeader.setTypeface(null, Typeface.BOLD);
 
+        /*
+         Check if the place short name is present in the Route
+         Object. If yes display the short place name e.g "Pizza Hut"
+         Otherwise Display the full address e.g "14 Upper Queen Street, Auckland, 1010"
+          */
         String startAdd = "";
         if(route.getStartTouristName().isEmpty())
             startAdd = route.getStartAddress();
@@ -158,6 +178,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         }
         lblListHeader.setText(startAdd);
 
+        /*
+        Check if its the start point of the tourist journey. If yes display the
+        start flag else display From Flag.
+         */
         if(groupPosition == 0) {
             lblListHeader.setCompoundDrawablesWithIntrinsicBounds(R.drawable.start, 0, 0, 0);
         } else
@@ -167,6 +191,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 .findViewById(R.id.lblListEnd);
         lblListEnd.setTypeface(null, Typeface.BOLD);
 
+        /*
+         Check if the place short name is present in the Route
+         Object. If yes display the short place name e.g "Pizza Hut"
+         Otherwise Display the full address e.g "14 Upper Queen Street, Auckland, 1010"
+          */
         String endAdd = "";
         if(route.getEndTouristName().isEmpty())
             endAdd = route.getEndAddress();
@@ -174,6 +203,10 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             endAdd = route.getEndTouristName();
         lblListEnd.setText(endAdd);
 
+        /*
+        Check if its the final end point of the tourist journey. If yes display the
+        finish line flag else display To Flag.
+         */
         if(groupPosition != this._listDataHeader.size() -1 ) {
             lblListEnd.setCompoundDrawablesWithIntrinsicBounds(R.drawable.to_marker, 0, 0, 0);
         } else

@@ -13,11 +13,22 @@ import com.example.nancy.aucklandtransport.R;
 import com.example.nancy.aucklandtransport.RouteStep;
 
 /**
+ * Path Adapter class is used to provide a customized
+ * list view of the turn by turn instructions of the walking path
+ * of the user's journey.
+ *
  * Created by Nancy on 9/4/14.
  */
 public class PathAdapter extends BaseAdapter {
+    /*
+     Instantiates layout XML file into the required customized list view
+      */
     private LayoutInflater mInflater;
     private Context context;
+
+    /*
+    RouteStep object containing the array of walking steps
+     */
     private RouteStep routeStep;
 
     public PathAdapter(Context context, RouteStep routeStep1) {

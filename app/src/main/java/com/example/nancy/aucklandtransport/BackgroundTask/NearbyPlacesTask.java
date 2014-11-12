@@ -33,15 +33,21 @@ import java.util.HashMap;
 public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
     String data = null;
 
-    // GoogleMap
+    /*
+    GoogleMap
+     */
     GoogleMap mGoogleMap;
 
     private boolean isTextSearch = false;
 
-    // Links marker id and place object
+    /*
+    Links marker id and place object
+     */
     HashMap<String, Place> mHMReference;
 
-    // Stores near by places
+    /*
+    Stores near by places
+     */
     Place[] mPlaces;
 
     public void setTextSearch() { isTextSearch = true; }
@@ -61,13 +67,19 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
         try{
             URL url = new URL(strUrl);
 
-            // Creating an http connection to communicate with url
+            /*
+            Creating an http connection to communicate with url
+             */
             urlConnection = (HttpURLConnection) url.openConnection();
 
-            // Connecting to url
+            /*
+            Connecting to url
+             */
             urlConnection.connect();
 
-            // Reading data from url
+            /*
+            Reading data from url
+             */
             iStream = urlConnection.getInputStream();
 
             BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
@@ -92,7 +104,9 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
         return data;
     }
 
-    // Invoked by execute() method of this object
+    /**
+     * Invoked by execute() method of this object
+     */
     @Override
     protected String doInBackground(String... url) {
         try {
@@ -103,13 +117,17 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
         return data;
     }
 
-    // Executed after the complete execution of doInBackground() method
+    /**
+     * Executed after the complete execution of doInBackground() method
+     */
     @Override
     protected void onPostExecute(String result) {
         ParserTask parserTask = new ParserTask();
 
-        // Start parsing the Google places in JSON format
-        // Invokes the "doInBackground()" method of ParserTask
+        /*
+        Start parsing the Google places in JSON format
+        Invokes the "doInBackground()" method of ParserTask
+         */
         parserTask.execute(result);
     }
 
@@ -120,7 +138,9 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
 
         JSONObject jObject;
 
-        // Invoked by execute() method of this object
+        /*
+        Invoked by execute() method of this object
+         */
         @Override
         protected Place[] doInBackground(String... jsonData) {
 
@@ -138,7 +158,9 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
             return places;
         }
 
-        // Executed after the complete execution of doInBackground() method
+        /*
+        Executed after the complete execution of doInBackground() method
+         */
         @Override
         protected void onPostExecute(Place[] places) {
 
@@ -149,10 +171,14 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
             for (int i = 0; i < places.length; i++) {
                 Place place = places[i];
 
-                // Getting latitude of the place
+                /*
+                Getting latitude of the place
+                 */
                 double lat = Double.parseDouble(place.mLat);
 
-                // Getting longitude of the place
+                /*
+                Getting longitude of the place
+                 */
                 double lng = Double.parseDouble(place.mLng);
 
                 LatLng latLng = new LatLng(lat, lng);
@@ -162,8 +188,10 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
 
                 Marker m = drawMarker(latLng, Constant.UNDEFINED_COLOR);
 
-                // Adding place reference to HashMap with marker id as HashMap key
-                // to get its reference in infowindow click event listener
+                /*
+                Adding place reference to HashMap with marker id as HashMap key
+                to get its reference in infowindow click event listener
+                 */
                 mHMReference.put(m.getId(), place);
             }
 
@@ -174,16 +202,25 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
      * Drawing marker at latLng with color
      */
     private Marker drawMarker(LatLng latLng, float color) {
-        // Creating a marker
+        /*
+        Creating a marker
+         */
         MarkerOptions markerOptions = new MarkerOptions();
 
-        // Setting the position for the marker
+        /*
+        Setting the position for the marker
+         */
         markerOptions.position(latLng);
 
+        /*
+        Defining a standard icon
+         */
         if (color != Constant.UNDEFINED_COLOR)
             markerOptions.icon(BitmapDescriptorFactory.defaultMarker(color));
 
-        // Placing a marker on the touched position
+        /*
+        Placing a marker on the touched position
+         */
         Marker m = mGoogleMap.addMarker(markerOptions);
 
         return m;

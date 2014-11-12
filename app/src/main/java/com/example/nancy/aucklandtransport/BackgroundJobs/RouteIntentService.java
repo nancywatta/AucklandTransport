@@ -23,20 +23,28 @@ import java.util.Locale;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
- * a service on a separate handler thread.
+ * a service on a separate handler thread. This class receives all the direction request
+ * everytime a tourist adds or deletes a place of interest when building up his itinerary.
  * <p>
  * helper methods.
+ *
+ * Created by Nancy on 10/16/14.
  */
 public class RouteIntentService extends IntentService {
 
     private static final String TAG = RouteIntentService.class.getSimpleName();
 
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
+    /*
+    Defining all the ACTIONs that the Intent Service will perform
+     */
     private static final String ACTION_START = "com.example.nancy.aucklandtransport.action.START";
     private static final String ACTION_END = "com.example.nancy.aucklandtransport.action.END";
     private static final String ACTION_DELETE = "com.example.nancy.aucklandtransport.action.DELETE";
     private static final String ACTION_RECALCULATE = "com.example.nancy.aucklandtransport.action.ACTION_RECALCULATE";
 
+    /*
+    Defining all parameters required for responding to users Direction request.
+     */
     private static final String START_ADD = "com.example.nancy.aucklandtransport.extra.START_ADD";
     private static final String START_COORDS = "com.example.nancy.aucklandtransport.extra.START_COORDS";
     private static final String INTERMEDIATE_ADD = "com.example.nancy.aucklandtransport.extra.INTERMEDIATE_ADD";
@@ -167,49 +175,79 @@ public class RouteIntentService extends IntentService {
      */
     private void handleActionStart(String startCoords, String startAdd,
                                    String intCoords, String intAdd) {
+        /*
+         get the departure time of the journey.
+          */
         long duration = touristPlaces.getTimeOfStart();
 
+        /*
+        if the departure time returned is zero, it means it is the first route
+        and thus take the departure time as the time that was input by user in the
+        Tourist Planner activity.
+         */
         if(duration == 0)
             duration = touristPlaces.getDepartureTime();
 
-        // Getting URL to the Google Directions API
+        /*
+         Getting URL to the Google Directions API
+          */
         String url = getDirectionsUrl(startCoords, intCoords,duration);
-        // For storing data from web service
+        /*
+         For storing data from web service
+          */
         String jsonData = "";
         JSONObject jObject;
         ArrayList<Route> routes = null;
 
         try {
-            // Fetching the data from web service
+            /*
+             Fetching the data from web service
+              */
             jsonData = HTTPConnect.downloadUrl(url);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try{
-            // Parsing the data in non-ui thread
+            /*
+             Parsing the data in non-ui thread
+              */
             jObject = new JSONObject(jsonData);
             DirectionsJSONParser parser = new DirectionsJSONParser();
 
-            // Starts parsing data
+            /*
+             Starts parsing data
+              */
             routes = parser.parse(jObject);
         }catch(Exception e){
             e.printStackTrace();
         }
 
         /**
-         *  if the param2 is added between param1 and Point A, so
-         *  routeArray would contain Route from param1 to Point A then below
-         *  function deletePreviousRoute will remove route param1 to Point A.
-         *  and function addRoute will add route , param1 to param2.
+         *  When adding a new destination point, delete the last route
+         *  from the routes array. This is because consider an example
+         *  where the existing routes array contains below two routes
+         *  Start -> A, A -> End
+         *  Thus when adding a new place B in between A and End,
+         *  route A -> End should be deleted and instead
+         *  the routes array should now contain below three routes.
+         *  Start -> A, A -> B, B -> End
          */
         touristPlaces.deletePreviousRoute();
+
+        /*
+        Add the new route fetched into the routes array
+         */
         touristPlaces.addRoute(startCoords, startAdd,
                 intCoords, intAdd, routes, duration);
 
-        // Creating an intent for broadcastreceiver
+        /*
+         Creating an intent for broadcastreceiver
+          */
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
-        // Sending the broadcast
+        /*
+         Sending the broadcast
+          */
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
 
     }
@@ -219,19 +257,27 @@ public class RouteIntentService extends IntentService {
         String fromAdd = param1;
         String toAdd = param2;
         try {
-            // encoding special characters like space in the user input place
+            /*
+             encoding special characters like space in the user input place
+              */
             fromAdd = URLEncoder.encode(fromAdd, "utf-8");
             toAdd = URLEncoder.encode(toAdd, "utf-8");
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
-        // Origin of route
+        /*
+         Origin of route
+          */
         String str_origin = "origin="+fromAdd;
 
-        // Destination of route
+        /*
+         Destination of route
+          */
         String str_dest = "destination="+toAdd;
 
-        // Sensor enabled
+        /*
+         Sensor enabled
+          */
         String sensor = "sensor=false";
 
         String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
@@ -244,14 +290,20 @@ public class RouteIntentService extends IntentService {
             secondsSinceEpoch = calendar.getTimeInMillis() / 1000L;
         }
 
-        // Building the parameters to the web service
+        /*
+         Building the parameters to the web service
+          */
         String parameters = str_origin+"&"+str_dest+"&"+sensor+"&"+key +
                 "&region=nz" + "&departure_time=" + Long.toString(secondsSinceEpoch) +"&"+mode;
 
-        // Output format
+        /*
+         Output format
+          */
         String output = "json";
 
-        // Building the url to the web service
+        /*
+         Building the url to the web service
+          */
         String url = "https://maps.googleapis.com/maps/api/directions/"+output+"?"+parameters;
 
         Log.d(TAG, "url:" + url);
@@ -266,36 +318,61 @@ public class RouteIntentService extends IntentService {
     private void handleActionEnd(String intCoords, String intAdd,
                                  String endCoords, String endAdd, long duration) {
 
-        // get Departure time adding the duration the user is going to stay at the current
-        // place
+        /**
+         * get Departure time adding the duration the user is going to stay at the current
+         * place
+         */
         long departureTime = touristPlaces.getDepartureTime(duration);
-        // Getting URL to the Google Directions API
+
+        /*
+         Getting URL to the Google Directions API
+          */
         String url = getDirectionsUrl(intCoords, endCoords, departureTime);
+
+        /*
+         For storing data from web service
+          */
         String jsonData = "";
         JSONObject jObject;
         ArrayList<Route> routes = null;
 
         try {
+            /*
+             Fetching the data from web service
+              */
             jsonData = HTTPConnect.downloadUrl(url);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try{
+            /*
+             Parsing the data in non-ui thread
+              */
             jObject = new JSONObject(jsonData);
             DirectionsJSONParser parser = new DirectionsJSONParser();
 
-            // Starts parsing data
+            /*
+             Starts parsing data
+              */
             routes = parser.parse(jObject);
         }catch(Exception e){
             e.printStackTrace();
         }
+
+        /*
+        Add the new route fetched into the routes array
+         */
         touristPlaces.addRoute(intCoords, intAdd,
                 endCoords, endAdd, routes, departureTime);
 
-        // Creating an intent for broadcastreceiver
+        /*
+         Creating an intent for broadcastreceiver
+          */
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
-        // Sending the broadcast
+        /*
+         Sending the broadcast
+          */
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
     }
 
@@ -306,36 +383,69 @@ public class RouteIntentService extends IntentService {
     private void handleActionDelete(String startCoords, String startAdd,
                                     String inCoords, String endCoords, String endAdd) {
 
+        /*
+         get the departure time of the journey.
+          */
         long duration = touristPlaces.getTimeOfStart(inCoords);
 
-        // Getting URL to the Google Directions API
+        /*
+         Getting URL to the Google Directions API
+          */
         String url = getDirectionsUrl(startCoords, endCoords,duration);
+
+        /*
+         For storing data from web service
+          */
         String jsonData = "";
         JSONObject jObject;
         ArrayList<Route> routes = null;
 
         try {
+            /*
+             Fetching the data from web service
+              */
             jsonData = HTTPConnect.downloadUrl(url);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try{
+            /*
+             Parsing the data in non-ui thread
+              */
             jObject = new JSONObject(jsonData);
             DirectionsJSONParser parser = new DirectionsJSONParser();
 
-            // Starts parsing data
+            /*
+             Starts parsing data
+              */
             routes = parser.parse(jObject);
         }catch(Exception e){
             e.printStackTrace();
         }
 
+        /**
+         * Delete the routes with inCoords as the start and end address
+         * And add the fetched route in place of the two routes deleted.
+         *  Consider an example where the existing routes array contains
+         *  below three routes
+         *  Start -> A, A -> B, B -> End
+         *  Thus when deleting place B from the tourist itinerary,
+         *  routes A -> B and B -> End should be deleted and instead
+         *  add the route A -> End. So the routes array should now contain
+         *  below two routes.
+         *  Start -> A, A -> End
+         */
         touristPlaces.deleteRoute(startCoords, startAdd,
                 endCoords, endAdd, inCoords, routes, duration, true);
 
-        // Creating an intent for broadcastreceiver
+        /*
+         Creating an intent for broadcastreceiver
+          */
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
-        // Sending the broadcast
+        /*
+         Sending the broadcast
+          */
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
     }
 
@@ -345,35 +455,63 @@ public class RouteIntentService extends IntentService {
      */
     private void handleActionRecalculate(String param1, String param2,
                                          long duration) {
+        /*
+         get the departure time of the journey adding the duration the user is
+         going to stay at the current place
+          */
         long departureTime = touristPlaces.getTimeOfDepart(param1, duration);
 
-        // Getting URL to the Google Directions API
+        /*
+        Getting URL to the Google Directions API
+         */
         String url = getDirectionsUrl(param1, param2,departureTime);
+
+        /*
+         For storing data from web service
+          */
         String jsonData = "";
         JSONObject jObject;
         ArrayList<Route> routes = null;
 
         try {
+            /*
+             Fetching the data from web service
+              */
             jsonData = HTTPConnect.downloadUrl(url);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try{
+            /*
+             Parsing the data in non-ui thread
+              */
             jObject = new JSONObject(jsonData);
             DirectionsJSONParser parser = new DirectionsJSONParser();
 
-            // Starts parsing data
+            /*
+            Starts parsing data
+             */
             routes = parser.parse(jObject);
         }catch(Exception e){
             e.printStackTrace();
         }
 
-        touristPlaces.deleteRoute(param1, "", param2, "", param1, routes, departureTime, false);
+        /**
+         * Delete the existing route from param1 location to param2 location
+         * Instead add the fetched route with new departure time
+         * from param1 location to param2 location
+         */
+        touristPlaces.deleteRoute(param1, "", param2, "",
+                param1, routes, departureTime, false);
 
-        // Creating an intent for broadcastreceiver
+        /*
+        Creating an intent for broadcastreceiver
+         */
         Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
-        // Sending the broadcast
+        /*
+        Sending the broadcast
+         */
         LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
 
     }

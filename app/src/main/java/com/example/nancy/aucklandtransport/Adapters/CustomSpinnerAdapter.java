@@ -12,6 +12,10 @@ import android.widget.TextView;
 import com.example.nancy.aucklandtransport.R;
 
 /**
+ * This class is used to populate the location Spinner
+ * around which to search for places of interest
+ * with an Image and a Text.
+ *
  * Created by Nancy on 10/24/14.
  */
 public class CustomSpinnerAdapter extends ArrayAdapter<String> {

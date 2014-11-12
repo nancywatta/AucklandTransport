@@ -33,7 +33,9 @@ import java.util.List;
  */
 public class GooglePlacesTask extends AsyncTask<String, Void, String> {
 
-    // used to store the textual search string input by user
+    /*
+    used to store the textual search string input by user
+     */
     String prefix="";
 
     AutoCompleteTextView textView;
@@ -48,7 +50,9 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
 
     @Override
     protected String doInBackground(String... place) {
-        // For storing data from web service
+        /*
+        For storing data from web service
+         */
         String data = "";
 
         String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
@@ -61,23 +65,35 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
             e1.printStackTrace();
         }
 
-        // place type to be searched
+        /*
+        place type to be searched
+         */
         String types = "types=geocode";
 
-        // Sensor enabled
+        /*
+        Sensor enabled
+         */
         String sensor = "sensor=false";
 
-        // Building the parameters to the web service
+        /*
+        Building the parameters to the web service
+         */
         String parameters = input+"&"+types+"&"+sensor+"&"+key+"&"+"components=country:nz";
 
-        // Output format
+        /*
+        Output format
+         */
         String output = "json";
 
-        // Building the url to the web service
+        /*
+        Building the url to the web service
+         */
         String url = "https://maps.googleapis.com/maps/api/place/autocomplete/"+output+"?"+parameters;
 
         try{
-            // Fetching the data from web service
+            /*
+            Fetching the data from web service
+             */
             data = downloadUrl(url);
         }catch(Exception e){
             Log.d("Background Task", e.toString());
@@ -89,10 +105,14 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
 
-        // Creating ParserTask
+        /*
+        Creating ParserTask
+         */
         ParserTask parserTask = new ParserTask();
 
-        // Starting Parsing the JSON string returned by Web Service
+        /*
+        Starting Parsing the JSON string returned by Web Service
+         */
         parserTask.execute(result);
     }
 
@@ -101,7 +121,9 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
 
         JSONObject jObject;
 
-        // Parsing the data in non-ui thread
+        /*
+        Parsing the data in non-ui thread
+         */
         @Override
         protected List<HashMap<String, String>> doInBackground(String... jsonData) {
 
@@ -112,7 +134,9 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
             try{
                 jObject = new JSONObject(jsonData[0]);
 
-                // Getting the parsed data as a List construct
+                /*
+                Getting the parsed data as a List construct
+                 */
                 places = placeJsonParser.parse(jObject);
 
             }catch(Exception e){
@@ -146,7 +170,9 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
             if(result != null)
                 finalResult.addAll(result);
 
-            // Creating a SimpleAdapter for the AutoCompleteTextView
+            /*
+            Creating a SimpleAdapter for the AutoCompleteTextView
+             */
             SimpleAdapter adapter = new SimpleAdapter(mContext, finalResult, android.R.layout.simple_list_item_1, from, to);
 
             textView.setAdapter(adapter);
@@ -161,13 +187,19 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
         try{
             URL url = new URL(strUrl);
 
-            // Creating an http connection to communicate with url
+            /*
+            Creating an http connection to communicate with url
+             */
             urlConnection = (HttpURLConnection) url.openConnection();
 
-            // Connecting to url
+            /*
+            Connecting to url
+             */
             urlConnection.connect();
 
-            // Reading data from url
+            /*
+            Reading data from url
+             */
             iStream = urlConnection.getInputStream();
 
             BufferedReader br = new BufferedReader(new InputStreamReader(iStream));

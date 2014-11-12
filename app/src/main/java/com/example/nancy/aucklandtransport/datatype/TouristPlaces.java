@@ -196,6 +196,9 @@ public class TouristPlaces {
          * Point A to End Point, then when adding place B as a new place
          *  that user would like to visit, remove route Point A to End Point,
          *  instead of this add Point A to Point B and Point B to End Point.
+         *
+         *  Start -> A -> End
+         *  Start -> A -> B -> End
          */
         int size = routesArray.size();
         if(routesArray.size() > 1) {

@@ -74,7 +74,7 @@ public class SurveyAPI {
         @Override
         protected void onPostExecute(String result) {
 
-            if(result == null)
+            if(result == null || result.compareTo("")==0)
                 return;
 
             Log.d(TAG, "surevy result: " + result);

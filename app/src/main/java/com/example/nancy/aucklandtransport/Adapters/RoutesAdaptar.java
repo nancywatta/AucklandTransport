@@ -31,12 +31,25 @@ import com.example.nancy.aucklandtransport.RouteStep;
 import java.util.ArrayList;
 
 /**
+ * RoutesAdaptar class is used to have a customized list view
+ * providing alternative route suggestion to the user for a given
+ * search.
+ *
  * Created by Nancy on 7/13/14.
  */
 public class RoutesAdaptar extends BaseAdapter {
     private static final String TAG = RoutesAdaptar.class.getSimpleName();
+
     private Activity activity;
+
+    /*
+     Array of alternative routes
+      */
     private ArrayList<Route> result;
+
+    /*
+     Instantiates layout XML file into the required customized list view
+      */
     private static LayoutInflater inflater=null;
 
     public RoutesAdaptar(Activity a, ArrayList<Route> d) {
@@ -88,7 +101,7 @@ public class RoutesAdaptar extends BaseAdapter {
         holder.btnRealTime.setTag(position);
         holder.realTimeData.setTag(position);
 
-        // Fetching i-th route
+        // Fetching position-th route
         final Route path = result.get(position);
 
         holder.text.setText(path.getDeparture().getTravelTime() + " - " + path.getArrival().getTravelTime() + " (" + path.getDuration().getTravelTime() + ")");
@@ -98,6 +111,11 @@ public class RoutesAdaptar extends BaseAdapter {
                 "Click refresh for Real Time" + "</small></small></small>"));
 
         final View finalConvertView = convertView;
+
+        /*
+        on click listener for the Refresh Button to fetch actual bus arrival
+        time from our application server
+        */
         holder.btnRealTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,6 +130,13 @@ public class RoutesAdaptar extends BaseAdapter {
 
                     for (int i = 0; i < path.getSteps().size(); i++) {
                         RouteStep routeStep = path.getSteps().get(i);
+
+                        /*
+                        Send a reference of the TextView to AucklandPublicTransportAPI class
+                        in order to strike the contents of this text view when the actual
+                        arrival time is fetched from server for the corresponding BUS of
+                        a given route, as this textview displays the static scheduled time.
+                         */
                         if (routeStep.getTransportName() == R.string.tr_bus) {
                             TextView textView = (TextView) finalConvertView.findViewById(i);
 
@@ -128,6 +153,13 @@ public class RoutesAdaptar extends BaseAdapter {
         });
 
         if(path.getSteps() != null) {
+
+            /*
+            Only if the first public transport step involves the BUS route,
+            make the real Time components visible to the user. Otherwise, hide
+            these components as the real time transit data is available only for
+            BUSES and not for any other transit vehicle.
+             */
             if(path.showrealTime()) {
                 holder.btnRealTime.setVisibility(View.VISIBLE);
                 holder.realTimeData.setVisibility(View.VISIBLE);
@@ -156,9 +188,11 @@ public class RoutesAdaptar extends BaseAdapter {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void showProgress(final boolean show, final View mProgressView, final TextView realTimeData) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
+        /*
+         On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+         for very easy animations. If available, use these APIs to fade-in
+         the progress spinner.
+          */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = activity.getResources().getInteger(android.R.integer.config_shortAnimTime);
 
@@ -180,19 +214,28 @@ public class RoutesAdaptar extends BaseAdapter {
                 }
             });
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
+            /*
+            The ViewPropertyAnimator APIs are not available, so simply show
+            and hide the relevant UI components.
+             */
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             realTimeData.setVisibility(show ? View.GONE : View.VISIBLE);
         }
     }
 
+    /**
+     * Function used to ensure that the items of a given list row
+     * gets wrapped up and do not extend the UI width and height
+     */
     private void populateLinks(LinearLayout ll, ArrayList<RouteStep> collection,
                                Route route, TextView realTimeText) {
 
         Display display = activity.getWindowManager().getDefaultDisplay();
         int maxWidth = display.getWidth() - 100;
 
+        /*
+         Only if route object contains steps array, allow wrap content
+          */
         if (collection.size() > 0) {
             LinearLayout llAlso = new LinearLayout(activity.getApplicationContext());
             llAlso.setLayoutParams(new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT,
@@ -206,7 +249,19 @@ public class RoutesAdaptar extends BaseAdapter {
                 TextView image = new TextView(activity.getApplicationContext());
                 if(samItem.isTransit()) {
                     image.setText(samItem.getDeparture().getTravelTime());
+
+                    /*
+                     Assign an ID to the textview so that when application
+                     gets the real time data, it can strike off the scheduled arrival time
+                      */
                     image.setId(pos);
+
+                    /*
+                     If the route step is the BUS, check if its the first public transport
+                     step of the journey, then strike the scheduled bus arrival time
+                     with the actual arrival time of the BUS retrieved from our application
+                     server.
+                      */
                     if(samItem.getTransportName() == R.string.tr_bus
                             && (pos == 0
                                   || (pos>0 && !collection.get(pos-1).isTransit()))
@@ -216,6 +271,10 @@ public class RoutesAdaptar extends BaseAdapter {
                     }
                 }
                 else {
+                    /*
+                     Display the time when the user has to start this particular step
+                     of the journey.
+                      */
                     if(pos == 0) {
                         image.setText(route.getDeparture().getTravelTime());
                     }
@@ -228,6 +287,10 @@ public class RoutesAdaptar extends BaseAdapter {
                     //((ImageView)image).setImageResource(samItem.getIconId());
                     //image.measure(0, 0);
                 }
+
+                /*
+                 display an image corresponding to the mode of travel.
+                  */
                 int id = samItem.getIconId();
                 image.setCompoundDrawablesWithIntrinsicBounds(
                         0, //left
@@ -239,6 +302,10 @@ public class RoutesAdaptar extends BaseAdapter {
                 image.measure(0, 0);
                 widthSoFar += image.getMeasuredWidth();
 
+                /*
+                if the components added so far has extended the UI width, wrap
+                the contents of the corresponding list row
+                 */
                 if (widthSoFar >= maxWidth) {
                     ll.addView(llAlso);
 
@@ -254,6 +321,11 @@ public class RoutesAdaptar extends BaseAdapter {
                     llAlso.addView(image);
                 }
 
+                /*
+                Display the transit vehicle line number and check if
+                the components added so far has not extended the UI width. If yes then wrap
+                the contents of the corresponding list row
+                 */
                 if(samItem.getShortName() != "" && !samItem.getShortName().equals("")) {
                     TextView name = new TextView(activity.getApplicationContext());
                     name.setText(samItem.getShortName());

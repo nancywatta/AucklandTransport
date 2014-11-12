@@ -54,12 +54,12 @@
     <string name="NotifyNextStop">Following the timetable you should exit on the next stop, please adjust if you are not going on time</string>
     <string name="RouteDone">Route done!</string>
     <string name="busNotifyExitText">You need to exit on the next stop</string>
-    <string name="busExitText">You need to get down the BUS in next %f meter(s)</string>
+    <string name="busExitText">You need to exit the BUS in next %f meter(s)</string>
     <string name="RouteCancel">Route canceled</string>
     <string name="RouteFinish">Route finished</string>
     <string name="RouteFinishText">Your trip finished!</string>
     <string name="RouteStart">Route started</string>
-    <string name="ArrivalText">You need to get down the vehicle in %d minutes</string>
+    <string name="ArrivalText">Estimated time of arrival for your next transition point is %d minutes</string>
     <string name="NewRoutes">There are new Route available</string>
 
     <!-- Activity Titles -->

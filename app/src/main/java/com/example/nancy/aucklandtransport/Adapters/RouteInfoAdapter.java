@@ -18,22 +18,37 @@ import com.example.nancy.aucklandtransport.AucklandPublicTransportAPI;
 import com.example.nancy.aucklandtransport.R;
 import com.example.nancy.aucklandtransport.Route;
 import com.example.nancy.aucklandtransport.RouteStep;
-import com.example.nancy.aucklandtransport.SpeedCalculator;
 
 /**
+ * RouteInfoAdapter class is used to have a customized list
+ * view displaying the detailed information regarding
+ * each step of the user's journey.
+ *
  * Created by Nancy on 9/4/14.
  */
 public class RouteInfoAdapter extends BaseAdapter {
+
+    /*
+     Instantiates layout XML file into the required customized list view
+      */
     private LayoutInflater mInflater;
     private Context context;
+
+    /*
+     Route object that contains the user's journey details
+      */
     private Route route;
-    private SpeedCalculator speedCalculator;
+
+    /*
+    speedCalculator can be used to display user specific duration for walking
+     */
+    //private SpeedCalculator speedCalculator;
 
     public RouteInfoAdapter(Context context, Route route) {
         mInflater = LayoutInflater.from(context);
         this.context = context;
         this.route = route;
-        speedCalculator = new SpeedCalculator(context);
+        //speedCalculator = new SpeedCalculator(context);
     }
 
     public int getCount() {
@@ -71,12 +86,20 @@ public class RouteInfoAdapter extends BaseAdapter {
             holder.text5.setVisibility(View.VISIBLE);
             holder.text1.setText(step.getDeparture().getTravelTime()
                     + " - " + step.getArrival().getTravelTime());
+
+            /*
+             if the step is BUS, show link to get real time
+              */
             if (step.getTransportName() == R.string.tr_bus) {
                 holder.realTimeData.setVisibility(View.VISIBLE);
                 holder.btnRealTime.setVisibility(View.VISIBLE);
                 holder.realTimeData.setHint(Html.fromHtml("<small><small><small>" +
                         "Click refresh for Real Time" + "</small></small></small>"));
 
+                /*
+                on click listener for the Refresh Button to fetch actual bus arrival
+                time from our application server
+                 */
                 holder.btnRealTime.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -131,9 +154,11 @@ public class RouteInfoAdapter extends BaseAdapter {
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
     public void showProgress(final boolean show, final View mProgressView, final TextView realTimeData) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
+        /*
+         On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
+         for very easy animations. If available, use these APIs to fade-in
+         the progress spinner.
+          */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
             int shortAnimTime = context.getResources().getInteger(android.R.integer.config_shortAnimTime);
 
@@ -155,8 +180,10 @@ public class RouteInfoAdapter extends BaseAdapter {
                 }
             });
         } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
+            /*
+            The ViewPropertyAnimator APIs are not available, so simply show
+            and hide the relevant UI components.
+             */
             mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
             realTimeData.setVisibility(show ? View.GONE : View.VISIBLE);
         }
