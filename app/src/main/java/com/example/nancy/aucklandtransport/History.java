@@ -17,6 +17,9 @@ import java.util.Comparator;
 import java.util.Map;
 
 /**
+ * History class is used to save the user's searches in the
+ * Shared Preferences.
+ *
  * Created by Nancy on 7/23/14.
  */
 public class History {

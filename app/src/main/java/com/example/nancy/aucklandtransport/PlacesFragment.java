@@ -38,6 +38,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
+ * PlacesFragment class is the Fragment class to search for the
+ * places of interest
+ *
  * Created by Nancy on 9/9/14.
  */
 public class PlacesFragment extends Fragment {

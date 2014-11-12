@@ -10,6 +10,17 @@ import android.widget.Button;
 
 import com.example.nancy.aucklandtransport.Utils.SurveyAPI;
 
+/**
+ * HomePage class is used to display two main features developed
+ * in our application.
+ * 1. Journey Planner
+ * 2. Tourist Planner
+ *
+ * This class is also used to display the link for survey, once the user
+ * is found to be eligible to take our application questionnaire.
+ *
+ * Created by Nancy on 11/3/14.
+ */
 public class HomePage extends Activity {
 
     private Button button;

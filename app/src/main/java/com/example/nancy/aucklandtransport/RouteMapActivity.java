@@ -37,6 +37,15 @@ import org.androidpn.client.Constants;
 
 import java.util.ArrayList;
 
+/**
+ * RouteMapActivity class is used to display the entire journey
+ * of the user on map. The walking distance is drawn with blue and
+ * the public transport segment is drawn with red color.
+ * The class also enables the user to watch his current location, thus providing
+ * a navigable map when he moves with the device.
+ *
+ * Created by Nancy on 8/20/14.
+ */
 public class RouteMapActivity extends FragmentActivity {
 
     private static final String TAG = RouteMapActivity.class.getSimpleName();

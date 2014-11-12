@@ -55,7 +55,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
 
-
+/**
+ * MainApp class is the activity asking for user to enter the origin
+ * and destination of the journey to be planned.
+ * The activity also allows a user to select a place in the origin or destination
+ * from the Recent Places Tab.
+ * It also allows a user to select the entire route from the Recent Route Tab.
+ *
+ * Created by Nancy on 7/3/14.
+ */
 public class MainApp extends FragmentActivity {
 
     private static final String TAG = MainApp.class.getSimpleName();

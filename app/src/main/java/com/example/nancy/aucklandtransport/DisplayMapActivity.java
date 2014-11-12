@@ -51,16 +51,28 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * DisplayMapActivity class is used to search for input location and
+ * display on the map. The class also enables to get the address by tapping
+ * a location on the map.
+ *
+ * Created by Nancy on 7/19/14.
+ */
 public class DisplayMapActivity extends FragmentActivity implements AlertPositiveListener{
 
+    // reference to Google Map
     private GoogleMap googleMap;
+
+    // Defining markerOptions for markers
     MarkerOptions markerOptions;
+
     LatLng latLng;
     GPSTracker gps;
     //EditText etLocation;
     Boolean isOrigin;
     Intent output;
 
+    // AutoCompleteTextView to get the user input location
     AutoCompleteTextView tvLocation;
     String prefix="";
 
@@ -83,6 +95,9 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
 
         tvLocation.setThreshold(1);
 
+        /*
+        Adding textWatcher to provide place predictions as user types.
+         */
         tvLocation.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -106,6 +121,9 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
 
         });
 
+        /*
+        Clear the text of tvLocation when user clicks on delete Button
+         */
         tvLocation.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -120,6 +138,9 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
             }
         });
 
+        /*
+        Hide Keyboard when user is done with typing
+         */
         tvLocation.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -178,7 +199,7 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                 startReverseGeo(latLng);
             }
 
-            // Getting reference to btn_find of the layout activity_main
+            // Getting reference to btn_find of the layout activity_display_map
             Button btn_find = (Button) findViewById(R.id.btn_find);
 
             // Defining button click event listener for the find button
@@ -190,6 +211,9 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                     // Getting user input location
                     String location = tvLocation.getText().toString();
 
+                    /*
+                    Hide Keyboard
+                     */
                     InputMethodManager inputManager = (InputMethodManager)
                             getSystemService(Context.INPUT_METHOD_SERVICE);
 

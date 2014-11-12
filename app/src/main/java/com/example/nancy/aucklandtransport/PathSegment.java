@@ -6,6 +6,9 @@ import com.example.nancy.aucklandtransport.datatype.TravelTime;
 import com.google.android.gms.maps.model.LatLng;
 
 /**
+ * PathSegment class represents the turn by turn instruction
+ * of the walking step of the user's journey.
+ *
  * Created by Nancy on 8/3/14.
  */
 public class PathSegment {

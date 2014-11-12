@@ -33,6 +33,16 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
+/**
+ * PathElevation class is used to give a list view of
+ * turn by turn instruction for the walking step of the user's journey
+ * and an elevation chart for the walking path.
+ *
+ * In case of Public Transport step of journey, it displays the departure and arrival
+ * stop name
+ *
+ * Created by Nancy on 8/9/14.
+ */
 public class PathElevation extends Activity {
     private static final String TAG = PathElevation.class.getSimpleName();
     String pathCoords ="";

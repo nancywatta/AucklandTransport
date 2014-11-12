@@ -13,7 +13,7 @@ import com.example.nancy.aucklandtransport.R;
 public final class LocationUtils {
 
     // Debugging tag for the application
-    public static final String APPTAG = "LocationSample";
+    public static final String APPTAG = "APT";
 
     // Name of shared preferences repository that stores persistent state
     public static final String SHARED_PREFERENCES =

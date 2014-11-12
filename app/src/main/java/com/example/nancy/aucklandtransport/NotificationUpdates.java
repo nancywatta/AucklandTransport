@@ -9,6 +9,13 @@ import android.widget.TextView;
 
 import org.androidpn.client.Constants;
 
+/**
+ * NotificationUpdates class is the activity that is displayed
+ * when user clicks on any notification in the notification
+ * drawer.
+ *
+ * Created by Nancy on 10/13/14.
+ */
 public class NotificationUpdates extends Activity {
 
     Intent intent;

@@ -20,19 +20,30 @@ public class TouristPlaces {
 
     private static final String TAG = TouristPlaces.class.getSimpleName();
 
-    // array of places to be visited
+    /*
+    array of places to be visited
+     */
     private static ArrayList<Place> placesArray;
 
-    // array of route the user will follow
+    /*
+    array of route the user will follow
+     */
     private static ArrayList<Route> routesArray;
 
-    // starting point of the user journey
+    /*
+    starting point of the user journey
+     */
     public static String startAddress;
 
-    // ending point of the user journey
+    /*
+    ending point of the user journey
+     */
     public static String endAddress;
 
-    // departure time of the journey, time in seconds since epoch
+    /*
+    departure time of the journey, time in seconds since epoch
+    input by the user in the Tourist Planner Activity
+     */
     private static long departureTime;
 
     // Links lat and lng with the formatted address
@@ -55,6 +66,16 @@ public class TouristPlaces {
         if(routesArray != null) routesArray.clear();
     }
 
+    /**
+     * Add the given route in the routes array
+     *
+     * @param start - Start location address
+     * @param startName - start location short name
+     * @param end - End location address
+     * @param endName - end location short name
+     * @param array - route from start to end to be added in routes array
+     * @param timeSinceEpoch - Departure time of the input route.
+     */
     public void addRoute(String start, String startName,
                          String end, String endName, ArrayList<Route> array, long timeSinceEpoch) {
         if(array == null || array.size() < 1) {
@@ -69,6 +90,11 @@ public class TouristPlaces {
         Log.d(TAG, "Valid timeSinceEpoch");
         for (Route route : array) {
             if (timeSinceEpoch != 0) {
+                /*
+                In case the input route fetched from Google does not have the
+                arrival and departure time set. So we manually set the departure and arrival times
+                based on the input time.
+                 */
                 if (route.getArrival().seconds == 0) {
                     Log.d(TAG, "Arrival Null");
                     route.getArrival().seconds = timeSinceEpoch +
@@ -94,6 +120,21 @@ public class TouristPlaces {
         routesArray.addAll(array);
     }
 
+    /**
+     * Delete the route from start to intermediateAdd
+     * Also delete intermediateAdd to end if the input isDelete indicator
+     * is set to true.
+     * After successfully deleting, add the input route  into the routes array
+     *
+     * @param start - Start location address
+     * @param startName - start location short name
+     * @param end - End location address
+     * @param endName - end location short name
+     * @param intermediateAdd - intermediate location address, place between the
+     *                        start and end location
+     * @param array - route from start to end to be added in routes array
+     * @param timeSinceEpoch - Departure time of the input route.
+     */
     public void deleteRoute(String start, String startName,
                             String end, String endName, String intermediateAdd,
                             ArrayList<Route> array, long timeSinceEpoch, boolean isDelete) {
@@ -119,9 +160,13 @@ public class TouristPlaces {
         Log.d(TAG , "deleteRoute: " + routesArray.size() + " deleteAddress: "
                 + intermediateAdd + " index: " + index);
 
-        // remove route from start address to intermediateAdd
+        /*
+        remove route from start address to intermediateAdd
+         */
         routesArray.remove(index);
-        // remove route from intermediateAdd to end address
+        /*
+        remove route from intermediateAdd to end address
+         */
         if(isDelete)
             routesArray.remove(index);
 
@@ -129,6 +174,11 @@ public class TouristPlaces {
         Log.d(TAG, "Valid timeSinceEpoch");
         for (Route route : array) {
             if (timeSinceEpoch != 0) {
+                /*
+                In case the input route fetched from Google does not have the
+                arrival and departure time set. So we manually set the departure and arrival times
+                based on the input time.
+                 */
                 if (route.getArrival().seconds == 0) {
                     Log.d(TAG, "Arrival Null");
                     route.getArrival().seconds = timeSinceEpoch +
@@ -151,10 +201,19 @@ public class TouristPlaces {
             route.setEndTouristName(endName);
         }
 
-        // add route from start address to end address disconnecting the intermediateAdd
+        /*
+        add route from start address to end address disconnecting the intermediateAdd
+         */
         routesArray.addAll(index, array);
     }
 
+    /**
+     * Get the departure time of the route ending with
+     * intermediateAdd
+     *
+     * @param intermediateAdd
+     * @return departure time in seconds since epoch
+     */
     public long getTimeOfStart(String intermediateAdd) {
         if(routesArray == null)
             return 0;
@@ -171,6 +230,13 @@ public class TouristPlaces {
         return routesArray.get(index).getDeparture().getSeconds();
     }
 
+    /**
+     * Get the arrival time of the route ending with
+     * intermediateAdd plus the duration passed in the input
+     *
+     * @param intermediateAdd
+     * @return arrival time in seconds since epoch
+     */
     public long getTimeOfDepart(String intermediateAdd, long duration) {
         if(routesArray == null)
             return 0;
@@ -187,25 +253,32 @@ public class TouristPlaces {
         return routesArray.get(index).getArrival().getSeconds() + (duration*60);
     }
 
+    /**
+     *  When adding a new destination point, delete the last route
+     *  from the routes array. This is because consider an example
+     *  where the existing routes array contains below two routes
+     *  Start -> A, A -> End
+     *  Thus when adding a new place B in between A and End,
+     *  route A -> End should be deleted and instead
+     *  the routes array should now contain below three routes.
+     *  Start -> A, A -> B, B -> End
+     */
     public void deletePreviousRoute() {
         if(routesArray == null)
             return;
 
-        /**
-         *  if the routeArray contains Route from StartPoint to Point A and
-         * Point A to End Point, then when adding place B as a new place
-         *  that user would like to visit, remove route Point A to End Point,
-         *  instead of this add Point A to Point B and Point B to End Point.
-         *
-         *  Start -> A -> End
-         *  Start -> A -> B -> End
-         */
         int size = routesArray.size();
         if(routesArray.size() > 1) {
             routesArray.remove(size - 1);
         }
     }
 
+    /**
+     * Get the departure time of the last route in the
+     * routes array
+     *
+     * @return departure time in seconds since epoch
+     */
     public long getTimeOfStart() {
         if(routesArray == null) {
             Log.d(TAG, "start of Journey");
@@ -219,6 +292,11 @@ public class TouristPlaces {
         return 0;
     }
 
+    /**
+     * Add the place of interest in the tourist places array
+     *
+     * @param place
+     */
     public void add(Place place) {
         if(placesArray == null)
             placesArray = new ArrayList<Place>();
@@ -227,6 +305,11 @@ public class TouristPlaces {
 //        Log.d(TAG , "Add:" + placesArray.size());
     }
 
+    /**
+     * Delete the place of interest from the tourist places array
+     *
+     * @param place
+     */
     public void delete(Place place) {
         if(placesArray == null)
             return;
@@ -243,6 +326,12 @@ public class TouristPlaces {
 //        Log.d("Size" , "Delete:" + placesArray.size());
     }
 
+    /**
+     * Check if the input place exist in the tourist places array
+     *
+     * @param place
+     * @return boolean indicator
+     */
     public boolean checkExisting(Place place) {
         if(placesArray == null)
             return false;
@@ -278,6 +367,12 @@ public class TouristPlaces {
 //
 //        return "";
 //    }
+
+    /**
+     * returns the place that is previous to the input place
+     * in the tourist places array. If No previous place of Interest,
+     * then return NULL
+     */
     public Place getPreviousAdd(Place place) {
         if(placesArray == null)
             return null;
@@ -298,8 +393,7 @@ public class TouristPlaces {
 
     /**
      * returns the next place to be visited from the
-     * given Place. If the given place is the last to be visited, then return the
-     * ending point of Journey.
+     * given Place.
      */
     public Place getNextAddress(Place place) {
         if(placesArray == null)
@@ -318,6 +412,13 @@ public class TouristPlaces {
         return null;
     }
 
+    /**
+     * Get the arrival time of the last route in the
+     * routes array plus the duration passed in the input
+     *
+     * @param duration
+     * @return long - arrival time in seconds since epoch
+     */
     public long getDepartureTime(long duration) {
         if(routesArray == null)
             return 0;

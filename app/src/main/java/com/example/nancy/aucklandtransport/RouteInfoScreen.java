@@ -31,6 +31,12 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.example.nancy.aucklandtransport.BackgroundJobs.ActivityRecognitionService;
 
+/**
+ * RouteInfoScreen class is used to provide the detailed
+ * information on the route selected by the user.
+ *
+ * Created by Nancy on 7/10/14.
+ */
 public class RouteInfoScreen extends FragmentActivity implements AlertPositiveListener,
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener{

@@ -8,6 +8,8 @@ import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
 
 /**
+ * MyAlertDialogWIndow class is used to show alert messages.
+ *
  * Created by Nancy on 7/11/14.
  */
 public class MyAlertDialogWIndow extends DialogFragment {

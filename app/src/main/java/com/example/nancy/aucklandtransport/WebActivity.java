@@ -7,12 +7,20 @@ import android.view.MenuItem;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+/**
+ * WebActivity class is used to embed a web page inside our application
+ * This web page displays the consent form and survey for our
+ * application.
+ *
+ * Created by Nancy on 11/7/14.
+ */
 public class WebActivity extends Activity {
 
     private String errorHtml = "";
+
+    // reference to WebView to display a web page
     private WebView webView;
 
-    // TODO change the hardcoded URL
     private String surveyUrl = "https://www.surveymonkey.com/s/DJHFSRK";
 
     @Override

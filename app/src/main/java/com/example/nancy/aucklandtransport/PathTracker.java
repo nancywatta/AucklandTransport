@@ -13,6 +13,12 @@ import android.widget.TextView;
 import java.util.Calendar;
 import java.util.Locale;
 
+/**
+ * PathTracker class is used to provide an option to user to
+ * change route.
+ *
+ * Created by Nancy on 7/28/14.
+ */
 public class PathTracker extends Activity {
 
     private static final String TAG = PathTracker.class.getSimpleName();

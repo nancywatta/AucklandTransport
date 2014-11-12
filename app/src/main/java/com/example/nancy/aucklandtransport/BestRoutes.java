@@ -28,13 +28,29 @@ import java.util.Locale;
  */
 public class BestRoutes {
 
+    /*
+    Debugging tag for the BestRoutes class
+     */
     private static final String TAG = BestRoutes.class.getSimpleName();
+
+    // start location of the journey
     String fromLoc;
+
+    // end location of the journey
     String toLoc;
+
+    // Notification message informing users of the new routes
     String message;
+
+    // Index of the BUS route step in the existing RouteStep array
     int busIndex;
+
     long timeSinceEpoch;
+
+    // current route that the user is following
     Route existingRoute;
+
+    // reference to the RouteEngine class
     RouteEngine routeEngine;
     Calendar c = Calendar.getInstance(Locale.getDefault());
 

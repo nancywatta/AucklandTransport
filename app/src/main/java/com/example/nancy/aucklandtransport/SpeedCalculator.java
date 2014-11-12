@@ -12,6 +12,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 /**
+ * SpeedCalculator class is used to learn the user speed
+ * as he walks with the device during pedestrian navigation.
+ *
  * Created by Nancy on 10/3/14.
  */
 public class SpeedCalculator {

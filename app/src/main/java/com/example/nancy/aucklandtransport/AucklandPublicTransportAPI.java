@@ -31,26 +31,43 @@ import java.util.HashMap;
 import java.util.UUID;
 
 /**
- * AucklandPublicTransportAPI to communicate with our private
+ * AucklandPublicTransportAPI class is used to communicate with our private
  * application server to get real time data for Bus and also get
  * Push Notifications from Server.
  *
  * Created by Nancy on 9/20/14.
  */
 public class AucklandPublicTransportAPI {
+    /*
+    Debugging tag for the AucklandPublicTransportAPI class
+     */
     private static final String TAG = AucklandPublicTransportAPI.class.getSimpleName();
 
     private static String main_url="";
     private Context mContext;
+
+    // TextView to display real time bus arrival data
     private TextView realTimeText;
+
     private View mProgressView;
+
+    // RoutesAdaptar to show the contents when data is fetched
     private RoutesAdaptar routesAdaptar;
+
+    // RouteInfoAdapter to show the contents when data is fetched
     private RouteInfoAdapter routeInfoAdapter;
     private long depTime;
+
+    // Reference to RouteEngine object
     private RouteEngine routeEngine = null;
     private SharedPreferences sharedPrefs;
     private Route route;
     private int routeStep;
+
+    /*
+    TextView to be updated to strike the content
+    when actual bus arrival time is fetched.
+     */
     private TextView textView;
 
     public void setRouteEngine(RouteEngine routeEngine) {
@@ -105,7 +122,9 @@ public class AucklandPublicTransportAPI {
 
     //http://localhost:8080/apt-server/ScheduleJob?lat=-36.861798&lng=174.74301&route=030&tripType=0&username=96ecf6226e93493e8c6c31e72e48114b
 
-    // Allow server to start tracking user to give notifications about Bus Arrival
+    /**
+     * Allow server to start tracking user to give notifications about Bus Arrival
+     */
     public void startServerTracking(LatLng busStop, String busNumber) {
 
         String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
@@ -144,7 +163,9 @@ public class AucklandPublicTransportAPI {
         scheduleTask.execute(url);
     }
 
-    // Allow server to stop tracking user
+    /*
+    Allow server to stop tracking user
+     */
     public void stopServerTracking(LatLng busStop, String busNumber) {
         String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
 
@@ -234,7 +255,9 @@ public class AucklandPublicTransportAPI {
     }
 
     //http://172.23.208.76:8080/apt-server/showDueTime.do?lat=-36.861798&lng=174.74301&route=030
-    // get real time bus arrival data from application server
+    /**
+     * get real time bus arrival data from application server
+     */
     public void getRealTimeDate(LatLng busStop, String busNumber, long depTime) {
         this.depTime = depTime;
         String location = "lat=" + busStop.latitude + "&lng=" + busStop.longitude;
@@ -324,6 +347,11 @@ public class AucklandPublicTransportAPI {
                     Log.d(TAG, "depDate: " + depDate + " actualArrivalTime: " +
                             actualArrivalTime);
 
+                    /*
+                    Check if the returned data is for the same bus that you searched for
+                    by comparing the scheduled time fetched from Google and the private
+                    application server
+                     */
                     if (depDate.compareTo(actualArrivalTime) == 0) {
                         SimpleDateFormat sdf = new SimpleDateFormat("hh:mm");
                         String shortTimeStr = sdf.format(expectedArrivalTime);

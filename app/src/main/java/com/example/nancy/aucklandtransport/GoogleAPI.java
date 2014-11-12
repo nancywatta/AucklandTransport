@@ -26,10 +26,18 @@ import java.util.HashMap;
 import java.util.List;
 
 /**
+ * GoogleAPI class to communicate with below Google Web Services.
+ * 1. Geocoding API
+ * 2. Reverse GeoCoding API
+ * 3. Directions API
+ *
  * Created by Nancy on 7/29/14.
  */
 public class GoogleAPI {
 
+    /*
+    Debugging tag for the GoogleAPI class
+     */
     private static final String TAG = GoogleAPI.class.getSimpleName();
 
     private static final String main_url = "https://maps.googleapis.com/maps/api/geocode/json?";
@@ -334,7 +342,7 @@ public class GoogleAPI {
         }
     }
 
-    /** A class to parse the Google Places in JSON format */
+    /** A class to parse the Google Directions in JSON format */
     private class ParserTask extends AsyncTask<String, Integer, RouteStep>{
 
         // Parsing the data in non-ui thread

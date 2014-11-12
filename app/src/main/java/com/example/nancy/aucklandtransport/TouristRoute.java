@@ -73,7 +73,12 @@ import java.util.HashMap;
  */
 public class TouristRoute extends FragmentActivity implements
         MyAlertDialogWIndow.AlertPositiveListener {
+
+    /*
+    Debugging tag for the TouristRoute class
+     */
     private static final String TAG = TouristRoute.class.getSimpleName();
+
     private View mProgressView;
     private View mRouteInfoView;
     EditText etLocation;

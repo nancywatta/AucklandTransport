@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 
 /**
- * AlertDialogManager class to show alert messages.
+ * AlertDialogManager class is used to show alert messages.
  *
  * Created by Nancy on 7/3/14.
  */
@@ -23,24 +23,34 @@ public class AlertDialogManager {
                                 Boolean status) {
         AlertDialog alertDialog = new AlertDialog.Builder(context).create();
 
-        // Setting Dialog Title
+        /*
+        Setting Dialog Title
+         */
         alertDialog.setTitle(title);
 
-        // Setting Dialog Message
+        /*
+        Setting Dialog Message
+         */
         alertDialog.setMessage(message);
 
         if(status != null)
-            // Setting alert dialog icon
+            /*
+            Setting alert dialog icon
+             */
             alertDialog.setIcon((status) ? R.drawable.ic_action_done : R.drawable.ic_action_remove);
 
-        // Setting OK Button
+        /*
+        Setting OK Button
+         */
         alertDialog.setButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 ((Activity)context).finish();
             }
         });
 
-        // Showing Alert Message
+        /*
+        Showing Alert Message
+         */
         alertDialog.show();
     }
 }

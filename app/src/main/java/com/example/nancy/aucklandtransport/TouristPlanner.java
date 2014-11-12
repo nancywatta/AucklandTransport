@@ -49,14 +49,26 @@ import java.util.Locale;
  */
 public class TouristPlanner extends FragmentActivity {
 
+    /*
+    Debugging tag for the TouristPlanner class
+     */
     private static final String TAG = TouristPlanner.class.getSimpleName();
     ArrayList<History.PlaceItem> history;
     ArrayList<History.RouteHistoryItem> routes;
+
+    // AutoCompleteTextView for the departure location
     AutoCompleteTextView origin;
+
+    // AutoCompleteTextView for the end location
     AutoCompleteTextView destination;
 
+    // Time picker fragment for departure time
     TimePickerFragment leaveTimeFragment = null;
+
+    // Time picker fragment for arrival time
     TimePickerFragment arriveTimeFragment = null;
+
+    // Date picker fragment for journey date
     DatePickerDialogFragment dateFragment = null;
 
     // Connection detector class
@@ -115,6 +127,7 @@ public class TouristPlanner extends FragmentActivity {
         history = History.getHistory(this);
         routes = History.getRoutes(this);
 
+        // Getting reference to AutoCompleteTextView to get the user input origin location
         origin = (AutoCompleteTextView) findViewById(R.id.editText1);
         gps = new GPSTracker(getBaseContext());
         googleAPI = new GoogleAPI();
@@ -126,6 +139,9 @@ public class TouristPlanner extends FragmentActivity {
 
         origin.setThreshold(1);
 
+        /*
+        Adding textWatcher to provide place predictions as user types.
+         */
         origin.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -149,6 +165,10 @@ public class TouristPlanner extends FragmentActivity {
 
         });
 
+        /*
+        Move cursor to destination textbox when click on Next button
+         on Keyboard
+         */
         origin.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -160,6 +180,9 @@ public class TouristPlanner extends FragmentActivity {
             }
         });
 
+        /*
+        Clear the text of origin when user clicks on delete Button
+         */
         origin.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -174,9 +197,13 @@ public class TouristPlanner extends FragmentActivity {
             }
         });
 
+        // Getting reference to AutoCompleteTextView to get the user input destination location
         destination = (AutoCompleteTextView) findViewById(R.id.editText2);
         destination.setThreshold(1);
 
+        /*
+        Adding textWatcher to provide place predictions as user types.
+         */
         destination.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -199,6 +226,9 @@ public class TouristPlanner extends FragmentActivity {
             }
         });
 
+        /*
+        Hide Keyboard when user is done with typing
+         */
         destination.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -212,6 +242,9 @@ public class TouristPlanner extends FragmentActivity {
             }
         });
 
+        /*
+        Clear the text of tvLocation when user clicks on delete Button
+         */
         destination.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {

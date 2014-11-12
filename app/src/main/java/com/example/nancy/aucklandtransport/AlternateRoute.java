@@ -25,12 +25,24 @@ import java.util.ArrayList;
  */
 public class AlternateRoute extends Activity {
 
+    /*
+    Debugging tag for the AlternateRoute class
+     */
     private static final String TAG = AlternateRoute.class.getSimpleName();
 
+    // start location of the journey
     String fromLoc;
+
+    // end location of the journey
     String toLoc;
+
+    // reference to the listview to be populated with routes array
     ListView list;
+
+    // Adapter for routes array
     RoutesAdaptar adapter;
+
+    // array of alternate routes for given origin and destination
     private ArrayList<Route> routes = null;
     TextView origin;
     TextView destination;
@@ -40,6 +52,7 @@ public class AlternateRoute extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alternate_route);
 
+        // Get the new routes from routeEngine
         routes = RouteEngine.newRoutes;
         fromLoc = routes.get(0).getStartAddress();
         try {
@@ -57,10 +70,15 @@ public class AlternateRoute extends Activity {
             e.printStackTrace();
         }
 
-
+        // Getting reference to ListView to display routes
         list=(ListView)findViewById(R.id.list);
+
+        // Getting reference to TextView to display origin address
         origin = (TextView)findViewById(R.id.textView1);
+
+        // Getting reference to TextView to display destination address
         destination = (TextView)findViewById(R.id.textView2);
+
         origin.setText("From : " + fromLoc);
         destination.setText("To :   " + toLoc);
 

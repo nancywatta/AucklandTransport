@@ -35,6 +35,13 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 
+/**
+ * RoutesActivity class is used to display the different
+ * routes alternatives fetched from Google Direction Web service
+ * for the user input origin, destination and departure/arrival time.
+ *
+ * Created by Nancy on 7/20/14.
+ */
 public class RoutesActivity extends Activity {
 
     private static final String TAG = RoutesActivity.class.getSimpleName();

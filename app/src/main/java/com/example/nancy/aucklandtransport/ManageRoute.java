@@ -19,6 +19,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Vector;
 
+/**
+ * ManageRoute class is used to provide the detailed
+ * information on the route selected by the user.
+ *
+ * Created by Nancy on 7/15/14.
+ */
 public class ManageRoute extends ActionBarActivity implements
         MyAlertDialogWIndow.AlertPositiveListener,
         ActionBar.TabListener {

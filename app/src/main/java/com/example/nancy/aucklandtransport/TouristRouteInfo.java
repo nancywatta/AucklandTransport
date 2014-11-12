@@ -18,11 +18,30 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 
+/**
+ * TouristRouteInfo class is used to display the entire tourist tour
+ * consisting of various destination points. The class makes use of the
+ * Expandable list view to display every leg of the entire journey.
+ *
+ * Created by Nancy on 10/7/14.
+ */
 public class TouristRouteInfo extends Activity {
 
+    /*
+    Debugging tag for the TouristRouteInfo class
+     */
     private static final String TAG = TouristRouteInfo.class.getSimpleName();
+
+    /*
+    reference to ExpandableListAdapter to link list view with data
+     */
     ExpandableListAdapter listAdapter;
+
+    /*
+    reference to ExpandableListView to display routes array
+     */
     ExpandableListView expListView;
+
     TouristPlaces touristPlaces = new TouristPlaces();
 
     @Override
@@ -42,12 +61,17 @@ public class TouristRouteInfo extends Activity {
 //        //this code for adjusting the group indicator into right side of the view
 //        expListView.setIndicatorBounds(width - GetDipsFromPixel(10), width - GetDipsFromPixel(10));
 
+        /*
+        Getting reference to ExpandableListView to display routes array
+        */
         expListView = (ExpandableListView) findViewById(R.id.lvExp);
 
         Intent intent = getIntent();
         ArrayList<Route> arrayList = new ArrayList<Route>();
 
+        // receive the route string from intent
         String routeString = intent.getStringExtra("route");
+        // If not empty then the tourist journey consist of only one route
         if(routeString != null) {
             try {
                 Route route = new Route(routeString);
@@ -56,22 +80,26 @@ public class TouristRouteInfo extends Activity {
             } catch (JSONException e) {
                 listAdapter = new ExpandableListAdapter(this, touristPlaces.getRoutesArray());
             }
-        } else {
+        } // If input route empty, fetch array from tourist places class
+        else {
             listAdapter = new ExpandableListAdapter(this, touristPlaces.getRoutesArray());
         }
 
         // setting list adapter
         expListView.setAdapter(listAdapter);
 
-        // Listview on child click listener
+
         final ArrayList<Route> finalArrayList = arrayList.size() < 1
                 ? touristPlaces.getRoutesArray() : arrayList;
+        // Listview on child click listener
         expListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
 
             @Override
             public boolean onChildClick(ExpandableListView parent, View v,
                                         int groupPosition, int childPosition, long id) {
                 Route route = null;
+
+                // The first row of every child is the link to ManageRoute activity
                 if(childPosition == 0) {
                     try {
                         route = new Route(finalArrayList.get(groupPosition).getJsonString());
@@ -87,6 +115,8 @@ public class TouristRouteInfo extends Activity {
                     }
                     return false;
                 }
+
+                // Leaving the first row, rest child items are the route steps
                 int childPos = childPosition - 1;
                 Intent myIntent = new Intent(TouristRouteInfo.this, PathElevation.class);
 

@@ -16,6 +16,10 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
+ * RouteEngine class represents the state machine designed to
+ * track the user's location and give him timely notifications
+ * for the entire on trip assistance.
+ *
  * Created by Nancy on 9/20/14.
  */
 public class RouteEngine {

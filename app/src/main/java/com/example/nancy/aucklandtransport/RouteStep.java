@@ -12,6 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * RouteStep class represents the single step of the journey.
+ * If the routeStep is of the type Walking, it will contain an array
+ * of path segment demoting turn by turn instruction.
+ *
  * Created by Nancy on 7/14/14.
  */
 public class RouteStep {

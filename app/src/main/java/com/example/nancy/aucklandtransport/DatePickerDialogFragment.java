@@ -23,7 +23,9 @@ public class DatePickerDialogFragment extends DialogFragment
     int buttonId;
 
     public DatePickerDialogFragment() {
-        // Assign current Date and Time Values to Variables
+        /*
+        Assign current Date and Time Values to Variables
+         */
         final Calendar c = Calendar.getInstance();
         mYear = c.get(Calendar.YEAR);
         mMonth = c.get(Calendar.MONTH);
@@ -45,7 +47,9 @@ public class DatePickerDialogFragment extends DialogFragment
         mMonth = monthOfYear;
         mDay = dayOfMonth;
 
-        // set the Button text to the date selected
+        /*
+        set the Button text to the date selected
+         */
         ((Button)getActivity().findViewById(buttonId))
                 .setText(twodigits(dayOfMonth) + "/" + twodigits((monthOfYear+1)) + "/" + yearSelected);
     }

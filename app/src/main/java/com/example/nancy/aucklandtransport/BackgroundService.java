@@ -44,6 +44,11 @@ import java.util.List;
 
 
 /**
+ * BackgroundService class is the service that keeps running in the
+ * background even when the application is not visible.
+ * This class is used to track the user's location and provide him
+ * the sound and vibration alerts throughout the journey.
+ *
  * Created by Nancy on 7/29/14.
  */
 public class BackgroundService extends Service implements
@@ -51,6 +56,9 @@ public class BackgroundService extends Service implements
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener {
 
+    /*
+    Debugging tag for the BackgroundService class
+     */
     private static final String TAG = BackgroundService.class.getSimpleName();
     //private LocationManager locationManager;
     private int currentState = 0;

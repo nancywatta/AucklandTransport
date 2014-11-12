@@ -14,6 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Route class represents the journey of the user from
+ * one location to another. It contains an array of steps denoting
+ * different mode of transportation.
+ *
  * Created by Nancy on 7/13/14.
  */
 public class Route {
