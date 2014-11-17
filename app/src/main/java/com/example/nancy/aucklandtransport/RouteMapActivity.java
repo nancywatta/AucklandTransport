@@ -24,6 +24,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.nancy.aucklandtransport.Utils.Constant;
+import com.example.nancy.aucklandtransport.datatype.Route;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -48,7 +50,9 @@ import java.util.ArrayList;
  */
 public class RouteMapActivity extends FragmentActivity {
 
+    // Debugging tag for the RouteMapActivity class
     private static final String TAG = RouteMapActivity.class.getSimpleName();
+
     private GoogleMap googleMap;
     private String routeString;
     Route route = null;
@@ -58,6 +62,8 @@ public class RouteMapActivity extends FragmentActivity {
     IntentFilter mFilter;
     public static CheckBox onBoardBtn;
     public static boolean boardedBus = false;
+
+    private boolean isAnimated = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +126,7 @@ public class RouteMapActivity extends FragmentActivity {
             googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
             if(route != null) {
-                if(!isRouteSet)
+                if(!isRouteSet || !isAnimated)
                     googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(route.getStartLocation(), 15));
 
                 Marker marker = googleMap.addMarker(new MarkerOptions()
@@ -227,18 +233,22 @@ public class RouteMapActivity extends FragmentActivity {
                 throws RemoteException {
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(lat, lon)).zoom(15).build();
-            if (isRouteSet)
+            if (isRouteSet) {
                 googleMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(cameraPosition));
+                        .newCameraPosition(cameraPosition));
+                isAnimated = true;
+            }
         }
 
         public void handleGPSUpdate(double lat, double lon, float angle) throws RemoteException {
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(new LatLng(lat, lon)).zoom(15).build();
 
-            if (isRouteSet)
+            if (isRouteSet) {
                 googleMap.animateCamera(CameraUpdateFactory
                         .newCameraPosition(cameraPosition));
+                isAnimated = true;
+            }
         }
 
         public void addressDiscovered(String address) throws RemoteException {

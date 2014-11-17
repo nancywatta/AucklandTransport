@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport.Utils;
+package com.example.nancy.aucklandtransport.APIs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -7,6 +7,8 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.example.nancy.aucklandtransport.R;
+import com.example.nancy.aucklandtransport.Utils.Constant;
+import com.example.nancy.aucklandtransport.Utils.HTTPConnect;
 
 import org.androidpn.client.Constants;
 

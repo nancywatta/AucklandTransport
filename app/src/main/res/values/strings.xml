@@ -14,6 +14,10 @@
     <string name="arrive_before">Arrive before</string>
     <string name="str_btn_find">Find</string>
     <string name="hnt_et_location">Enter location</string>
+
+    <!-- Key to access Google APIs -->
+    <string name="API_KEY">AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw</string>
+
     <string name="title_activity_routes">Routes</string>
     <string name="tr_walk">Walk</string>
     <string name="tr_bus">Bus</string>
@@ -48,6 +52,7 @@
     <string name="RunningLateText">You need to walk faster</string>
     <string name="OffRouteText">You are walking off the route</string>
     <string name="DepartureText2">You need to start departure as soon as possible, you are %d minutes late!</string>
+    <string name="DepartureText3">You are %d minutes late, please consider to change route!</string>
     <string name="DepartureTimer">Start departure</string>
     <string name="NotifyExit">Exit from %s</string>
     <string name="NotifyExitText">You need to exit on the next stop</string>
@@ -82,7 +87,10 @@
     <!-- Latitude, longitude format -->
     <string name="latitude_longitude">%1$.8f, %2$.8f</string>
     <string name="play_services_available">Google Play services is available</string>
-    <string name="IP_ADDRESS">172.23.145.78</string>
+
+    <!-- IP ADDRESS -->
+    <string name="IP_ADDRESS">192.168.1.3</string>
+
     <string name="mCancelRoute">Stop Navigation</string>
     <string name="mClickOnBoard">Click the OnBoard Button once you are in the vehicle</string>
     <string name="mNotifyOnBoard">Notify APT when you board the vehicle</string>
@@ -161,5 +169,7 @@
     <string name="title_activity_tourist_map">TouristMapActivity</string>
     <string name="title_activity_tourist_route_info">TouristRouteInfo</string>
     <string name="title_activity_web">WebActivity</string>
+
+    <string name="action_navigation">Back to Current Route</string>
 
 </resources>

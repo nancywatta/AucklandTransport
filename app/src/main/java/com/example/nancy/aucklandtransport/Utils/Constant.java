@@ -43,6 +43,7 @@ public class Constant {
     public final static String TO_ADDRSTR = "com.example.nancy.aucklandtransport.TO_ADDRSTR";
     public final static String ORIGIN = "com.example.nancy.aucklandtransport.ORIGIN";
     public final static String ADDRSTR = "com.example.nancy.aucklandtransport.ADDRESS";
+    public final static String ISDEPARTURE = "com.example.nancy.aucklandtransport.ISDEPARTURE";
 
     public final static String USAGE_COUNT = "com.example.nancy.aucklandtransport.USAGE_COUNT";
 
@@ -51,4 +52,10 @@ public class Constant {
     public static final int SURVEY_ELIG_COUNT = 5;
 
     public static String NOTIFICATION_MESSAGE = "";
+
+    // Constants that define the activity detection interval
+    public static final int MILLISECONDS_PER_SECOND = 1000;
+    public static final int DETECTION_INTERVAL_SECONDS = 1;
+    public static final int DETECTION_INTERVAL_MILLISECONDS =
+            MILLISECONDS_PER_SECOND * DETECTION_INTERVAL_SECONDS;
 }

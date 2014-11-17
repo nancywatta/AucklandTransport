@@ -26,6 +26,7 @@ import android.widget.Toast;
 
 import com.example.nancy.aucklandtransport.Adapters.RouteInfoAdapter;
 import com.example.nancy.aucklandtransport.Utils.Constant;
+import com.example.nancy.aucklandtransport.datatype.Route;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -45,6 +46,7 @@ public class RouteInfoFragment extends Fragment implements
         GooglePlayServicesClient.OnConnectionFailedListener,
         ServiceConnection{
 
+    // Debugging tag for the RouteInfoFragment class
     private static final String TAG = RouteInfoFragment.class.getSimpleName();
     Context context;
 
@@ -61,11 +63,6 @@ public class RouteInfoFragment extends Fragment implements
     private ActivityRecognitionClient arclient;
     private PendingIntent pIntent;
     private Boolean mInProgress;
-    // Constants that define the activity detection interval
-    public static final int MILLISECONDS_PER_SECOND = 1000;
-    public static final int DETECTION_INTERVAL_SECONDS = 1;
-    public static final int DETECTION_INTERVAL_MILLISECONDS =
-            MILLISECONDS_PER_SECOND * DETECTION_INTERVAL_SECONDS;
 
     private IBackgroundServiceAPI api = null;
     private boolean isGPSon = false;
@@ -370,7 +367,7 @@ public class RouteInfoFragment extends Fragment implements
 
     @Override
     public void onConnected(Bundle arg0) {
-        arclient.requestActivityUpdates(DETECTION_INTERVAL_MILLISECONDS, pIntent);
+        arclient.requestActivityUpdates(Constant.DETECTION_INTERVAL_MILLISECONDS, pIntent);
         mInProgress = false;
     }
 

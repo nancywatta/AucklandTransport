@@ -18,8 +18,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.APIs.SurveyAPI;
 import com.example.nancy.aucklandtransport.Adapters.RoutesAdaptar;
 import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
+import com.example.nancy.aucklandtransport.Utils.Constant;
+import com.example.nancy.aucklandtransport.datatype.Route;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONObject;
@@ -44,20 +47,35 @@ import java.util.ArrayList;
  */
 public class RoutesActivity extends Activity {
 
+    // Debugging tag for the RoutesActivity class
     private static final String TAG = RoutesActivity.class.getSimpleName();
+
     private View mProgressView;
     private View mRouteInfoView;
 
+    // start location of the journey
     String fromLoc;
+
+    // end location of the journey
     String toLoc;
     String fromCoords = "";
     String toCoords = "";
     Boolean isDeparture;
     long timeSinceEpoch;
+
+    // reference to the listview to be populated with routes array
     ListView list;
+
+    // Adapter for routes array
     RoutesAdaptar adapter;
+
+    // array of alternate routes for given origin and destination
     private ArrayList<Route> routes = null;
+
+    // TextView for the departure location
     TextView origin;
+
+    // TextView for the end location
     TextView destination;
     Boolean isRouteSave = false;
 
@@ -70,7 +88,7 @@ public class RoutesActivity extends Activity {
         mProgressView = findViewById(R.id.login_progress);
 
         Intent intent = getIntent();
-        fromLoc = intent.getStringExtra(MainApp.FROM_LOCATION);
+        fromLoc = intent.getStringExtra(Constant.FROM_LOCATION);
         try {
             // encoding special characters like space in the user input place
             fromLoc = URLDecoder.decode(fromLoc, "utf-8");
@@ -78,7 +96,7 @@ public class RoutesActivity extends Activity {
             e.printStackTrace();
         }
 
-        toLoc = intent.getStringExtra(MainApp.TO_LOCATION);
+        toLoc = intent.getStringExtra(Constant.TO_LOCATION);
         try {
             // encoding special characters like space in the user input place
             toLoc = URLDecoder.decode(toLoc, "utf-8");
@@ -86,10 +104,10 @@ public class RoutesActivity extends Activity {
             e.printStackTrace();
         }
 
-        isDeparture = intent.getBooleanExtra(MainApp.ISDEPARTURE, true);
-        timeSinceEpoch = intent.getLongExtra(MainApp.TIME, 0);
-        fromCoords = intent.getStringExtra(MainApp.FROM_COORDS);
-        toCoords = intent.getStringExtra(MainApp.TO_COORDS);
+        isDeparture = intent.getBooleanExtra(Constant.ISDEPARTURE, true);
+        timeSinceEpoch = intent.getLongExtra(Constant.TIME, 0);
+        fromCoords = intent.getStringExtra(Constant.FROM_COORDS);
+        toCoords = intent.getStringExtra(Constant.TO_COORDS);
 
         Log.d(TAG, "fromCoords" + fromCoords);
         if(fromCoords != "" && !fromCoords.equals(""))
@@ -118,6 +136,9 @@ public class RoutesActivity extends Activity {
         // Start downloading json data from Google Directions API
         downloadTask.execute(url);
 
+        // Track the user request in the Server
+        trackUsageRequest();
+
         // Click event for single list row
         list.setOnItemClickListener(new OnItemClickListener() {
 
@@ -138,6 +159,12 @@ public class RoutesActivity extends Activity {
 
             }
         });
+    }
+
+    // Track the user request in the Server
+    private void trackUsageRequest() {
+        SurveyAPI surveyAPI = new SurveyAPI(getApplicationContext());
+        surveyAPI.getServerCount();
     }
 
     /**
@@ -196,11 +223,10 @@ public class RoutesActivity extends Activity {
         // Sensor enabled
         String sensor = "sensor=false";
 
-        String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
+        String key = "key=" + getString(R.string.API_KEY);
 
         String mode = "mode=transit";
 
-        String time ="";
         String parameters = "";
         // Building the parameters to the web service
         if(isDeparture == true)
@@ -254,8 +280,10 @@ public class RoutesActivity extends Activity {
         }catch(Exception e){
             Log.d("Exception while downloading url", e.toString());
         }finally{
-            iStream.close();
-            urlConnection.disconnect();
+            if(iStream != null)
+                iStream.close();
+            if(urlConnection != null)
+                urlConnection.disconnect();
         }
         return data;
     }
@@ -319,7 +347,7 @@ public class RoutesActivity extends Activity {
         protected void onPostExecute(ArrayList<Route> result) {
             showProgress(false);
 
-            if(result.size()<1){
+            if(result.size()<1 || result == null){
                 Toast.makeText(getBaseContext(), "No Routes Available", Toast.LENGTH_SHORT).show();
                 return;
             }

@@ -98,8 +98,10 @@ public class NearbyPlacesTask extends AsyncTask<String, Integer, String> {
         }catch(Exception e){
             Log.d("Exception while downloading url", e.toString());
         }finally{
-            iStream.close();
-            urlConnection.disconnect();
+            if(iStream != null)
+                iStream.close();
+            if(urlConnection != null)
+                urlConnection.disconnect();
         }
         return data;
     }

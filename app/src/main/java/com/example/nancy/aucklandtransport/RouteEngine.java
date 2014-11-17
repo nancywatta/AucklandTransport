@@ -8,7 +8,12 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.APIs.AucklandPublicTransportAPI;
+import com.example.nancy.aucklandtransport.APIs.GoogleAPI;
 import com.example.nancy.aucklandtransport.Utils.Constant;
+import com.example.nancy.aucklandtransport.datatype.PathSegment;
+import com.example.nancy.aucklandtransport.datatype.Route;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
@@ -129,9 +134,10 @@ public class RouteEngine {
 
                 stopServer(mRoute, currentStep - 1);
 
-                currentStep++;
+                if(currentStep == 0)
+                    startServer(mRoute, currentStep);
 
-                startServer(mRoute, currentStep);
+                currentStep++;
 
                 break;
             case Constant.PRE_CHANGE_OVER:
@@ -147,6 +153,8 @@ public class RouteEngine {
                     //if(mRoute.getTotalTransfers() >=2)
                         checkRoute(mRoute, currentStep);
                 }
+
+                startServer(mRoute, currentStep);
                 break;
 
             case Constant.WALKING:
@@ -422,7 +430,7 @@ public class RouteEngine {
         String text = message + context.getResources().getString(R.string.NewRoutes);
         service.createNotification(text,
                 context.getResources().getString(R.string.app_name),
-                context.getResources().getString(R.string.NewRoutes),
+                text,
                         true, true, Toast.LENGTH_LONG);
         newRoutes = routes;
         RouteInfoFragment.newRoutesBtn.setVisibility(View.VISIBLE);

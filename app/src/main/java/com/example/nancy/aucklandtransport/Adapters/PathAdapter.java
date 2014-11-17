@@ -8,9 +8,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.example.nancy.aucklandtransport.PathSegment;
+import com.example.nancy.aucklandtransport.datatype.PathSegment;
 import com.example.nancy.aucklandtransport.R;
-import com.example.nancy.aucklandtransport.RouteStep;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 
 /**
  * Path Adapter class is used to provide a customized

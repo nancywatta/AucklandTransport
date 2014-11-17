@@ -2,8 +2,6 @@ package com.example.nancy.aucklandtransport.datatype;
 
 import android.util.Log;
 
-import com.example.nancy.aucklandtransport.Route;
-
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,6 +16,7 @@ import java.util.Iterator;
  */
 public class TouristPlaces {
 
+    // Debugging tag for the TouristPlaces class
     private static final String TAG = TouristPlaces.class.getSimpleName();
 
     /*
@@ -145,14 +144,19 @@ public class TouristPlaces {
             return;
         }
 
+        boolean isFound = false;
+
         int index;
         for(index = 0; index < routesArray.size(); index++) {
             Route route = routesArray.get(index);
-            if(route.getEndTouristPlace().compareTo(intermediateAdd) == 0 && isDelete)
+            if(route.getEndTouristPlace().compareTo(intermediateAdd) == 0 && isDelete) {
+                isFound = true;
                 break;
+            }
             else if(route.getStartTouristPlace().compareTo(intermediateAdd) == 0 && !isDelete) {
                 startName = route.getStartTouristName();
                 endName = route.getEndTouristName();
+                isFound = true;
                 break;
             }
         }
@@ -160,51 +164,53 @@ public class TouristPlaces {
         Log.d(TAG , "deleteRoute: " + routesArray.size() + " deleteAddress: "
                 + intermediateAdd + " index: " + index);
 
+        if(isFound) {
         /*
         remove route from start address to intermediateAdd
          */
-        routesArray.remove(index);
+            routesArray.remove(index);
         /*
         remove route from intermediateAdd to end address
          */
-        if(isDelete)
-            routesArray.remove(index);
+            if (isDelete)
+                routesArray.remove(index);
 
 
-        Log.d(TAG, "Valid timeSinceEpoch");
-        for (Route route : array) {
-            if (timeSinceEpoch != 0) {
+            Log.d(TAG, "Valid timeSinceEpoch");
+            for (Route route : array) {
+                if (timeSinceEpoch != 0) {
                 /*
                 In case the input route fetched from Google does not have the
                 arrival and departure time set. So we manually set the departure and arrival times
                 based on the input time.
                  */
-                if (route.getArrival().seconds == 0) {
-                    Log.d(TAG, "Arrival Null");
-                    route.getArrival().seconds = timeSinceEpoch +
-                            route.getDuration().seconds;
-                    Date date = new Date(route.getArrival().seconds * 1000L); // *1000 is to convert seconds to milliseconds
-                    SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a"); // the format of your date
-                    route.getArrival().travelTime = sdf.format(date);
+                    if (route.getArrival().seconds == 0) {
+                        Log.d(TAG, "Arrival Null");
+                        route.getArrival().seconds = timeSinceEpoch +
+                                route.getDuration().seconds;
+                        Date date = new Date(route.getArrival().seconds * 1000L); // *1000 is to convert seconds to milliseconds
+                        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a"); // the format of your date
+                        route.getArrival().travelTime = sdf.format(date);
+                    }
+                    if (route.getDeparture().seconds == 0) {
+                        Log.d(TAG, "Departure Null: " + timeSinceEpoch);
+                        route.getDeparture().seconds = timeSinceEpoch;
+                        Date date = new Date(timeSinceEpoch * 1000L); // *1000 is to convert minutes to milliseconds
+                        SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a"); // the format of your date
+                        route.getDeparture().travelTime = sdf.format(date);
+                    }
                 }
-                if (route.getDeparture().seconds == 0) {
-                    Log.d(TAG, "Departure Null: " + timeSinceEpoch);
-                    route.getDeparture().seconds = timeSinceEpoch;
-                    Date date = new Date(timeSinceEpoch * 1000L); // *1000 is to convert minutes to milliseconds
-                    SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a"); // the format of your date
-                    route.getDeparture().travelTime = sdf.format(date);
-                }
+                route.setStartTouristPlace(start);
+                route.setEndTouristPlace(end);
+                route.setStartTouristName(startName);
+                route.setEndTouristName(endName);
             }
-            route.setStartTouristPlace(start);
-            route.setEndTouristPlace(end);
-            route.setStartTouristName(startName);
-            route.setEndTouristName(endName);
-        }
 
         /*
         add route from start address to end address disconnecting the intermediateAdd
          */
-        routesArray.addAll(index, array);
+            routesArray.addAll(index, array);
+        }
     }
 
     /**
@@ -227,7 +233,10 @@ public class TouristPlaces {
                 break;
         }
 
-        return routesArray.get(index).getDeparture().getSeconds();
+        if (index < routesArray.size())
+            return routesArray.get(index).getDeparture().getSeconds();
+        else
+            return 0;
     }
 
     /**
@@ -250,7 +259,10 @@ public class TouristPlaces {
                 break;
         }
 
-        return routesArray.get(index).getArrival().getSeconds() + (duration*60);
+        if (index < routesArray.size())
+            return routesArray.get(index).getArrival().getSeconds() + (duration*60);
+        else
+            return 0;
     }
 
     /**
@@ -424,10 +436,12 @@ public class TouristPlaces {
             return 0;
 
         int lastIndex = routesArray.size() - 1;
-        Route route = routesArray.get(lastIndex);
-        if(route.getArrival().seconds != 0) {
-            Log.d(TAG, " Not Zero ARRIVAL Seconds");
-            return route.getArrival().getSeconds() + (duration*60);
+        if(lastIndex >= 0) {
+            Route route = routesArray.get(lastIndex);
+            if (route.getArrival().seconds != 0) {
+                Log.d(TAG, " Not Zero ARRIVAL Seconds");
+                return route.getArrival().getSeconds() + (duration * 60);
+            }
         }
         return 0;
     }

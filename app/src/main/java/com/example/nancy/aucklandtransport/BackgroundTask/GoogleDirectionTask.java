@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
-import com.example.nancy.aucklandtransport.Route;
+import com.example.nancy.aucklandtransport.datatype.Route;
 import com.example.nancy.aucklandtransport.Utils.HTTPConnect;
 import com.example.nancy.aucklandtransport.datatype.TouristPlaces;
 

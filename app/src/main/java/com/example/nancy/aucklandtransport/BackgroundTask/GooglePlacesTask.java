@@ -8,6 +8,7 @@ import android.widget.SimpleAdapter;
 
 import com.example.nancy.aucklandtransport.History;
 import com.example.nancy.aucklandtransport.Parser.PlaceJSONParser;
+import com.example.nancy.aucklandtransport.R;
 
 import org.json.JSONObject;
 
@@ -55,7 +56,7 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
          */
         String data = "";
 
-        String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
+        String key = "key=" + mContext.getString(R.string.API_KEY);
 
         String input="";
 
@@ -218,8 +219,10 @@ public class GooglePlacesTask extends AsyncTask<String, Void, String> {
         }catch(Exception e){
             Log.d("Exception while downloading url", e.toString());
         }finally{
-            iStream.close();
-            urlConnection.disconnect();
+            if(iStream != null)
+                iStream.close();
+            if(urlConnection != null)
+                urlConnection.disconnect();
         }
         return data;
     }

@@ -28,6 +28,7 @@ import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.example.nancy.aucklandtransport.APIs.GoogleAPI;
 import com.example.nancy.aucklandtransport.BackgroundJobs.GPSTracker;
 import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
 import com.example.nancy.aucklandtransport.Utils.ConnectionDetector;
@@ -132,10 +133,11 @@ public class TouristPlanner extends FragmentActivity {
         gps = new GPSTracker(getBaseContext());
         googleAPI = new GoogleAPI();
 
-        googleAPI.getReverseGeocode(new LatLng(gps.getLatitude(), gps.getLongitude()));
+        googleAPI.getReverseGeocode(new LatLng(gps.getLatitude(), gps.getLongitude()),
+                getString(R.string.API_KEY));
 
-        if(googleAPI.geoPlaces != null)
-            origin.setText(googleAPI.geoPlaces.get(0).get("formatted_address"));
+        if(googleAPI.getCurrentAddress() != null)
+            origin.setText(googleAPI.getCurrentAddress());
 
         origin.setThreshold(1);
 
@@ -155,12 +157,12 @@ public class TouristPlanner extends FragmentActivity {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count,
                                           int after) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
 
         });
@@ -217,12 +219,12 @@ public class TouristPlanner extends FragmentActivity {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count,
                                           int after) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
         });
 
@@ -243,7 +245,7 @@ public class TouristPlanner extends FragmentActivity {
         });
 
         /*
-        Clear the text of tvLocation when user clicks on delete Button
+        Clear the text of destination when user clicks on delete Button
          */
         destination.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -262,6 +264,7 @@ public class TouristPlanner extends FragmentActivity {
         TabHost tabs = (TabHost)findViewById(R.id.TabHost01);
         tabs.setup();
 
+        // Adding Tab for recent places and routes stored in Shared Preferences
         Log.d(TAG, "size" + history.size());
         if (history.size() > 0 || routes.size() > 0) {
 
@@ -287,7 +290,10 @@ public class TouristPlanner extends FragmentActivity {
             tabs.addTab(spec2);
         } else tabs.setVisibility(View.GONE);
 
+        // getting reference for the ListView to display recent Places
         myPlaces = (ListView)findViewById(R.id.myPlacesList);
+
+        // getting reference for the ListView to display recent Routes
         myRoutes = (ListView)findViewById(R.id.myRoutesList);
 
         placeAdapter = new History.PlaceAdapter(this);
@@ -405,6 +411,11 @@ public class TouristPlanner extends FragmentActivity {
         return (i > 9 ? "" + i : "0"+i);
     }
 
+    /**
+     * Function to open Display Map Activity page to set origin
+     *
+     * @param v
+     */
     public void showMapOfFromLoc(View v) {
         AutoCompleteTextView origin1 = (AutoCompleteTextView) findViewById(R.id.editText1);
         try {
@@ -417,6 +428,11 @@ public class TouristPlanner extends FragmentActivity {
         }
     }
 
+    /**
+     * Function to open Display Map Activity page to set Destination
+     *
+     * @param v
+     */
     public void showMapOfToLoc(View v) {
         try {
             String toAddress = destination.getText().toString(); // Get address
@@ -436,6 +452,7 @@ public class TouristPlanner extends FragmentActivity {
             long secondsSinceEpoch = getTimeSinceEpoch(leaveTimeFragment, dateFragment);
             long arrivalSecEpoch = getTimeSinceEpoch(arriveTimeFragment, dateFragment);
 
+            // If End address empty, give validation Error
             if(toAddress.equals("") || toAddress==null) {
                 AlertDialog alertDialog = new AlertDialog.Builder(TouristPlanner.this).create();
                 alertDialog.setTitle("Validation Error");
@@ -446,7 +463,9 @@ public class TouristPlanner extends FragmentActivity {
                     } });
                 alertDialog.show();
 
-            } else if(secondsSinceEpoch >= arrivalSecEpoch && arriveCheck.isChecked()) {
+            }
+            // If Arrival Time checked, it should be greater than the departure time
+            else if(secondsSinceEpoch >= arrivalSecEpoch && arriveCheck.isChecked()) {
                 AlertDialog alertDialog = new AlertDialog.Builder(TouristPlanner.this).create();
                 alertDialog.setTitle("Validation Error");
                 alertDialog.setMessage("Arrival Time should be greater than Departure");
@@ -457,10 +476,11 @@ public class TouristPlanner extends FragmentActivity {
                 alertDialog.show();
             }
             else {
+                // If from address empty, take current location
                 if (fromAddress.equals("") || fromAddress == null) {
 
-                    if(googleAPI.geoPlaces != null)
-                        fromAddress = googleAPI.geoPlaces.get(0).get("formatted_address");
+                    if(googleAPI.getCurrentAddress() != null)
+                        fromAddress = googleAPI.getCurrentAddress();
                     Log.d(TAG, "fromAdd " + fromAddress);
                 }
 
@@ -470,7 +490,8 @@ public class TouristPlanner extends FragmentActivity {
                 intent.putExtra(Constant.TIME, secondsSinceEpoch);
                 intent.putExtra(Constant.FROM_COORDS, fromCoords);
                 intent.putExtra(Constant.TO_COORDS, toCoords);
-                intent.putExtra(Constant.ARRIVE_TIME, arrivalSecEpoch);
+                if(arriveCheck.isChecked())
+                    intent.putExtra(Constant.ARRIVE_TIME, arrivalSecEpoch);
                 startActivity(intent);
             }
         } catch (Exception e){
@@ -540,7 +561,7 @@ public class TouristPlanner extends FragmentActivity {
         switch(requestCode) {
             case (Constant.PICK_ADDRESS_REQUEST) : {
                 if (resultCode == Activity.RESULT_OK) {
-                    // TODO Extract the data returned from the child Activity.
+                    // Extract the data returned from the child Activity.
                     String fromAddr = data.getStringExtra(Constant.FROM_ADDRSTR);
                     if(fromAddr!=null && !fromAddr.equals(""))
                         origin.setText(fromAddr);

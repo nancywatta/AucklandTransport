@@ -22,6 +22,8 @@ import android.widget.Toast;
 import com.example.nancy.aucklandtransport.BackgroundTask.NearbyPlacesTask;
 import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.example.nancy.aucklandtransport.datatype.Place;
+import com.example.nancy.aucklandtransport.datatype.Route;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdate;

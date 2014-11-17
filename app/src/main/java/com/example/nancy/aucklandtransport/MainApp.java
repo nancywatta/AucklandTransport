@@ -28,7 +28,6 @@ import android.view.View.OnTouchListener;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -37,20 +36,15 @@ import android.widget.RadioButton;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.example.nancy.aucklandtransport.APIs.GoogleAPI;
 import com.example.nancy.aucklandtransport.BackgroundJobs.GPSTracker;
 import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
 import com.example.nancy.aucklandtransport.History.PlaceItem;
 import com.example.nancy.aucklandtransport.History.RouteHistoryItem;
 import com.example.nancy.aucklandtransport.Utils.ConnectionDetector;
-import com.example.nancy.aucklandtransport.Utils.SurveyAPI;
+import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.google.android.gms.maps.model.LatLng;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
@@ -66,37 +60,52 @@ import java.util.Locale;
  */
 public class MainApp extends FragmentActivity {
 
+    /*
+    Debugging tag for the MainApp class
+     */
     private static final String TAG = MainApp.class.getSimpleName();
+
+    /*
+    AutoCompleteTextView for the departure location
+     */
     AutoCompleteTextView origin;
+
+    /*
+    AutoCompleteTextView for the end location
+     */
     AutoCompleteTextView destination;
+
     Button date;
     Button time;
     String fromCoords ="";
     String toCoords="";
     String prefix="";
-    public final static String ADDRSTR = "com.example.nancy.aucklandtransport.ADDRESS";
-    public final static String FROM_LOCATION = "com.example.nancy.aucklandtransport.FROMADDRESS";
-    public final static String TO_LOCATION = "com.example.nancy.aucklandtransport.TOADDRESS";
-    public final static String TIME = "com.example.nancy.aucklandtransport.TIME";
-    public final static String FROM_ADDRSTR = "com.example.nancy.aucklandtransport.FROM_ADDRSTR";
-    public final static String TO_ADDRSTR = "com.example.nancy.aucklandtransport.TO_ADDRSTR";
-    public final static String FROM_COORDS = "com.example.nancy.aucklandtransport.FROM_COORDS";
-    public final static String TO_COORDS = "com.example.nancy.aucklandtransport.TO_COORDS";
-    public final static String ORIGIN = "com.example.nancy.aucklandtransport.ORIGIN";
-    public final static String ISDEPARTURE = "com.example.nancy.aucklandtransport.ISDEPARTURE";
-    static final int PICK_ADDRESS_REQUEST = 1;
 
-    // Connection detector class
+    /*
+    Connection detector class
+     */
     ConnectionDetector cd;
 
-    // Alert Dialog Manager
+    /*
+    Alert Dialog Manager
+     */
     AlertDialogManager alert = new AlertDialogManager();
 
-    // flag for Internet connection status
+    /*
+    flag for Internet connection status
+     */
     Boolean isInternetPresent = false;
 
+    /*
+    Time picker fragment for departure/arrival time
+     */
     TimePickerFragment timeFragment = null;
+
+    /*
+    Date picker fragment for journey date
+     */
     DatePickerDialogFragment dateFragment = null;
+
     SharedPreferences prefs;
 
     ArrayList<PlaceItem> history;
@@ -105,7 +114,8 @@ public class MainApp extends FragmentActivity {
     ListView myPlaces, myRoutes;
     History.PlaceAdapter placeAdapter;
     History.RoutesAdapter routesAdapter;
-    private ArrayAdapter<String> autoCompleteAdapter;
+    //private ArrayAdapter<String> autoCompleteAdapter;
+
     private int lastSelectedPlace = -1;
 
     GPSTracker gps;
@@ -163,17 +173,24 @@ public class MainApp extends FragmentActivity {
         history = History.getHistory(this);
         routes = History.getRoutes(this);
 
+        // Getting reference to AutoCompleteTextView to get the user input origin location
         origin = (AutoCompleteTextView) findViewById(R.id.editText1);
+
+        // Get the User's Current Location
         gps = new GPSTracker(getBaseContext());
+
         googleAPI = new GoogleAPI();
 
-        googleAPI.getReverseGeocode(new LatLng(gps.getLatitude(), gps.getLongitude()));
+        // Convert the users current location coordinates into human readable address
+        googleAPI.getReverseGeocode(new LatLng(gps.getLatitude(), gps.getLongitude()),
+                getString(R.string.API_KEY));
 
-        if(googleAPI.geoPlaces != null)
-            origin.setText(googleAPI.geoPlaces.get(0).get("formatted_address"));
+        if(googleAPI.getCurrentAddress() != null)
+            origin.setText(googleAPI.getCurrentAddress());
 
         origin.setThreshold(1);
 
+        // Adding textWatcher to provide place predictions as user types.
         origin.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -187,16 +204,20 @@ public class MainApp extends FragmentActivity {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count,
                                           int after) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
 
         });
 
+        /*
+        Move cursor to destination textbox when click on Next button
+         on Keyboard
+         */
         origin.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -208,6 +229,9 @@ public class MainApp extends FragmentActivity {
             }
         });
 
+        /*
+        Clear the text of origin when user clicks on delete Button
+         */
         origin.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -222,9 +246,11 @@ public class MainApp extends FragmentActivity {
             }
         });
 
+        // Getting reference to AutoCompleteTextView to get the user input destination location
         destination = (AutoCompleteTextView) findViewById(R.id.editText2);
         destination.setThreshold(1);
 
+        // Adding textWatcher to provide place predictions as user types.
         destination.addTextChangedListener(new TextWatcher() {
 
             @Override
@@ -238,15 +264,16 @@ public class MainApp extends FragmentActivity {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count,
                                           int after) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
         });
 
+        // Hide Keyboard when user is done with typing
         destination.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -260,6 +287,7 @@ public class MainApp extends FragmentActivity {
             }
         });
 
+        // Clear the text of destination when user clicks on delete Button
         destination.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -277,6 +305,7 @@ public class MainApp extends FragmentActivity {
         TabHost tabs = (TabHost)findViewById(R.id.TabHost01);
         tabs.setup();
 
+        // Adding Tab for recent places and routes stored in Shared Preferences
         Log.d(TAG, "size" + history.size());
         if (history.size() > 0 || routes.size() > 0) {
 
@@ -302,7 +331,10 @@ public class MainApp extends FragmentActivity {
             tabs.addTab(spec2);
         } else tabs.setVisibility(View.GONE);
 
+        // getting reference for the ListView to display recent Places
         myPlaces = (ListView)findViewById(R.id.myPlacesList);
+
+        // getting reference for the ListView to display recent Routes
         myRoutes = (ListView)findViewById(R.id.myRoutesList);
 
         placeAdapter = new History.PlaceAdapter(this);
@@ -439,45 +471,6 @@ public class MainApp extends FragmentActivity {
         return (i > 9 ? "" + i : "0"+i);
     }
 
-    /** A method to download json data from url */
-    private String downloadUrl(String strUrl) throws IOException {
-        String data = "";
-        InputStream iStream = null;
-        HttpURLConnection urlConnection = null;
-        try{
-            URL url = new URL(strUrl);
-
-            // Creating an http connection to communicate with url
-            urlConnection = (HttpURLConnection) url.openConnection();
-
-            // Connecting to url
-            urlConnection.connect();
-
-            // Reading data from url
-            iStream = urlConnection.getInputStream();
-
-            BufferedReader br = new BufferedReader(new InputStreamReader(iStream));
-
-            StringBuffer sb = new StringBuffer();
-
-            String line = "";
-            while( ( line = br.readLine()) != null){
-                sb.append(line);
-            }
-
-            data = sb.toString();
-
-            br.close();
-
-        }catch(Exception e){
-            Log.d("Exception while downloading url", e.toString());
-        }finally{
-            iStream.close();
-            urlConnection.disconnect();
-        }
-        return data;
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -499,25 +492,35 @@ public class MainApp extends FragmentActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Function to open Display Map Activity page to set origin
+     *
+     * @param v
+     */
     public void showMapOfFromLoc(View v) {
         AutoCompleteTextView origin1 = (AutoCompleteTextView) findViewById(R.id.editText1);
         try {
             String fromAddress = origin1.getText().toString(); // Get address
             Intent intent = new Intent(this, DisplayMapActivity.class);
-            intent.putExtra(ADDRSTR, fromAddress);
-            intent.putExtra(ORIGIN, true);
-            startActivityForResult(intent, PICK_ADDRESS_REQUEST);
+            intent.putExtra(Constant.ADDRSTR, fromAddress);
+            intent.putExtra(Constant.ORIGIN, true);
+            startActivityForResult(intent, Constant.PICK_ADDRESS_REQUEST);
             } catch (Exception e){
         }
     }
 
+    /**
+     * Function to open Display Map Activity page to set Destination
+     *
+     * @param v
+     */
     public void showMapOfToLoc(View v) {
         try {
             String toAddress = destination.getText().toString(); // Get address
             Intent intent = new Intent(this, DisplayMapActivity.class);
-            intent.putExtra(ADDRSTR, toAddress);
-            intent.putExtra(ORIGIN, false);
-            startActivityForResult(intent, PICK_ADDRESS_REQUEST);
+            intent.putExtra(Constant.ADDRSTR, toAddress);
+            intent.putExtra(Constant.ORIGIN, false);
+            startActivityForResult(intent, Constant.PICK_ADDRESS_REQUEST);
         } catch (Exception e){
         }
     }
@@ -533,6 +536,7 @@ public class MainApp extends FragmentActivity {
             String toAddress = destination.getText().toString(); // Get address
             String fromAddress = origin.getText().toString(); // Get address
 
+            // If End address empty, give validation Error
             if(toAddress.equals("") || toAddress==null) {
                 AlertDialog alertDialog = new AlertDialog.Builder(MainApp.this).create();
                 alertDialog.setTitle("Validation Error");
@@ -545,10 +549,12 @@ public class MainApp extends FragmentActivity {
 
             }
             else {
+                // If from address empty, take current location
                 if (fromAddress.equals("") || fromAddress == null) {
 
-                    if(googleAPI.geoPlaces != null)
-                        fromAddress = googleAPI.geoPlaces.get(0).get("formatted_address");
+                    // Get Current Location
+                    if(googleAPI.getCurrentAddress() != null)
+                        fromAddress = googleAPI.getCurrentAddress();
                     Log.d(TAG, "fromAdd " + fromAddress);
                 }
 
@@ -570,7 +576,6 @@ public class MainApp extends FragmentActivity {
                     calendar.set(Calendar.DAY_OF_MONTH, dateFragment.mDay);
                 }
 
-                //trackUsageRequest();
                 long secondsSinceEpoch = calendar.getTimeInMillis() / 1000L;
 
                 Log.d("MainApp", "secondsSinceEpoch " + secondsSinceEpoch +
@@ -579,15 +584,15 @@ public class MainApp extends FragmentActivity {
                         + " Day of Month: " + calendar.get(Calendar.DAY_OF_MONTH) + " " + calendar.getTime());
 
                 Intent intent = new Intent(this, RoutesActivity.class);
-                intent.putExtra(FROM_LOCATION, fromAddress);
-                intent.putExtra(TO_LOCATION, toAddress);
-                intent.putExtra(TIME, secondsSinceEpoch);
-                intent.putExtra(FROM_COORDS, fromCoords);
-                intent.putExtra(TO_COORDS, toCoords);
+                intent.putExtra(Constant.FROM_LOCATION, fromAddress);
+                intent.putExtra(Constant.TO_LOCATION, toAddress);
+                intent.putExtra(Constant.TIME, secondsSinceEpoch);
+                intent.putExtra(Constant.FROM_COORDS, fromCoords);
+                intent.putExtra(Constant.TO_COORDS, toCoords);
                 if (leaveAfter.isChecked() == true)
-                    intent.putExtra(ISDEPARTURE, true);
+                    intent.putExtra(Constant.ISDEPARTURE, true);
                 else
-                    intent.putExtra(ISDEPARTURE, false);
+                    intent.putExtra(Constant.ISDEPARTURE, false);
                 startActivity(intent);
             }
         } catch (Exception e){
@@ -596,31 +601,26 @@ public class MainApp extends FragmentActivity {
         }
     }
 
-    private void trackUsageRequest() {
-        SurveyAPI surveyAPI = new SurveyAPI(getApplicationContext());
-        surveyAPI.getServerCount();
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         placeAdapter.notifyDataSetChanged();
         switch(requestCode) {
-            case (PICK_ADDRESS_REQUEST) : {
+            case (Constant.PICK_ADDRESS_REQUEST) : {
                 if (resultCode == Activity.RESULT_OK) {
-                    // TODO Extract the data returned from the child Activity.
-                    String fromAddr = data.getStringExtra(FROM_ADDRSTR);
+                    // Extract the data returned from the child Activity.
+                    String fromAddr = data.getStringExtra(Constant.FROM_ADDRSTR);
                     if(fromAddr!=null && !fromAddr.equals(""))
                         origin.setText(fromAddr);
-                    String toAddr = data.getStringExtra(TO_ADDRSTR);
+                    String toAddr = data.getStringExtra(Constant.TO_ADDRSTR);
                     if(toAddr!=null && !toAddr.equals(""))
                         destination.setText(toAddr);
 
-                    String fCoords = data.getStringExtra(FROM_COORDS);
+                    String fCoords = data.getStringExtra(Constant.FROM_COORDS);
                     Log.d(TAG, "fCoords" + fCoords);
                     if(fCoords!=null && fCoords!="")
                         fromCoords = fCoords;
-                    String tCoords = data.getStringExtra(TO_COORDS);
+                    String tCoords = data.getStringExtra(Constant.TO_COORDS);
                     Log.d(TAG, "tCoords" + tCoords);
                     if(tCoords!=null && tCoords!="")
                         toCoords = tCoords;
@@ -774,13 +774,13 @@ public class MainApp extends FragmentActivity {
                 && fromAddress.compareTo("")!=0 && toAddress.compareTo("")!=0) {
 
             Intent myIntent = new Intent(MainApp.this, RoutesActivity.class);
-            myIntent.putExtra(FROM_LOCATION, fromAddress);
-            myIntent.putExtra(TO_LOCATION, toAddress);
+            myIntent.putExtra(Constant.FROM_LOCATION, fromAddress);
+            myIntent.putExtra(Constant.TO_LOCATION, toAddress);
             Calendar c = Calendar.getInstance(Locale.getDefault());
-            myIntent.putExtra(TIME, (c.getTimeInMillis()/ 1000L));
-            myIntent.putExtra(FROM_COORDS, fromCoords);
-            myIntent.putExtra(TO_COORDS, toCoords);
-            myIntent.putExtra(ISDEPARTURE, true);
+            myIntent.putExtra(Constant.TIME, (c.getTimeInMillis()/ 1000L));
+            myIntent.putExtra(Constant.FROM_COORDS, fromCoords);
+            myIntent.putExtra(Constant.TO_COORDS, toCoords);
+            myIntent.putExtra(Constant.ISDEPARTURE, true);
             startActivity(myIntent);
         }
     }

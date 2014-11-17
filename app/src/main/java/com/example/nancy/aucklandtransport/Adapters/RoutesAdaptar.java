@@ -23,10 +23,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.nancy.aucklandtransport.AucklandPublicTransportAPI;
+import com.example.nancy.aucklandtransport.APIs.AucklandPublicTransportAPI;
 import com.example.nancy.aucklandtransport.R;
-import com.example.nancy.aucklandtransport.Route;
-import com.example.nancy.aucklandtransport.RouteStep;
+import com.example.nancy.aucklandtransport.datatype.Route;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 
 import java.util.ArrayList;
 

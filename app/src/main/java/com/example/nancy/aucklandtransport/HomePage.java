@@ -8,7 +8,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
-import com.example.nancy.aucklandtransport.Utils.SurveyAPI;
+import com.example.nancy.aucklandtransport.APIs.SurveyAPI;
 
 /**
  * HomePage class is used to display two main features developed

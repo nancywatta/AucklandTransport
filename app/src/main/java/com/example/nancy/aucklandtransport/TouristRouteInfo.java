@@ -12,6 +12,7 @@ import android.widget.ExpandableListView;
 import android.widget.Toast;
 
 import com.example.nancy.aucklandtransport.Adapters.ExpandableListAdapter;
+import com.example.nancy.aucklandtransport.datatype.Route;
 import com.example.nancy.aucklandtransport.datatype.TouristPlaces;
 
 import org.json.JSONException;

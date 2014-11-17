@@ -1,5 +1,7 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.datatype;
 
+import com.example.nancy.aucklandtransport.R;
+import com.example.nancy.aucklandtransport.datatype.PathSegment;
 import com.example.nancy.aucklandtransport.datatype.TravelDistance;
 import com.example.nancy.aucklandtransport.datatype.TravelTime;
 import com.google.android.gms.maps.model.LatLng;

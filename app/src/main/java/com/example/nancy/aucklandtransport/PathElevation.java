@@ -21,6 +21,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.nancy.aucklandtransport.Adapters.PathAdapter;
+import com.example.nancy.aucklandtransport.datatype.PathSegment;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONException;
@@ -167,7 +169,7 @@ public class PathElevation extends Activity {
                 connection.connect();
                 InputStream input = connection.getInputStream();
                 BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inSampleSize = 2048;
+                options.inSampleSize = 4;
                 Bitmap myBitmap = BitmapFactory.decodeStream(input);
                 return myBitmap;
             } catch (Exception e) {
@@ -179,6 +181,9 @@ public class PathElevation extends Activity {
         @Override
         protected void onPostExecute(Bitmap result) {
             super.onPostExecute(result);
+
+            if(result == null)
+                return;
             imageView.setImageBitmap(result);
             View parentView= findViewById(R.id.pathView);
             int height=parentView.getHeight();
@@ -228,8 +233,10 @@ public class PathElevation extends Activity {
         }catch(Exception e){
             Log.d("Exception while downloading url", e.toString());
         }finally{
-            iStream.close();
-            urlConnection.disconnect();
+            if(iStream != null)
+                iStream.close();
+            if(urlConnection != null)
+                urlConnection.disconnect();
         }
         return data;
     }

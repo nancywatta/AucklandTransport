@@ -35,12 +35,15 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.APIs.SurveyAPI;
 import com.example.nancy.aucklandtransport.Adapters.CustomSpinnerAdapter;
 import com.example.nancy.aucklandtransport.BackgroundTask.NearbyPlacesTask;
 import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
 import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.example.nancy.aucklandtransport.Utils.HTTPConnect;
 import com.example.nancy.aucklandtransport.datatype.Place;
+import com.example.nancy.aucklandtransport.datatype.Route;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 import com.example.nancy.aucklandtransport.datatype.TouristPlaces;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -87,7 +90,13 @@ public class TouristRoute extends FragmentActivity implements
     String toLoc;
     String fromCoords = "";
     String toCoords = "";
+
+    // Departure time in seconds since epoch
     long timeSinceEpoch;
+
+    // Arrival time in seconds since epoch
+    long arrivalSecEpoch;
+
     private Route route = null;
 
     Boolean isRouteSave = false;
@@ -180,6 +189,8 @@ public class TouristRoute extends FragmentActivity implements
         }
 
         timeSinceEpoch = intent.getLongExtra(Constant.TIME, 0);
+        arrivalSecEpoch = intent.getLongExtra(Constant.ARRIVE_TIME, 0);
+
         fromCoords = intent.getStringExtra(Constant.FROM_COORDS);
         toCoords = intent.getStringExtra(Constant.TO_COORDS);
 
@@ -244,6 +255,13 @@ public class TouristRoute extends FragmentActivity implements
 
         // Start downloading json data from Google Directions API
         downloadTask.execute(url);
+
+        trackUsageRequest();
+    }
+
+    private void trackUsageRequest() {
+        SurveyAPI surveyAPI = new SurveyAPI(getApplicationContext());
+        surveyAPI.getServerCount();
     }
 
     private void addPolyLine() {
@@ -434,6 +452,12 @@ public class TouristRoute extends FragmentActivity implements
                 Log.d(TAG, "route: " + route.getSteps().size());
             } catch (JSONException e) {
                 e.printStackTrace();
+            }
+
+            if(route.getArrival() != null && arrivalSecEpoch!=0 &&
+                    arrivalSecEpoch < route.getArrival().getSeconds()) {
+                Toast.makeText(getBaseContext(), "Please be aware that the arrival time of the Journey" +
+                        "selected is greater than the input Arrival Time", Toast.LENGTH_LONG).show();
             }
 
             if(fromCoords=="" || fromCoords.equals("") || fromCoords == null) {
@@ -669,7 +693,7 @@ public class TouristRoute extends FragmentActivity implements
                         sb.append("&radius="+radius);
                         sb.append("&keyword=" + location);
                         sb.append("&sensor=true");
-                        sb.append("&key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw");
+                        sb.append("&key=" + getString(R.string.API_KEY));
 
                         Log.d(TAG, "url: " + sb.toString());
 

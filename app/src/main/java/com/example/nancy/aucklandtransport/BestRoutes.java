@@ -4,6 +4,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
+import com.example.nancy.aucklandtransport.datatype.Route;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 
 import org.json.JSONObject;
 
@@ -151,8 +153,10 @@ public class BestRoutes {
         }catch(Exception e){
             Log.d("Exception while downloading url", e.toString());
         }finally{
-            iStream.close();
-            urlConnection.disconnect();
+            if(iStream != null)
+                iStream.close();
+            if(urlConnection != null)
+                urlConnection.disconnect();
         }
         return data;
     }

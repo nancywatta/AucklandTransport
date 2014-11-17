@@ -1,5 +1,6 @@
 package com.example.nancy.aucklandtransport;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,6 +12,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.nancy.aucklandtransport.Adapters.RoutesAdaptar;
+import com.example.nancy.aucklandtransport.datatype.Route;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -104,6 +106,11 @@ public class AlternateRoute extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.alternate_route, menu);
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            actionBar.setHomeButtonEnabled(false); // disable the button
+            actionBar.setDisplayHomeAsUpEnabled(false); // remove the left caret
+        }
         return true;
     }
 

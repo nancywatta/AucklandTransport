@@ -9,6 +9,28 @@
     android:orientation="vertical"
     tools:context="com.example.nancy.aucklandtransport.RouteInfo">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageButton
+            android:id="@+id/NavigationIcon"
+            android:src="@android:drawable/ic_menu_directions"
+            android:onClick="launchNavigation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Go to Navigation Page to set this route"
+            android:textColor="#040404"
+            android:typeface="sans"
+            android:textSize="15dip"
+            android:textStyle="bold"
+            android:layout_alignTop="@+id/NavigationIcon"
+            android:layout_toRightOf="@+id/NavigationIcon"/>
+    </RelativeLayout>
+
     <ListView
         android:layout_height="wrap_content"
         android:id="@+id/RouteInfoScreenListView"

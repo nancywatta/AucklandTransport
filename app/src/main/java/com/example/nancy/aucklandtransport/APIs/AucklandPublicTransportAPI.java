@@ -1,4 +1,4 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.APIs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -12,7 +12,12 @@ import android.widget.TextView;
 
 import com.example.nancy.aucklandtransport.Adapters.RouteInfoAdapter;
 import com.example.nancy.aucklandtransport.Adapters.RoutesAdaptar;
+import com.example.nancy.aucklandtransport.BestRoutes;
 import com.example.nancy.aucklandtransport.Parser.RealTimeJSONParser;
+import com.example.nancy.aucklandtransport.R;
+import com.example.nancy.aucklandtransport.datatype.Route;
+import com.example.nancy.aucklandtransport.RouteEngine;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.androidpn.client.Constants;
@@ -151,10 +156,7 @@ public class AucklandPublicTransportAPI {
 //        else
 //            userName = "username=" + sharedPrefs.getString(Constants.XMPP_USERNAME, "");
 
-        // TODO remove hardcoding
-        //String url = main_url + "ScheduleJob?" + location + "&" + routeName + "&" + userName;
-        String url = main_url + "ScheduleJob?" +
-                "lat=-36.861798&lng=174.74301&route=030&tripType=0&" + userName;
+        String url = main_url + "ScheduleJob?" + location + "&" + routeName + "&" + userName;
 
         Log.d(TAG, "url : " +  url);
 
@@ -177,10 +179,7 @@ public class AucklandPublicTransportAPI {
 
         //String userName = "username=" + sharedPrefs.getString(Constants.XMPP_USERNAME, "");
 
-        // TODO remove hardcoding
-        //String url = main_url + "DeleteJob?" + location + "&" + routeName + "&" + userName;
-        String url = main_url + "DeleteJob?" +
-                "lat=-36.861798&lng=174.74301&route=030&tripType=0&" + userName;
+        String url = main_url + "DeleteJob?" + location + "&" + routeName + "&" + userName;
 
         Log.d(TAG, "url : " +  url);
 
@@ -248,8 +247,10 @@ public class AucklandPublicTransportAPI {
         }catch(Exception e){
             Log.d(TAG, e.toString());
         }finally{
-            iStream.close();
-            urlConnection.disconnect();
+            if(iStream != null)
+                iStream.close();
+            if(urlConnection != null)
+                urlConnection.disconnect();
         }
         return data;
     }
@@ -405,16 +406,13 @@ public class AucklandPublicTransportAPI {
             Calendar c = Calendar.getInstance();
             long diff = (arrivalTime.getTime() - c.getTimeInMillis()) / 1000L;
 
-            //TODO remove hard coding
-            diff = 301;
-
             if ((diff > 300) || diff < 0) {
                 String message = "";
                 if(diff > 300)
                     message = "Your " +
                         mContext.getResources().getString(nextRoute.getTransportName())
                         + " " + nextRoute.getShortName()
-                        + " is arriving in next " + Math.round(diff / 60) + " minute.";
+                        + " is arriving in next " + Math.round(diff / 60) + " minute. ";
                 else
                 message = "Your " +
                         mContext.getResources().getString(nextRoute.getTransportName())

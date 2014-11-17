@@ -26,6 +26,7 @@ import com.example.nancy.aucklandtransport.BackgroundJobs.GPSTracker;
 import com.example.nancy.aucklandtransport.BackgroundTask.GooglePlacesTask;
 import com.example.nancy.aucklandtransport.MyAlertDialogWIndow.AlertPositiveListener;
 import com.example.nancy.aucklandtransport.Parser.GeocodeJSONParser;
+import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -86,8 +87,8 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                 getSupportFragmentManager().findFragmentById(R.id.map);
 
         Intent intent = getIntent();
-        isOrigin = intent.getBooleanExtra(MainApp.ORIGIN, true);
-        String message = intent.getStringExtra(MainApp.ADDRSTR);
+        isOrigin = intent.getBooleanExtra(Constant.ORIGIN, true);
+        String message = intent.getStringExtra(Constant.ADDRSTR);
 
         // Getting reference to AutoCompleteTextView to get the user input location
         tvLocation = (AutoCompleteTextView) findViewById(R.id.editText1);
@@ -111,12 +112,12 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count,
                                           int after) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                // TODO Auto-generated method stub
+                // Auto-generated method stub
             }
 
         });
@@ -269,9 +270,9 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
     @Override
     public void onPositiveClick(boolean isLocationSet) {
         if(isOrigin == true)
-            output.putExtra(MainApp.FROM_ADDRSTR, tvLocation.getText().toString());
+            output.putExtra(Constant.FROM_ADDRSTR, tvLocation.getText().toString());
         else
-            output.putExtra(MainApp.TO_ADDRSTR, tvLocation.getText().toString());
+            output.putExtra(Constant.TO_ADDRSTR, tvLocation.getText().toString());
         setResult(RESULT_OK, output);
         finish();
     }
@@ -291,7 +292,8 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
         String sensor = "sensor=false";
 
         // url , from where the geocoding data is fetched
-        url = url + address + "&" + sensor + "&" + "region=nz" + "&" + "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
+        url = url + address + "&" + sensor + "&" + "region=nz" + "&" + "key="
+        + getString(R.string.API_KEY);
 
         // Instantiating DownloadTask to get places from Google Geocoding service
         // in a non-ui thread
@@ -325,7 +327,7 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
 
         String sensor = "sensor=false";
 
-        String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
+        String key = "key=" + getString(R.string.API_KEY);
 
         // url , from where the geocoding data is fetched
         url = url + latilong + "&" + sensor + "&" + key + "&" + "region=nz";
@@ -368,8 +370,10 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
         }catch(Exception e){
             Log.d("Exception while downloading url", e.toString());
         }finally{
-            iStream.close();
-            urlConnection.disconnect();
+            if(iStream != null)
+                iStream.close();
+            if(urlConnection != null)
+                urlConnection.disconnect();
         }
 
         return data;
@@ -433,6 +437,11 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
         @Override
         protected void onPostExecute(List<HashMap<String,String>> list){
 
+            if(list == null || list.size() < 1) {
+                Toast.makeText(getBaseContext(), "No Data Available", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             // Clears all the existing markers
             googleMap.clear();
 
@@ -476,9 +485,9 @@ public class DisplayMapActivity extends FragmentActivity implements AlertPositiv
                     tvLocation.setText(name);
                     String temp = latLng.latitude + "," + latLng.longitude;
                     if(isOrigin == true)
-                        output.putExtra(MainApp.FROM_COORDS, temp);
+                        output.putExtra(Constant.FROM_COORDS, temp);
                     else
-                        output.putExtra(MainApp.TO_COORDS, temp);
+                        output.putExtra(Constant.TO_COORDS, temp);
                     setResult(RESULT_OK, output);
                 }
             }

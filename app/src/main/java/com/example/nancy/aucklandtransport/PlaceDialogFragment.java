@@ -293,7 +293,8 @@ public class PlaceDialogFragment extends DialogFragment {
 //            }
         } else {
             Log.d(TAG, " Initial Route");
-            touristPlaces.getRoutesArray().clear();
+            if(touristPlaces.getRoutesArray() != null)
+                touristPlaces.getRoutesArray().clear();
             //touristPlaces.deleteRoute(null, null, placeCoords, null, 0, true);
             // Creating an intent for broadcastreceiver
             Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);

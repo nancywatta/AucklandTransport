@@ -23,8 +23,10 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.nancy.aucklandtransport.APIs.GoogleAPI;
 import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.example.nancy.aucklandtransport.Utils.LocationUtils;
+import com.example.nancy.aucklandtransport.datatype.Route;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -118,6 +120,10 @@ public class BackgroundService extends Service implements
 
     List<HashMap<String, String>> geoPlaces;
 
+    public void  setGeoPlaces(List<HashMap<String, String>> value) {
+         this.geoPlaces = value;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -177,7 +183,7 @@ public class BackgroundService extends Service implements
 
         handle = new Handler();
 
-        alarmSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.alarm_clock);
+        alarmSound = Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.ringtone);
     }
 
     private Runnable mRunnable = new Runnable() {
@@ -196,9 +202,13 @@ public class BackgroundService extends Service implements
                         if (!hasRemindedDep) {
                             String str = String.format(getString(R.string.DepartureText1),
                                     Math.round(diff / (1000 * 60)));
-                            if (diff <= 0)
+                            if ( diff <0 && diff <= -(5 * 60 * 1000L))
+                                str = String.format(getString(R.string.DepartureText3),
+                                        Math.round(-diff / (1000 * 60)));
+                            else if (diff <= 0)
                                 str = String.format(getString(R.string.DepartureText2),
                                         Math.round(-diff / (1000 * 60)));
+
                             createNotification(getString(R.string.DepartureTimer),
                                     getString(R.string.app_name), str, true,
                                     (diff > reminderTime - 1500), Toast.LENGTH_LONG);
@@ -230,6 +240,7 @@ public class BackgroundService extends Service implements
         createNotification(getString(R.string.RouteDone),
                 getString(R.string.app_name),
                 getString(R.string.RouteDone), false, false, Toast.LENGTH_LONG);
+        changeState(Constant.STATE_DO_NOTHING);
     }
 
     @Override
@@ -287,6 +298,7 @@ public class BackgroundService extends Service implements
     @Override
     public void onConnected(Bundle bundle) {
         startPeriodicUpdates();
+        // TODO remove mock mode
         mLocationClient.setMockMode(true);
 
     }
@@ -477,7 +489,8 @@ public class BackgroundService extends Service implements
         Log.i(TAG, "getAddressFromGoogle " + l);
         new Thread(new Runnable() {
             public void run() {
-                api.getReverseGeocode(new LatLng(l.getLatitude(), l.getLongitude()));
+                api.getReverseGeocode(new LatLng(l.getLatitude(), l.getLongitude()),
+                        getString(R.string.API_KEY));
 
                 if(geoPlaces != null) {
                     if (geoPlaces.size() > 0) {

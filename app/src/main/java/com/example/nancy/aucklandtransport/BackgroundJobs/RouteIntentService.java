@@ -7,7 +7,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
-import com.example.nancy.aucklandtransport.Route;
+import com.example.nancy.aucklandtransport.datatype.Route;
 import com.example.nancy.aucklandtransport.Utils.Constant;
 import com.example.nancy.aucklandtransport.Utils.HTTPConnect;
 import com.example.nancy.aucklandtransport.datatype.TouristPlaces;
@@ -223,32 +223,34 @@ public class RouteIntentService extends IntentService {
             e.printStackTrace();
         }
 
-        /**
-         *  When adding a new destination point, delete the last route
-         *  from the routes array. This is because consider an example
-         *  where the existing routes array contains below two routes
-         *  Start -> A, A -> End
-         *  Thus when adding a new place B in between A and End,
-         *  route A -> End should be deleted and instead
-         *  the routes array should now contain below three routes.
-         *  Start -> A, A -> B, B -> End
-         */
-        touristPlaces.deletePreviousRoute();
+        if(routes != null && routes.size() > 0) {
+            /**
+             *  When adding a new destination point, delete the last route
+             *  from the routes array. This is because consider an example
+             *  where the existing routes array contains below two routes
+             *  Start -> A, A -> End
+             *  Thus when adding a new place B in between A and End,
+             *  route A -> End should be deleted and instead
+             *  the routes array should now contain below three routes.
+             *  Start -> A, A -> B, B -> End
+             */
+            touristPlaces.deletePreviousRoute();
 
         /*
         Add the new route fetched into the routes array
          */
-        touristPlaces.addRoute(startCoords, startAdd,
-                intCoords, intAdd, routes, duration);
+            touristPlaces.addRoute(startCoords, startAdd,
+                    intCoords, intAdd, routes, duration);
 
         /*
          Creating an intent for broadcastreceiver
           */
-        Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
+            Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
         /*
          Sending the broadcast
           */
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
+        }
 
     }
 
@@ -360,20 +362,22 @@ public class RouteIntentService extends IntentService {
             e.printStackTrace();
         }
 
+        if(routes != null && routes.size() > 0) {
         /*
         Add the new route fetched into the routes array
          */
-        touristPlaces.addRoute(intCoords, intAdd,
-                endCoords, endAdd, routes, departureTime);
+            touristPlaces.addRoute(intCoords, intAdd,
+                    endCoords, endAdd, routes, departureTime);
 
         /*
          Creating an intent for broadcastreceiver
           */
-        Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
+            Intent broadcastIntent = new Intent(Constant.BROADCAST_ACTION);
         /*
          Sending the broadcast
           */
-        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(broadcastIntent);
+        }
     }
 
     /**

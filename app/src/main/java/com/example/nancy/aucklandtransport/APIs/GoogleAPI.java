@@ -1,10 +1,12 @@
-package com.example.nancy.aucklandtransport;
+package com.example.nancy.aucklandtransport.APIs;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.nancy.aucklandtransport.BackgroundService;
 import com.example.nancy.aucklandtransport.Parser.DirectionsJSONParser;
 import com.example.nancy.aucklandtransport.Parser.GeocodeJSONParser;
+import com.example.nancy.aucklandtransport.datatype.RouteStep;
 import com.example.nancy.aucklandtransport.datatype.TravelTime;
 import com.google.android.gms.maps.model.LatLng;
 
@@ -51,7 +53,7 @@ public class GoogleAPI {
 
     private RouteStep routeStep;
 
-    List<HashMap<String, String>> geoPlaces;
+    private List<HashMap<String, String>> geoPlaces;
 
     private BackgroundService service;
 
@@ -63,12 +65,28 @@ public class GoogleAPI {
         this.service = service;
     }
 
-    public List<HashMap<String, String>> getReverseGeocode(LatLng data) {
+    public String getCurrentAddress() {
+        if(geoPlaces!=null && geoPlaces.size() > 0)
+            return geoPlaces.get(0).get("formatted_address");
+        return null;
+    }
+
+    /**
+     * Function to convert the geographical coordinates into
+     * human readable address. This is done by calling Google Reverse Geocoding
+     * web service in an Async Task.
+     *
+     * @param data Location coordinates to be converted into address
+     * @param api_key Key to access Google APIs
+     * @return
+     */
+    public List<HashMap<String, String>> getReverseGeocode(LatLng data,
+                                                           String api_key) {
         String latilong = "latlng=" + data.latitude +","+data.longitude;
 
         String sensor = "sensor=false";
 
-        String key = "key=AIzaSyCOA_RXGLEYFgJyKJjGhVDkIwfkIAr0diw";
+        String key = "key=" + api_key;
 
         // url , from where the geocoding data is fetched
         String url = main_url + latilong + "&" + sensor + "&" + key;
@@ -206,7 +224,7 @@ public class GoogleAPI {
             Log.d(TAG, "not null list");
             geoPlaces = list;
             if(service != null)
-                service.geoPlaces = list;
+                service.setGeoPlaces(list);
         }
     }
 
@@ -304,8 +322,10 @@ public class GoogleAPI {
         }catch(Exception e){
             Log.d("Exception while downloading url", e.toString());
         }finally{
-            iStream.close();
-            urlConnection.disconnect();
+            if(iStream != null)
+                iStream.close();
+            if(urlConnection != null)
+                urlConnection.disconnect();
         }
         return data;
     }
